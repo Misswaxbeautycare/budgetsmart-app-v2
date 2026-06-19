@@ -13,10 +13,10 @@ const STRIPE_BUSI    = 'https://buy.stripe.com/cNi9ATc6z9Fn7ZB4ZCaEE01';
 const PAYPAL         = 'https://www.paypal.me/Misswaxbeautycare';
 const CALENDLY       = 'https://calendly.com/missnyungedigitalservices/echange-projet-digital-ecommerce';
 const ADMIN_PWD      = 'Budgetsmart20@131690-25';
-const APP_URL        = 'https://misswaxbeautycare.github.io/budgetsmart-app';
+const APP_URL        = 'https://misswaxbeautycare.github.io/budgetsmart-app-v2';
 
 const CATS = {nourriture:'🥗',transport:'🚌',loyer:'🏠',factures:'💡',shopping:'🛍',sante:'💊',enfants:'👶',business:'💼',loisirs:'🎭',epargne:'💰',dettes:'📉',autre:'📦'};
-const COLORS = ['#2E7D5E','#1E5A9C','#C8922A','#D4621A','#7B3DB5','#B53051','#4AAB9B'];
+const COLORS = ['#E8631C','#2E7DD6','#D98C12','#1F9D6B','#7B3DB5','#B53051','#F0AB35'];
 
 const TIPS = [
   {cat:'Budget',txt:'La règle 50/30/20 : 50% besoins, 30% envies, 20% épargne. Commencez dès aujourd\'hui.'},
@@ -108,11 +108,11 @@ function showEmailConfirmScreen(email) {
     <p style="font-size:0.9rem;color:#4B5563;margin:14px 0;line-height:1.6">
       Nous avons envoyé un lien de confirmation à<br/><strong>${email}</strong>
     </p>
-    <p style="font-size:0.85rem;color:#6B7280;margin-bottom:18px;line-height:1.6">
+    <p style="font-size:0.85rem;color:#6B5F52;margin-bottom:18px;line-height:1.6">
       Cliquez sur le lien dans l'email pour activer votre compte, puis revenez ici pour vous connecter.
     </p>
     <button class="btn-g" id="btnBackToLogin" style="width:100%">Retour à la connexion</button>
-    <p style="font-size:0.76rem;color:#6B7280;margin-top:14px">
+    <p style="font-size:0.76rem;color:#6B5F52;margin-top:14px">
       Vous ne voyez pas l'email ? Vérifiez vos spams.
     </p>
   `;
@@ -419,8 +419,8 @@ function drawDonut(cats, cur) {
     if (leg) { const d=document.createElement('div');d.className='dl';d.innerHTML='<div class="dd" style="background:'+col+'"></div><span style="flex:1">'+(CATS[cat]||'')+' '+cat+'</span><span style="font-weight:800">'+fmt(val,cur)+'</span>';leg.appendChild(d); }
   });
   ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
-  ctx.fillStyle='#0D1117';ctx.font='bold 10px DM Sans,sans-serif';ctx.textAlign='center';ctx.fillText(fmt(tot,cur).split(' ')[0],cx,cy-1);
-  ctx.fillStyle='#6B7280';ctx.font='9px DM Sans,sans-serif';ctx.fillText('total',cx,cy+11);
+  ctx.fillStyle='#1A1410';ctx.font='bold 10px DM Sans,sans-serif';ctx.textAlign='center';ctx.fillText(fmt(tot,cur).split(' ')[0],cx,cy-1);
+  ctx.fillStyle='#6B5F52';ctx.font='9px DM Sans,sans-serif';ctx.fillText('total',cx,cy+11);
 }
 
 function drawBar(all, cur) {
@@ -433,17 +433,17 @@ function drawBar(all, cur) {
   const pL=40,pR=8,pT=10,pB=24,cW=W-pL-pR,cH=H-pT-pB;
   const max=Math.max(...months.flatMap(m=>[m.inc,m.exp,m.sav]),1);
   ctx.strokeStyle='#E8E5E0';ctx.lineWidth=1;
-  for(let i=0;i<=4;i++){const y=pT+cH-(i/4)*cH;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(pL+cW,y);ctx.stroke();ctx.fillStyle='#6B7280';ctx.font='8px DM Sans';ctx.textAlign='right';ctx.fillText(Math.round(max*i/4),pL-3,y+3);}
+  for(let i=0;i<=4;i++){const y=pT+cH-(i/4)*cH;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(pL+cW,y);ctx.stroke();ctx.fillStyle='#6B5F52';ctx.font='8px DM Sans';ctx.textAlign='right';ctx.fillText(Math.round(max*i/4),pL-3,y+3);}
   const bw=cW/months.length,gw=bw*0.22,bwi=bw*0.19;
   months.forEach((mm,i)=>{
     const x=pL+i*bw+gw;
-    [['#2E7D5E',mm.inc],['#D4621A',mm.exp],['#C8922A',mm.sav]].forEach(([col,val],j)=>{
+    [['#1F9D6B',mm.inc],['#E8631C',mm.exp],['#D98C12',mm.sav]].forEach(([col,val],j)=>{
       const bh=(val/max)*cH;ctx.fillStyle=col;ctx.beginPath();ctx.roundRect(x+j*(bwi+2),pT+cH-bh,bwi,bh,[3,3,0,0]);ctx.fill();
     });
-    ctx.fillStyle='#6B7280';ctx.font='8px DM Sans';ctx.textAlign='center';ctx.fillText(mm.lbl,pL+i*bw+bw/2,H-6);
+    ctx.fillStyle='#6B5F52';ctx.font='8px DM Sans';ctx.textAlign='center';ctx.fillText(mm.lbl,pL+i*bw+bw/2,H-6);
   });
-  [['Revenus','#2E7D5E'],['Dépenses','#D4621A'],['Économies','#C8922A']].forEach(([lbl,col],i)=>{
-    const lx=W-200+i*68;ctx.fillStyle=col;ctx.fillRect(lx,3,8,8);ctx.fillStyle='#6B7280';ctx.font='8px DM Sans';ctx.textAlign='left';ctx.fillText(lbl,lx+11,10);
+  [['Revenus','#1F9D6B'],['Dépenses','#E8631C'],['Économies','#D98C12']].forEach(([lbl,col],i)=>{
+    const lx=W-200+i*68;ctx.fillStyle=col;ctx.fillRect(lx,3,8,8);ctx.fillStyle='#6B5F52';ctx.font='8px DM Sans';ctx.textAlign='left';ctx.fillText(lbl,lx+11,10);
   });
 }
 
@@ -496,7 +496,7 @@ function renderGoalEvo(cur) {
     const pct = Math.min(100,Math.round(((g.sav||0)/g.target)*100))||0;
     return `<div class="ad-item">
       <div class="ad-name">${g.name} ${pct>=100?'🏆':''}</div>
-      <div class="ad-bar"><div class="ad-fill" style="width:${pct}%;background:linear-gradient(90deg,#1E5A9C,#2E7D5E)"></div></div>
+      <div class="ad-bar"><div class="ad-fill" style="width:${pct}%;background:linear-gradient(90deg,#2E7DD6,#E8631C)"></div></div>
       <div class="ad-meta">${fmt(g.sav||0,cur)} / ${fmt(g.target,cur)} — ${pct}%</div>
     </div>`;
   }).join('');
@@ -580,8 +580,8 @@ function renderGoals() {
         <button class="goal-del" data-id="${g.id}">✕</button>
       </div>
       <div class="goal-amts">
-        <div><div style="font-size:0.68rem;color:#6B7280;font-weight:800;text-transform:uppercase;margin-bottom:2px">Économisé</div><div class="goal-sv">${fmt(g.sav||0,cur)}</div></div>
-        <div class="goal-tg"><div style="font-size:0.68rem;color:#6B7280;font-weight:800;text-transform:uppercase;margin-bottom:2px">Objectif</div><strong style="font-family:'Cormorant Garamond',serif;font-size:1.1rem">${fmt(g.target,cur)}</strong></div>
+        <div><div style="font-size:0.68rem;color:#6B5F52;font-weight:800;text-transform:uppercase;margin-bottom:2px">Économisé</div><div class="goal-sv">${fmt(g.sav||0,cur)}</div></div>
+        <div class="goal-tg"><div style="font-size:0.68rem;color:#6B5F52;font-weight:800;text-transform:uppercase;margin-bottom:2px">Objectif</div><strong style="font-family:'Cormorant Garamond',serif;font-size:1.1rem">${fmt(g.target,cur)}</strong></div>
       </div>
       <div class="pb-bar"><div class="pb-fill" style="width:${pct}%"></div></div>
       <div class="pb-pct">${pct}% — Restant : ${fmt(Math.max(0,g.target-(g.sav||0)),cur)}</div>
