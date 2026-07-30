@@ -4,10 +4,10 @@
   "description": "L'intelligence financière pour tous. La sérénité, enfin accessible.",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#FFFCF7",
-  "theme_color": "#E8631C",
+  "background_color": "#FFFFFF",
+  "theme_color": "#1E3A8A",
   "orientation": "portrait",
-  "scope": "/",
+  "scope": "/budgetsmart-app-v2/",
   "lang": "fr",
   "icons": [
     {
