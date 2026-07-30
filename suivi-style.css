@@ -1,0 +1,97 @@
+/* ══════════════════════════════════════════════════════════════
+   MODULE SUIVI — styles alignés sur le design system BudgetSmart
+   Réutilise les variables --or/--go/--bl/--g/--re/--bg/--card/--bo
+   Couleurs de niveau (cohérent avec le reste de l'app) :
+     simple  → vert   (--g)   comme les revenus / succès
+     modérée → or/gold(--go)  comme les défis
+     complexe→ orange (--or)  couleur de marque
+     urgent  → rouge  (--re)  comme les alertes existantes
+   ══════════════════════════════════════════════════════════════ */
+
+.suivi-tabs{display:flex;gap:9px;margin-bottom:18px;flex-wrap:wrap;}
+.suivi-tab{padding:10px 20px;border-radius:18px;font-size:1rem;font-weight:700;background:var(--orp);color:var(--mu);border:none;cursor:pointer;transition:all var(--tr);}
+.suivi-tab.active{background:var(--or);color:#fff;}
+.suivi-panel{animation:fi 0.22s ease;}
+
+/* ── Dettes : en-tête ── */
+.sd-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;background:var(--card);border:2px solid var(--bo);border-radius:var(--r);padding:16px 20px;margin-bottom:16px;box-shadow:var(--s1);}
+.sd-header > span{font-size:1.02rem;color:var(--mu);font-weight:700;}
+.sd-header strong{font-family:var(--ft);font-size:1.5rem;color:var(--or);font-weight:800;}
+.sd-header label{font-size:0.9rem;color:var(--mu);font-weight:700;display:flex;align-items:center;gap:8px;}
+.sd-header input{padding:8px 10px;border:2px solid var(--bo);border-radius:var(--rs);font-size:0.96rem;background:var(--bg);color:var(--tx);}
+
+/* ── Dettes : liste (grille façon tableau) ── */
+#dettesList{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.sd-item{display:grid;grid-template-columns:1.5fr 1fr 0.7fr 1fr 40px 32px;gap:8px;align-items:center;padding:11px 13px;border-radius:var(--rs);background:var(--bg);border:2px solid var(--bo);}
+.sd-item.sd-retard{background:var(--rep);border-color:#F0AFA0;}
+.sd-item.sd-proche{background:var(--gop);border-color:var(--gol);}
+.sd-item.sd-paye{opacity:0.55;}
+.sd-item input{border:none;background:transparent;font-size:0.98rem;color:var(--tx);font-weight:600;width:100%;padding:4px 2px;}
+.sd-item .sd-nom{font-weight:700;}
+.sd-item.sd-retard input{color:var(--re);}
+.sd-item.sd-proche input{color:#8A5A00;}
+.sd-paye-btn{width:28px;height:28px;border-radius:8px;border:2px solid var(--bo);background:transparent;color:var(--mu);font-weight:900;justify-self:center;}
+.sd-paye-btn.on{background:var(--g);border-color:var(--g);color:#fff;}
+.sd-del{background:none;border:none;color:var(--mu);font-size:0.95rem;cursor:pointer;justify-self:center;}
+.sd-del:hover{color:var(--re);}
+
+/* ── Recommandations ── */
+.sr-box{display:flex;flex-direction:column;gap:10px;margin-top:20px;}
+.sr-alerte,.sr-attention,.sr-succes{border-radius:var(--rs);padding:13px 16px;font-size:0.98rem;font-weight:600;line-height:1.55;border:2px solid;}
+.sr-alerte{background:var(--rep);border-color:#F0AFA0;color:var(--re);}
+.sr-attention{background:var(--gop);border-color:var(--gol);color:#8A5A00;}
+.sr-succes{background:var(--gp);border-color:#A8E6C5;color:var(--g);}
+
+.sr-ordre{background:var(--tx);color:var(--bg);border-radius:var(--r);padding:16px 20px;}
+.sr-ordre strong{font-family:var(--ft);font-size:1.05rem;display:block;margin-bottom:8px;color:var(--gol);}
+.sr-ordre ol{padding-left:20px;font-size:0.98rem;line-height:1.9;font-weight:600;}
+
+.sr-carte{border-radius:var(--rs);padding:14px 16px;border:2px solid;background:var(--card);}
+.sr-carte strong{font-family:var(--ft);font-size:1.1rem;font-weight:800;}
+.sr-carte p{font-size:0.96rem;margin-top:6px;line-height:1.55;font-weight:600;}
+.sr-simple{border-color:#A8E6C5;background:var(--gp);color:var(--g);}
+.sr-moderee{border-color:var(--gol);background:var(--gop);color:#8A5A00;}
+.sr-complexe{border-color:var(--orl);background:var(--orp);color:var(--or);}
+.sr-urgent{border-color:#F0AFA0;background:var(--rep);color:var(--re);}
+.sr-carte p{color:var(--mid);}
+
+/* ── Agenda ── */
+.sa-form{display:flex;gap:9px;margin-bottom:16px;flex-wrap:wrap;}
+.sa-form input[type=text]{flex:1;min-width:160px;}
+#agendaList{display:flex;flex-direction:column;gap:8px;}
+.sa-item{display:flex;flex-direction:column;gap:3px;padding:12px 15px;border-radius:var(--rs);background:var(--bg);border:2px solid var(--bo);position:relative;}
+.sa-item strong{font-size:1.02rem;color:var(--tx);font-weight:700;}
+.sa-item span{font-size:0.88rem;color:var(--mu);font-weight:700;}
+.sa-item.sa-proche{background:var(--gop);border-color:var(--gol);}
+.sa-item.sa-proche span{color:#8A5A00;font-weight:800;}
+.sa-item.sa-retard{background:var(--rep);border-color:#F0AFA0;}
+.sa-item.sa-retard span{color:var(--re);font-weight:800;}
+.sa-item button{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--mu);font-size:0.92rem;cursor:pointer;}
+
+/* ── Tâches journalières ── */
+.st-form{display:flex;gap:9px;margin-bottom:12px;align-items:center;flex-wrap:wrap;}
+.st-form input[type=text]{flex:1;min-width:160px;}
+#sTacheCompteur{font-size:0.92rem;color:var(--mu);font-weight:700;}
+#tachesList{display:flex;flex-direction:column;gap:8px;}
+.st-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--rs);background:var(--bg);border:2px solid var(--bo);}
+.st-item.st-danger{background:var(--rep);border-color:#F0AFA0;}
+.st-item.st-danger span{color:var(--re);font-weight:700;}
+.st-item.st-fait{opacity:0.55;}
+.st-item.st-fait span{text-decoration:line-through;}
+.st-item span{flex:1;font-size:1rem;color:var(--tx);font-weight:600;}
+.st-check{width:26px;height:26px;border-radius:7px;border:2px solid var(--g);background:transparent;color:var(--g);font-weight:900;flex-shrink:0;}
+.st-item.st-fait .st-check{background:var(--g);color:#fff;}
+.st-del{background:none;border:none;color:var(--mu);cursor:pointer;font-size:0.9rem;}
+.st-del:hover{color:var(--re);}
+
+/* ── Objectifs consolidés ── */
+.oc-resume{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;background:var(--card);border:2px solid var(--bo);border-radius:var(--r);padding:15px 20px;margin-bottom:16px;box-shadow:var(--s1);font-size:0.96rem;color:var(--mu);font-weight:700;}
+#objectifsConsolides{display:flex;flex-direction:column;gap:2px;}
+.oc-item{background:var(--card);border:2px solid var(--bo);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;box-shadow:var(--s1);}
+.oc-item strong{font-family:var(--ft);font-size:1.15rem;color:var(--tx);display:block;margin-bottom:8px;}
+.oc-item span{font-size:0.92rem;color:var(--mu);font-weight:700;}
+
+@media(max-width:900px){
+  .sd-item{grid-template-columns:1fr 1fr;grid-template-areas:"nom nom" "montant taux" "echeance paye" "note note";}
+  .sd-header{flex-direction:column;align-items:flex-start;}
+}
