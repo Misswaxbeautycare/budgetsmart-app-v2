@@ -7,9 +7,10 @@
 <link rel="stylesheet" href="style.css"/>
 <link rel="stylesheet" href="suivi-style.css"/>
 <script src="suivi-module.js" defer></script>
+<script src="deblocage-module.js" defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
-<meta name="theme-color" content="#1E3A8A"/>
+<meta name="theme-color" content="#E8631C"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="BudgetSmart"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
@@ -17,7 +18,6 @@
 </head>
 <body>
 
-<!-- ÉCRAN CONNEXION / INSCRIPTION -->
 <div class="auth-screen" id="authScreen">
   <div class="auth-box">
     <img src="icons/logo.png" class="auth-logo" onerror="this.style.display='none'"/>
@@ -431,7 +431,7 @@
   </div>
   <div id="cs2" style="display:none">
     <div class="card" style="padding:26px">
-      <div class="ct">Offre : <span id="coOffer" style="color:#1E3A8A"></span> — <span id="coPrice" style="color:#3B5BA9"></span></div>
+      <div class="ct">Offre : <span id="coOffer" style="color:#E8631C"></span> — <span id="coPrice" style="color:#D98C12"></span></div>
       <div class="fg2">
         <div class="fg"><label>Prénom et Nom</label><input type="text" id="coName" class="inp" placeholder="Votre nom complet"/></div>
         <div class="fg"><label>Email</label><input type="email" id="coEmail" class="inp" placeholder="votre@email.com"/></div>
@@ -593,6 +593,18 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
       <button class="anb" data-p="pricing">Plans</button>
       <button class="anb" data-p="coaching">Coaching</button>
     </div>
+  </div>
+  <div class="card">
+    <div class="ct">Prévisualiser un plan</div>
+    <p style="font-size:0.9rem;color:#6B5F52;margin-bottom:14px">
+      Voir l'app comme un client de chaque plan, sans changer ton propre abonnement.
+    </p>
+    <select id="adminPlanPreview" class="inp">
+      <option value="gratuit">Vue Gratuit</option>
+      <option value="basic">Vue Basic</option>
+      <option value="premium">Vue Premium</option>
+      <option value="business">Vue Business</option>
+    </select>
   </div>
   <div class="card"><div class="ct">Mon Épargne</div><div id="adGoalsList"><div class="empty">Aucun objectif.</div></div></div>
   <div class="card"><div class="ct">Dépenses récentes</div><div id="adEntries"><div class="empty">Aucune entrée.</div></div></div>
