@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="style.css"/>
 <link rel="stylesheet" href="suivi-style.css"/>
 <script src="suivi-module.js" defer></script>
-<script src="deblocage-module.js" defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#E8631C"/>
@@ -247,6 +246,11 @@
         <input type="number" id="sRevenu"/>
       </label>
     </div>
+    <div class="sd-chart-card">
+      <canvas id="dettesChart" width="180" height="180"></canvas>
+      <div id="dettesChartLeg"></div>
+    </div>
+    <div id="sRepartitionType"></div>
     <div id="dettesList"></div>
     <button id="btnAddDette" class="btn-g">+ Ajouter une dette</button>
     <div id="sRecommandations" class="sr-box"></div>
@@ -567,66 +571,3 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
       <div class="about-name">BudgetSmart</div>
       <div class="about-ver">Version 1.0 · L'intelligence financière pour tous</div>
       <div class="about-copy">© 2025 Miss Nyunge Digital Services · Belgique</div>
-    </div>
-  </div>
-</section>
-
-<section class="page" id="p-admin">
-  <div class="ph"><div><h1 class="pt">Espace Admin</h1><p class="ps">Accès propriétaire — tous les plans débloqués</p></div><div class="admin-badge">Propriétaire</div></div>
-  <div class="admin-stats">
-    <div class="as as-g"><div class="as-ico">💰</div><div class="as-l">Économies totales</div><div class="as-v" id="adSav">0,00 €</div></div>
-    <div class="as as-b"><div class="as-ico">📊</div><div class="as-l">Dépenses ce mois</div><div class="as-v" id="adExp">0,00 €</div></div>
-    <div class="as as-go"><div class="as-ico">🎯</div><div class="as-l">Objectifs actifs</div><div class="as-v" id="adGoals">0</div></div>
-    <div class="as as-o"><div class="as-ico">🔥</div><div class="as-l">Défis en cours</div><div class="as-v" id="adDefis">0</div></div>
-  </div>
-  <div class="card">
-    <div class="ct">Accès rapide</div>
-    <div class="admin-nav">
-      <button class="anb" data-p="dashboard">Dashboard</button>
-      <button class="anb" data-p="daily">Dépenses</button>
-      <button class="anb" data-p="goals">Objectif</button>
-      <button class="anb" data-p="business">Business</button>
-      <button class="anb" data-p="couple">Couple</button>
-      <button class="anb" data-p="tips">Conseils</button>
-      <button class="anb" data-p="defis">Défis</button>
-      <button class="anb" data-p="family">Famille</button>
-      <button class="anb" data-p="pricing">Plans</button>
-      <button class="anb" data-p="coaching">Coaching</button>
-    </div>
-  </div>
-  <div class="card">
-    <div class="ct">Prévisualiser un plan</div>
-    <p style="font-size:0.9rem;color:#6B5F52;margin-bottom:14px">
-      Voir l'app comme un client de chaque plan, sans changer ton propre abonnement.
-    </p>
-    <select id="adminPlanPreview" class="inp">
-      <option value="gratuit">Vue Gratuit</option>
-      <option value="basic">Vue Basic</option>
-      <option value="premium">Vue Premium</option>
-      <option value="business">Vue Business</option>
-    </select>
-  </div>
-  <div class="card"><div class="ct">Mon Épargne</div><div id="adGoalsList"><div class="empty">Aucun objectif.</div></div></div>
-  <div class="card"><div class="ct">Dépenses récentes</div><div id="adEntries"><div class="empty">Aucune entrée.</div></div></div>
-  <div class="card" style="text-align:center"><button class="btn-danger" id="btnLogout">Quitter le mode Admin</button></div>
-</section>
-
-</main>
-
-<div class="modal" id="modal">
-  <div class="modal-box">
-    <div class="modal-ico" id="mIco">🔒</div>
-    <div class="modal-title" id="mTitle">Fonctionnalité Premium</div>
-    <p class="modal-text" id="mText">Passez à un plan payant.</p>
-    <div class="pc-btns" style="margin-bottom:10px">
-      <button class="btn-card" id="mCard">Payer par carte bancaire</button>
-      <button class="btn-pp" id="mPP">Payer avec PayPal</button>
-    </div>
-    <button class="modal-close" id="mClose">Rester sur le plan gratuit</button>
-  </div>
-</div>
-
-<div id="toast"></div>
-<script src="script.js"></script>
-</body>
-</html>
