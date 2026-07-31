@@ -1,8 +1,8 @@
 'use strict';
 
-/* Protection : si ce fichier est collé/chargé deux fois par erreur,
-   ce bloc ne s'exécute qu'une seule fois — plus aucun risque
-   d'erreur "already declared". */
+/* Version simplifiée et sûre : ne touche plus à window.open ni à
+   getStripeLink, pour ne plus jamais bloquer aucun bouton du site.
+   Se contente de vérifier le plan et débloquer les fonctionnalités. */
 if (!window.__deblocageChargeUneFois) {
 window.__deblocageChargeUneFois = true;
 
@@ -16,28 +16,22 @@ window.estAdmin = function () {
   return !!ls('bs_admin');
 };
 
-function ajouterIdentiteAuLien(base, userId, email) {
-  if (!userId) return base;
-  try {
-    const url = new URL(base);
-    url.searchParams.set("client_reference_id", userId);
-    if (email) url.searchParams.set("prefilled_email", email);
-    return url.toString();
-  } catch { return base; }
-}
-
 window.chargerAbonnement = async function () {
-  const { data: sessionData } = await _sbDeblocage.auth.getSession();
-  const user = sessionData?.session?.user;
-  if (!user) { window.currentPlan = "gratuit"; appliquerDeblocagePlan(); return; }
+  try {
+    const { data: sessionData } = await _sbDeblocage.auth.getSession();
+    const user = sessionData?.session?.user;
+    if (!user) { window.currentPlan = "gratuit"; appliquerDeblocagePlan(); return; }
 
-  const { data, error } = await _sbDeblocage
-    .from("subscriptions")
-    .select("plan, status")
-    .eq("user_id", user.id)
-    .single();
+    const { data, error } = await _sbDeblocage
+      .from("subscriptions")
+      .select("plan, status")
+      .eq("user_id", user.id)
+      .single();
 
-  window.currentPlan = (!error && data && data.status === "active") ? data.plan : "gratuit";
+    window.currentPlan = (!error && data && data.status === "active") ? data.plan : "gratuit";
+  } catch (e) {
+    window.currentPlan = "gratuit";
+  }
   appliquerDeblocagePlan();
 };
 
@@ -75,30 +69,6 @@ window.addGoal = function () {
   toast('Objectif créé !');
 };
 
-const _getStripeLinkOriginal = window.getStripeLink;
-async function getStripeLinkAsync(name) {
-  const base = _getStripeLinkOriginal(name);
-  const { data: sessionData } = await _sbDeblocage.auth.getSession();
-  const user = sessionData?.session?.user;
-  if (!user) return base;
-  return ajouterIdentiteAuLien(base, user.id, user.email);
-}
-window.getStripeLink = function (name) {
-  const base = _getStripeLinkOriginal(name);
-  const w = window.open(base, '_blank');
-  getStripeLinkAsync(name).then(urlAvecIdentite => {
-    if (w && urlAvecIdentite !== base) w.location = urlAvecIdentite;
-  });
-  return base;
-};
-const _windowOpenOriginal = window.open.bind(window);
-window.open = function (url, ...rest) {
-  if (typeof url === 'string' && url.includes('buy.stripe.com')) {
-    return null;
-  }
-  return _windowOpenOriginal(url, ...rest);
-};
-
 let _deblocageDejaLance = false;
 function _deblocageTenterDemarrage() {
   if (_deblocageDejaLance) return;
@@ -110,4 +80,4 @@ function _deblocageTenterDemarrage() {
 new MutationObserver(_deblocageTenterDemarrage).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 document.addEventListener('DOMContentLoaded', () => setTimeout(_deblocageTenterDemarrage, 400));
 
-} // fin de la protection anti-double-chargement
+}
