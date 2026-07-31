@@ -1,14 +1,20 @@
 'use strict';
 
+/* Protection : si ce fichier est collé/chargé deux fois par erreur,
+   ce bloc ne s'exécute qu'une seule fois — plus aucun risque
+   d'erreur "already declared". */
+if (!window.__deblocageChargeUneFois) {
+window.__deblocageChargeUneFois = true;
+
 const _SUPABASE_URL = 'https://otpnegpmvsmutyhhmkvp.supabase.co';
 const _SUPABASE_KEY = 'sb_publishable_TrwWbJEwRijrmgEcNtzOqw_aosdIv_E';
 const _sbDeblocage = supabase.createClient(_SUPABASE_URL, _SUPABASE_KEY);
 
-let currentPlan = "gratuit";
+window.currentPlan = "gratuit";
 
-function estAdmin() {
+window.estAdmin = function () {
   return !!ls('bs_admin');
-}
+};
 
 function ajouterIdentiteAuLien(base, userId, email) {
   if (!userId) return base;
@@ -20,10 +26,10 @@ function ajouterIdentiteAuLien(base, userId, email) {
   } catch { return base; }
 }
 
-async function chargerAbonnement() {
+window.chargerAbonnement = async function () {
   const { data: sessionData } = await _sbDeblocage.auth.getSession();
   const user = sessionData?.session?.user;
-  if (!user) { currentPlan = "gratuit"; appliquerDeblocagePlan(); return; }
+  if (!user) { window.currentPlan = "gratuit"; appliquerDeblocagePlan(); return; }
 
   const { data, error } = await _sbDeblocage
     .from("subscriptions")
@@ -31,12 +37,12 @@ async function chargerAbonnement() {
     .eq("user_id", user.id)
     .single();
 
-  currentPlan = (!error && data && data.status === "active") ? data.plan : "gratuit";
+  window.currentPlan = (!error && data && data.status === "active") ? data.plan : "gratuit";
   appliquerDeblocagePlan();
-}
+};
 
-function appliquerDeblocagePlan() {
-  const admin = estAdmin();
+window.appliquerDeblocagePlan = function () {
+  const admin = window.estAdmin();
   const debloquePremium = admin || currentPlan === "premium" || currentPlan === "business";
 
   const labels = { gratuit: "Plan Gratuit", basic: "Plan Basic", premium: "Plan Premium", business: "Plan Business" };
@@ -49,9 +55,9 @@ function appliquerDeblocagePlan() {
   document.querySelectorAll(".ob-lock").forEach((el) => {
     el.style.display = debloquePremium ? "none" : "block";
   });
-}
+};
 
-function addGoal() {
+window.addGoal = function () {
   const goals = ls('goals', []);
   if (goals.length >= 1 && !window._objectifsIllimites) {
     showModal('🔒', 'Objectifs illimités', 'Le Plan Gratuit inclut 1 objectif. Passez au Plan Basic pour des objectifs illimités !');
@@ -67,7 +73,7 @@ function addGoal() {
   ['gCustom', 'gTarget', 'gSaved', 'gDate'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   renderGoals(); renderDash();
   toast('Objectif créé !');
-}
+};
 
 const _getStripeLinkOriginal = window.getStripeLink;
 async function getStripeLinkAsync(name) {
@@ -103,3 +109,5 @@ function _deblocageTenterDemarrage() {
 }
 new MutationObserver(_deblocageTenterDemarrage).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 document.addEventListener('DOMContentLoaded', () => setTimeout(_deblocageTenterDemarrage, 400));
+
+} // fin de la protection anti-double-chargement
