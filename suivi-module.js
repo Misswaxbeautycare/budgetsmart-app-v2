@@ -1,6 +1,11 @@
-/* ══════════════════════════════════════════════════════════════
-   MODULE SUIVI — Dettes / Agenda / Tâches / Objectifs consolidés
-   ══════════════════════════════════════════════════════════════ */
+'use strict';
+
+/* Protection anti-double-chargement : si ce fichier est collé ou
+   chargé deux fois par erreur, ce bloc entier ne s'exécute qu'une
+   seule fois — impossible de casser le site avec un copier-coller
+   en double. */
+if (!window.__suiviChargeUneFois) {
+window.__suiviChargeUneFois = true;
 
 function suiviToday() { return new Date().toISOString().slice(0,10); }
 function suiviJoursRestants(dateStr) {
@@ -285,3 +290,5 @@ function _suiviTenterDemarrage() {
 }
 new MutationObserver(_suiviTenterDemarrage).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 document.addEventListener('DOMContentLoaded', () => setTimeout(_suiviTenterDemarrage, 300));
+
+} // fin de la protection anti-double-chargement
