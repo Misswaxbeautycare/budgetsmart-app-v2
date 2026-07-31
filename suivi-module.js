@@ -1,11 +1,7 @@
 /* ══════════════════════════════════════════════════════════════
    MODULE SUIVI — Dettes / Agenda / Tâches / Objectifs consolidés
-   À coller dans script.js (après la section ADMIN par ex.)
-   Réutilise ls()/sv()/fmt()/toast()/txt() déjà définis plus haut,
-   et la clé 'goals' déjà existante — pas de nouvelle table objectifs.
    ══════════════════════════════════════════════════════════════ */
 
-/* ── Helpers dates (safe, ne plantent jamais sur une date vide) ── */
 function suiviToday() { return new Date().toISOString().slice(0,10); }
 function suiviJoursRestants(dateStr) {
   const t = new Date(); t.setHours(0,0,0,0);
@@ -15,7 +11,6 @@ function suiviJoursRestants(dateStr) {
   return Math.round((d - t) / 86400000);
 }
 
-/* ── Init : appeler suiviInit() dans initApp() ── */
 function suiviInit() {
   document.querySelectorAll('.suivi-tab').forEach(btn => {
     btn.addEventListener('click', () => suiviGo(btn.dataset.tab));
@@ -51,7 +46,6 @@ function suiviGo(tab) {
   if (tab === 'objectifs') renderObjectifsConsolides();
 }
 
-/* ══ DETTES ══ */
 function addDette() {
   const dettes = ls('dettes', []);
   dettes.push({ id: Date.now(), nom: 'Nouvelle dette', montant: 0, taux: 0, echeance: suiviToday(), paye: false, note: '' });
@@ -105,7 +99,6 @@ function renderDettes() {
   }).join('');
 }
 
-/* ── Recommandations (méthode avalanche + analyse pro) ── */
 function suiviPlanDette(d) {
   const jrs = suiviJoursRestants(d.echeance);
   const montant = d.montant || 0, taux = d.taux || 0;
@@ -184,7 +177,6 @@ function renderRecommandations() {
   box.innerHTML = analyse + ordreHtml + cartes;
 }
 
-/* ══ AGENDA (échéances dettes + rendez-vous manuels) ══ */
 function addEvenement() {
   const titre = document.getElementById('sEvTitre')?.value.trim();
   const date  = document.getElementById('sEvDate')?.value || suiviToday();
@@ -222,7 +214,6 @@ function renderAgendaSuivi() {
   }).join('');
 }
 
-/* ══ TÂCHES JOURNALIÈRES ══ */
 function addTache() {
   const titre = document.getElementById('sTacheTitre')?.value.trim();
   const date = document.getElementById('sTacheDate')?.value || suiviToday();
@@ -260,10 +251,6 @@ function renderTaches() {
   }).join('');
 }
 
-/* ══ OBJECTIFS CONSOLIDÉS ══
-   Utilise directement ls('goals') / sv('goals') — la même clé que
-   le reste de BudgetSmart (dashboard, page Objectifs existante).
-   Rien de dupliqué : ajouter un objectif ici = il apparaît partout. */
 function renderObjectifsConsolides() {
   const goals = ls('goals', []);
   const dettes = ls('dettes', []).filter(d => !d.paye);
@@ -288,10 +275,6 @@ function renderObjectifsConsolides() {
   }).join('');
 }
 
-/* ══ AUTO-DÉMARRAGE ══
-   Se déclenche tout seul dès que l'utilisateur est connecté
-   (classe 'authed' sur <body>), sans avoir besoin d'ajouter
-   suiviInit() dans initApp() dans script.js. */
 let _suiviDejaLance = false;
 function _suiviTenterDemarrage() {
   if (_suiviDejaLance) return;
