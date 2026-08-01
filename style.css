@@ -25,11 +25,11 @@ input,select{font-family:var(--fb);}
 
 /* ── SIDEBAR ── */
 .sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sw);background:var(--sid);border-right:3px solid var(--or);display:flex;flex-direction:column;z-index:100;overflow-y:auto;transition:transform var(--tr);box-shadow:4px 0 24px rgba(232,99,28,0.06);}
-.sidebar-logo{display:flex;align-items:center;gap:13px;padding:22px 18px 18px;border-bottom:2px solid var(--orp);}
+.sidebar-logo{display:flex;align-items:center;gap:13px;padding:22px 18px 22px;border-bottom:2px solid var(--orp);}
 .logo-img{width:48px;height:48px;border-radius:12px;object-fit:cover;flex-shrink:0;border:2px solid var(--orp);}
 .logo-text{font-family:var(--ft);font-size:1.65rem;font-weight:800;color:var(--tx);display:block;line-height:1.1;}
 .logo-text em{color:var(--or);font-style:normal;}
-.logo-sub{font-size:0.74rem;color:var(--mu);margin-top:3px;font-weight:600;}
+.logo-sub{font-size:0.8rem;color:var(--or);margin-top:5px;font-weight:800;letter-spacing:0.01em;line-height:1.35;}
 .sp{display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--orp);margin:12px 12px;border-radius:13px;cursor:pointer;transition:all var(--tr);border:2px solid transparent;}
 .sp:hover{border-color:var(--or);}
 .sp-av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--gol));display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.05rem;font-weight:800;flex-shrink:0;overflow:hidden;}
@@ -303,18 +303,15 @@ input,select{font-family:var(--fb);}
 .dp-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--or),var(--gol));}
 .dp-pct{font-size:0.9rem;font-weight:800;color:var(--or);min-width:38px;text-align:right;}
 
-/* Trophée */
 .defi-trophy{background:linear-gradient(135deg,var(--blp),#fff);border:2.5px solid var(--bl);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:14px;animation:fi 0.4s ease;}
 .trophy-ico{font-size:3rem;animation:bounce 1s ease-in-out infinite;}
 @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
 .trophy-t{font-family:var(--ft);font-size:1.45rem;font-weight:800;color:var(--bl);margin-bottom:6px;}
 .trophy-m{font-size:0.98rem;color:var(--mid);font-weight:600;}
 
-/* Rappel / encouragement */
 .defi-rappel{background:var(--rep);border:2px solid #F5C6C0;border-radius:var(--rs);padding:11px 15px;font-size:0.96rem;font-weight:700;color:var(--re);margin-bottom:11px;text-align:center;}
 .defi-enc{background:var(--gp);border:2px solid #A8E6C5;border-radius:var(--rs);padding:11px 15px;font-size:0.96rem;font-weight:600;color:var(--g);margin-bottom:11px;text-align:center;font-style:italic;}
 
-/* Tracker */
 .defi-tracker{background:var(--bg);border-radius:var(--rs);padding:16px;border:2px solid var(--bo);margin-bottom:14px;}
 .dt-amounts{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:12px;}
 .dt-box{text-align:center;padding:10px;background:var(--card);border-radius:var(--rs);border:2px solid var(--bo);}
@@ -502,9 +499,6 @@ body:not(.authed) .sidebar,body:not(.authed) .main,body:not(.authed) .mh{display
 
 /* ══════════════════════════════════════════════════════════════
    MODULE SUIVI — Dettes / Agenda / Tâches / Objectifs
-   (copie de suivi-style.css — déjà uploadé séparément aussi,
-   ce bloc est juste là en secours si jamais le fichier séparé
-   pose problème)
    ══════════════════════════════════════════════════════════════ */
 .suivi-tabs{display:flex;gap:9px;margin-bottom:18px;flex-wrap:wrap;}
 .suivi-tab{padding:10px 20px;border-radius:18px;font-size:1rem;font-weight:700;background:var(--orp);color:var(--mu);border:none;cursor:pointer;transition:all var(--tr);}
