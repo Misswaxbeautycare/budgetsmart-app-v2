@@ -13,10 +13,10 @@ const STRIPE_BUSI    = 'https://buy.stripe.com/cNi9ATc6z9Fn7ZB4ZCaEE01';
 const PAYPAL         = 'https://www.paypal.me/Misswaxbeautycare';
 const CALENDLY       = 'https://calendly.com/missnyungedigitalservices/echange-projet-digital-ecommerce';
 const ADMIN_PWD      = 'Budgetsmart20@131690-25';
-const APP_URL        = 'https://misswaxbeautycare.github.io/budgetsmart-app-v2';
+const APP_URL        = 'https://misswaxbeautycare.github.io/budgetsmart';
 
 const CATS = {nourriture:'🥗',transport:'🚌',loyer:'🏠',factures:'💡',shopping:'🛍',sante:'💊',enfants:'👶',business:'💼',loisirs:'🎭',epargne:'💰',dettes:'📉',autre:'📦'};
-const COLORS = ['#E8631C','#2E7DD6','#D98C12','#1F9D6B','#7B3DB5','#B53051','#F0AB35'];
+const COLORS = ['#2E7D5E','#1E5A9C','#C8922A','#D4621A','#7B3DB5','#B53051','#4AAB9B'];
 
 const TIPS = [
   {cat:'Budget',txt:'La règle 50/30/20 : 50% besoins, 30% envies, 20% épargne. Commencez dès aujourd\'hui.'},
@@ -108,11 +108,11 @@ function showEmailConfirmScreen(email) {
     <p style="font-size:0.9rem;color:#4B5563;margin:14px 0;line-height:1.6">
       Nous avons envoyé un lien de confirmation à<br/><strong>${email}</strong>
     </p>
-    <p style="font-size:0.85rem;color:#6B5F52;margin-bottom:18px;line-height:1.6">
+    <p style="font-size:0.85rem;color:#6B7280;margin-bottom:18px;line-height:1.6">
       Cliquez sur le lien dans l'email pour activer votre compte, puis revenez ici pour vous connecter.
     </p>
     <button class="btn-g" id="btnBackToLogin" style="width:100%">Retour à la connexion</button>
-    <p style="font-size:0.76rem;color:#6B5F52;margin-top:14px">
+    <p style="font-size:0.76rem;color:#6B7280;margin-top:14px">
       Vous ne voyez pas l'email ? Vérifiez vos spams.
     </p>
   `;
@@ -189,7 +189,7 @@ async function doLogout() {
   location.reload();
 }
 
-function onAuthSuccess(user) {
+async function onAuthSuccess(user) {
   currentUser = user;
   document.body.classList.add('authed');
   const name = user.user_metadata?.name || user.email.split('@')[0];
@@ -198,6 +198,17 @@ function onAuthSuccess(user) {
   if (!p.email) p.email = user.email;
   sv('profile', p);
   txt('userEmailDisplay', user.email);
+
+  // Sync profile to Supabase (upsert)
+  try {
+    await sbClient.from('profiles').upsert({
+      id: user.id,
+      email: user.email,
+      name: name,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'id' });
+  } catch(e) { console.log('Profile sync:', e.message); }
+
   initApp();
 }
 
@@ -217,7 +228,6 @@ function initApp() {
   renderPricingAll();
   initCoaching();
   initAdmin();
-  chargerAbonnement();
   initPWA();
   initNotif();
 }
@@ -290,15 +300,15 @@ function initAllButtons() {
   b('togAF', () => { pMode='af'; document.getElementById('togAF').classList.add('active'); document.getElementById('togEU').classList.remove('active'); renderPricingMain(); });
 
   /* Pricing payment */
-  b('selCard', () => window.open(getStripeLinkAvecIdentite(document.getElementById('selName')?.textContent), '_blank'));
+  b('selCard', () => window.open(getStripeLink(document.getElementById('selName')?.textContent), '_blank'));
   b('selPP',   () => window.open(PAYPAL, '_blank'));
 
   /* Business project */
-  b('pcBCard', () => window.open(getStripeLinkAvecIdentite('Business'), '_blank'));
+  b('pcBCard', () => window.open(getStripeLink('Business'), '_blank'));
   b('pcBPP',   () => window.open(PAYPAL, '_blank'));
 
   /* Couple project */
-  b('pcCCard', () => window.open(getStripeLinkAvecIdentite('Business'), '_blank'));
+  b('pcCCard', () => window.open(getStripeLink('Business'), '_blank'));
   b('pcCPP',   () => window.open(PAYPAL, '_blank'));
 
   /* Modal */
@@ -316,6 +326,18 @@ function initAllButtons() {
 
   /* Profile PWA install */
   b('btnLogout',      adminLogout);
+  b('btnRefreshUsers', renderAdmin);
+
+  // Admin search filter
+  const adSearch = document.getElementById('adSearchUser');
+  if (adSearch) adSearch.addEventListener('input', () => {
+    const q = adSearch.value.toLowerCase();
+    document.querySelectorAll('.admin-user-row').forEach(row => {
+      const email = row.querySelector('.aur-email')?.textContent.toLowerCase()||'';
+      const name  = row.querySelector('.aur-name')?.textContent.toLowerCase()||'';
+      row.style.display = (email.includes(q)||name.includes(q)) ? 'flex' : 'none';
+    });
+  });
 
   /* Photo */
   const pi = document.getElementById('photoInput');
@@ -420,8 +442,8 @@ function drawDonut(cats, cur) {
     if (leg) { const d=document.createElement('div');d.className='dl';d.innerHTML='<div class="dd" style="background:'+col+'"></div><span style="flex:1">'+(CATS[cat]||'')+' '+cat+'</span><span style="font-weight:800">'+fmt(val,cur)+'</span>';leg.appendChild(d); }
   });
   ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
-  ctx.fillStyle='#1A1410';ctx.font='bold 10px DM Sans,sans-serif';ctx.textAlign='center';ctx.fillText(fmt(tot,cur).split(' ')[0],cx,cy-1);
-  ctx.fillStyle='#6B5F52';ctx.font='9px DM Sans,sans-serif';ctx.fillText('total',cx,cy+11);
+  ctx.fillStyle='#0D1117';ctx.font='bold 10px DM Sans,sans-serif';ctx.textAlign='center';ctx.fillText(fmt(tot,cur).split(' ')[0],cx,cy-1);
+  ctx.fillStyle='#6B7280';ctx.font='9px DM Sans,sans-serif';ctx.fillText('total',cx,cy+11);
 }
 
 function drawBar(all, cur) {
@@ -434,17 +456,17 @@ function drawBar(all, cur) {
   const pL=40,pR=8,pT=10,pB=24,cW=W-pL-pR,cH=H-pT-pB;
   const max=Math.max(...months.flatMap(m=>[m.inc,m.exp,m.sav]),1);
   ctx.strokeStyle='#E8E5E0';ctx.lineWidth=1;
-  for(let i=0;i<=4;i++){const y=pT+cH-(i/4)*cH;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(pL+cW,y);ctx.stroke();ctx.fillStyle='#6B5F52';ctx.font='8px DM Sans';ctx.textAlign='right';ctx.fillText(Math.round(max*i/4),pL-3,y+3);}
+  for(let i=0;i<=4;i++){const y=pT+cH-(i/4)*cH;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(pL+cW,y);ctx.stroke();ctx.fillStyle='#6B7280';ctx.font='8px DM Sans';ctx.textAlign='right';ctx.fillText(Math.round(max*i/4),pL-3,y+3);}
   const bw=cW/months.length,gw=bw*0.22,bwi=bw*0.19;
   months.forEach((mm,i)=>{
     const x=pL+i*bw+gw;
-    [['#1F9D6B',mm.inc],['#E8631C',mm.exp],['#D98C12',mm.sav]].forEach(([col,val],j)=>{
+    [['#2E7D5E',mm.inc],['#D4621A',mm.exp],['#C8922A',mm.sav]].forEach(([col,val],j)=>{
       const bh=(val/max)*cH;ctx.fillStyle=col;ctx.beginPath();ctx.roundRect(x+j*(bwi+2),pT+cH-bh,bwi,bh,[3,3,0,0]);ctx.fill();
     });
-    ctx.fillStyle='#6B5F52';ctx.font='8px DM Sans';ctx.textAlign='center';ctx.fillText(mm.lbl,pL+i*bw+bw/2,H-6);
+    ctx.fillStyle='#6B7280';ctx.font='8px DM Sans';ctx.textAlign='center';ctx.fillText(mm.lbl,pL+i*bw+bw/2,H-6);
   });
-  [['Revenus','#1F9D6B'],['Dépenses','#E8631C'],['Économies','#D98C12']].forEach(([lbl,col],i)=>{
-    const lx=W-200+i*68;ctx.fillStyle=col;ctx.fillRect(lx,3,8,8);ctx.fillStyle='#6B5F52';ctx.font='8px DM Sans';ctx.textAlign='left';ctx.fillText(lbl,lx+11,10);
+  [['Revenus','#2E7D5E'],['Dépenses','#D4621A'],['Économies','#C8922A']].forEach(([lbl,col],i)=>{
+    const lx=W-200+i*68;ctx.fillStyle=col;ctx.fillRect(lx,3,8,8);ctx.fillStyle='#6B7280';ctx.font='8px DM Sans';ctx.textAlign='left';ctx.fillText(lbl,lx+11,10);
   });
 }
 
@@ -497,7 +519,7 @@ function renderGoalEvo(cur) {
     const pct = Math.min(100,Math.round(((g.sav||0)/g.target)*100))||0;
     return `<div class="ad-item">
       <div class="ad-name">${g.name} ${pct>=100?'🏆':''}</div>
-      <div class="ad-bar"><div class="ad-fill" style="width:${pct}%;background:linear-gradient(90deg,#2E7DD6,#E8631C)"></div></div>
+      <div class="ad-bar"><div class="ad-fill" style="width:${pct}%;background:linear-gradient(90deg,#1E5A9C,#2E7D5E)"></div></div>
       <div class="ad-meta">${fmt(g.sav||0,cur)} / ${fmt(g.target,cur)} — ${pct}%</div>
     </div>`;
   }).join('');
@@ -554,7 +576,7 @@ function delEntry(id) { if(!confirm('Supprimer ?'))return; sv('entries',ls('entr
 /* ══ GOALS ══ */
 function addGoal() {
   const goals = ls('goals', []);
-  if (goals.length >= 1 && !window._objectifsIllimites) { showModal('🔒','Objectifs illimités','Le Plan Gratuit inclut 1 objectif. Passez au Plan Basic pour des objectifs illimités !'); return; }
+  if (goals.length >= 1) { showModal('🔒','Objectifs illimités','Le Plan Gratuit inclut 1 objectif. Passez au Plan Basic pour des objectifs illimités !'); return; }
   const name   = document.getElementById('gCustom')?.value.trim() || document.getElementById('gName')?.value;
   const target = parseFloat(document.getElementById('gTarget')?.value)||0;
   const sav    = parseFloat(document.getElementById('gSaved')?.value)||0;
@@ -581,8 +603,8 @@ function renderGoals() {
         <button class="goal-del" data-id="${g.id}">✕</button>
       </div>
       <div class="goal-amts">
-        <div><div style="font-size:0.68rem;color:#6B5F52;font-weight:800;text-transform:uppercase;margin-bottom:2px">Économisé</div><div class="goal-sv">${fmt(g.sav||0,cur)}</div></div>
-        <div class="goal-tg"><div style="font-size:0.68rem;color:#6B5F52;font-weight:800;text-transform:uppercase;margin-bottom:2px">Objectif</div><strong style="font-family:'Cormorant Garamond',serif;font-size:1.1rem">${fmt(g.target,cur)}</strong></div>
+        <div><div style="font-size:0.68rem;color:#6B7280;font-weight:800;text-transform:uppercase;margin-bottom:2px">Économisé</div><div class="goal-sv">${fmt(g.sav||0,cur)}</div></div>
+        <div class="goal-tg"><div style="font-size:0.68rem;color:#6B7280;font-weight:800;text-transform:uppercase;margin-bottom:2px">Objectif</div><strong style="font-family:'Cormorant Garamond',serif;font-size:1.1rem">${fmt(g.target,cur)}</strong></div>
       </div>
       <div class="pb-bar"><div class="pb-fill" style="width:${pct}%"></div></div>
       <div class="pb-pct">${pct}% — Restant : ${fmt(Math.max(0,g.target-(g.sav||0)),cur)}</div>
@@ -727,7 +749,7 @@ function renderPricingMain() {
         txt('selName', plan.name);
         txt('selPrice', plan.price+' '+plan.unit);
         const sc = document.getElementById('selCard');
-        if (sc) { sc.onclick = () => window.open(getStripeLinkAvecIdentite(plan.name),'_blank'); }
+        if (sc) { sc.onclick = () => window.open(getStripeLink(plan.name),'_blank'); }
         bar.scrollIntoView({behavior:'smooth',block:'center'});
       }
       toast('Plan '+plan.name+' sélectionné !');
@@ -748,7 +770,7 @@ function renderPricingProject(elId, payBoxId) {
       if (box) {
         box.style.display='block';
         const cb = box.querySelector('.btn-card');
-        if (cb) cb.onclick = () => window.open(getStripeLinkAvecIdentite(plans[i].name),'_blank');
+        if (cb) cb.onclick = () => window.open(getStripeLink(plans[i].name),'_blank');
         box.scrollIntoView({behavior:'smooth',block:'center'});
       }
       toast('Plan '+plans[i].name+' sélectionné !');
@@ -861,37 +883,142 @@ function showModal(ico,title,text) {
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
 
 /* ══ ADMIN ══ */
-function initAdmin() {
-  if (window.location.hash==='#admin') setTimeout(adminLogin,500);
+/* ══ ADMIN SUPABASE ══ */
+let isAdmin = false;
+
+async function initAdmin() {
+  if (window.location.hash==='#admin') setTimeout(checkAdminAccess, 500);
   const logo = document.querySelector('.sidebar-logo');
-  if (logo) { let c=0; logo.addEventListener('click',()=>{c++;if(c>=3){c=0;adminLogin();}setTimeout(()=>{c=0;},1500);}); }
-  if (ls('bs_admin')===ADMIN_PWD) activateAdmin();
+  if (logo) { let c=0; logo.addEventListener('click',()=>{c++;if(c>=3){c=0;checkAdminAccess();}setTimeout(()=>{c=0;},1500);}); }
+  await checkAdminAccess();
 }
-function adminLogin() {
-  const pwd = prompt('Mot de passe administrateur :');
-  if (pwd===ADMIN_PWD) { sv('bs_admin',ADMIN_PWD); activateAdmin(); toast('Mode Admin activé !'); go('admin'); }
-  else if (pwd!==null) toast('Mot de passe incorrect.');
+
+async function checkAdminAccess() {
+  if (!currentUser) return;
+  try {
+    const { data } = await sbClient
+      .from('profiles')
+      .select('is_admin, plan')
+      .eq('id', currentUser.id)
+      .single();
+    if (data?.is_admin) {
+      isAdmin = true;
+      activateAdmin();
+    }
+  } catch(e) {}
 }
+
 function activateAdmin() {
   const li = document.getElementById('adminLi'); if(li) li.style.display='block';
   const ac = document.getElementById('adminCard'); if(ac) ac.style.display='block';
-  txt('sbPlan','Admin — Accès Complet'); txt('spPlan','Propriétaire');
-  appliquerDeblocagePlan();
+  txt('sbPlan','Admin — Accès Complet');
+  txt('spPlan','Propriétaire');
+  renderAdmin();
 }
-function renderAdmin() {
+
+async function renderAdmin() {
+  if (!isAdmin) return;
+  
+  // Stats locales
   const entries=ls('entries',[]),goals=ls('goals',[]),joined=ls('joinedDefis',{}),p=ls('profile',{}),cur=p.currency||'€';
   const now=new Date(),m=now.getMonth(),y=now.getFullYear();
   let mE=0,tS=0;
   entries.forEach(e=>{const d=new Date(e.date);if(d.getMonth()===m&&d.getFullYear()===y)mE+=e.exp||0;tS+=e.sav||0;});
   txt('adSav',fmt(tS,cur)); txt('adExp',fmt(mE,cur));
   txt('adGoals',goals.length.toString()); txt('adDefis',Object.keys(joined).length.toString());
-  const gl=document.getElementById('adGoalsList');
-  if(gl) gl.innerHTML=goals.length?goals.map(g=>{const pct=Math.min(100,Math.round(((g.sav||0)/g.target)*100))||0;return`<div class="ad-item"><div class="ad-name">${g.name}</div><div class="ad-bar"><div class="ad-fill" style="width:${pct}%"></div></div><div class="ad-meta">${fmt(g.sav||0,cur)} / ${fmt(g.target,cur)} — ${pct}%</div></div>`;}).join(''):'<div class="empty">Aucun objectif.</div>';
-  const el=document.getElementById('adEntries');
-  if(el) el.innerHTML=[...entries].reverse().slice(0,5).map(e=>`<div class="tx-item"><div class="tx-cat">${CATS[e.cat]||'📦'}</div><div class="tx-info"><div class="tx-date">${new Date(e.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}</div><div class="tx-note">${e.note||e.cat}</div></div><div class="tx-amt">${e.inc?'<div class="tx-inc">+'+fmt(e.inc,cur)+'</div>':''}${e.exp?'<div class="tx-exp">-'+fmt(e.exp,cur)+'</div>':''}</div></div>`).join('')||'<div class="empty">Aucune entrée.</div>';
-  initAdminPlanPreview();
+
+  // Charger tous les utilisateurs depuis Supabase
+  try {
+    const { data: users, error } = await sbClient
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    txt('adTotalUsers', (users?.length || 0).toString());
+    renderUsersList(users || []);
+  } catch(e) {
+    console.error('Admin load error:', e);
+    const ul = document.getElementById('adUsersList');
+    if (ul) ul.innerHTML = '<div class="empty">Erreur de chargement des utilisateurs.</div>';
+  }
 }
-function adminLogout(){if(!confirm('Quitter le mode Admin ?'))return;localStorage.removeItem('bs_admin');location.reload();}
+
+function renderUsersList(users) {
+  const ul = document.getElementById('adUsersList');
+  if (!ul) return;
+  if (!users.length) { ul.innerHTML = '<div class="empty">Aucun utilisateur inscrit.</div>'; return; }
+  
+  const planColors = {
+    'gratuit':  '#6B5F52',
+    'basic':    '#2E7DD6',
+    'premium':  '#E8631C',
+    'business': '#D98C12'
+  };
+  
+  ul.innerHTML = users.map(u => `
+    <div class="admin-user-row" data-id="${u.id}">
+      <div class="aur-info">
+        <div class="aur-email">${u.email || '—'}</div>
+        <div class="aur-name">${u.name || 'Sans nom'}</div>
+        <div class="aur-date">Inscrit le ${u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR') : '—'}</div>
+      </div>
+      <div class="aur-plan">
+        <select class="inp plan-select" data-uid="${u.id}" style="padding:7px 11px;font-size:0.92rem;font-weight:700;color:${planColors[u.plan||'gratuit']};border-color:${planColors[u.plan||'gratuit']}">
+          <option value="gratuit"  ${(u.plan||'gratuit')==='gratuit'  ? 'selected':''}>Gratuit</option>
+          <option value="basic"    ${u.plan==='basic'    ? 'selected':''}>Basic — 2,99€</option>
+          <option value="premium"  ${u.plan==='premium'  ? 'selected':''}>Premium — 5,99€</option>
+          <option value="business" ${u.plan==='business' ? 'selected':''}>Business — 9,99€</option>
+        </select>
+        <button class="btn-apply-plan" data-uid="${u.id}">Appliquer</button>
+      </div>
+      <div class="aur-status">
+        <span class="aur-badge ${u.is_admin ? 'badge-admin' : 'badge-user'}">${u.is_admin ? '👑 Admin' : '👤 Utilisateur'}</span>
+      </div>
+    </div>
+  `).join('');
+
+  // Boutons Appliquer plan
+  ul.querySelectorAll('.btn-apply-plan').forEach(btn => {
+    btn.addEventListener('click', () => applyUserPlan(btn.dataset.uid));
+  });
+
+  // Mise à jour couleur select en temps réel
+  ul.querySelectorAll('.plan-select').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const colors = {'gratuit':'#6B5F52','basic':'#2E7DD6','premium':'#E8631C','business':'#D98C12'};
+      sel.style.color = colors[sel.value] || '#6B5F52';
+      sel.style.borderColor = colors[sel.value] || '#6B5F52';
+    });
+  });
+}
+
+async function applyUserPlan(userId) {
+  const sel = document.querySelector(`.plan-select[data-uid="${userId}"]`);
+  if (!sel) return;
+  const plan = sel.value;
+  const btn = document.querySelector(`.btn-apply-plan[data-uid="${userId}"]`);
+  if (btn) { btn.disabled = true; btn.textContent = 'En cours…'; }
+  
+  try {
+    const { error } = await sbClient
+      .from('profiles')
+      .update({ plan, updated_at: new Date().toISOString() })
+      .eq('id', userId);
+    if (error) throw error;
+    toast(`✅ Plan ${plan} attribué avec succès !`);
+    if (btn) { btn.disabled = false; btn.textContent = 'Appliquer'; }
+  } catch(e) {
+    toast('❌ Erreur : ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Appliquer'; }
+  }
+}
+
+function adminLogout(){
+  if(!confirm('Quitter le mode Admin ?')) return;
+  localStorage.removeItem('bs_admin');
+  location.reload();
+}
 
 /* ══ PWA ══ */
 function initPWA() {
@@ -909,6 +1036,7 @@ function initPWA() {
 function initPWABanner() {
   const bn = document.getElementById('pwaBanner');
   if (!bn) return;
+  // Cacher si déjà installé
   if (window.matchMedia('(display-mode:standalone)').matches || localStorage.getItem('bs_installed')==='1') {
     bn.style.display='none'; return;
   }
@@ -958,372 +1086,4 @@ function scheduleNotif() {
     });
   },9000);
   localStorage.setItem('bs_notif',today);
-}
-/* ══════════════════════════════════════════════════════════════
-   MODULE SUIVI — Dettes / Agenda / Tâches / Objectifs consolidés
-   À coller dans script.js (après la section ADMIN par ex.)
-   Réutilise ls()/sv()/fmt()/toast()/txt() déjà définis plus haut,
-   et la clé 'goals' déjà existante — pas de nouvelle table objectifs.
-   ══════════════════════════════════════════════════════════════ */
-
-/* ── Helpers dates (safe, ne plantent jamais sur une date vide) ── */
-function suiviToday() { return new Date().toISOString().slice(0,10); }
-function suiviJoursRestants(dateStr) {
-  const t = new Date(); t.setHours(0,0,0,0);
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return 0;
-  d.setHours(0,0,0,0);
-  return Math.round((d - t) / 86400000);
-}
-
-/* ── Init : appeler suiviInit() dans initApp() ── */
-function suiviInit() {
-  document.querySelectorAll('.suivi-tab').forEach(btn => {
-    btn.addEventListener('click', () => suiviGo(btn.dataset.tab));
-  });
-  const bAdd = document.getElementById('btnAddDette');
-  if (bAdd) bAdd.addEventListener('click', addDette);
-  const bEv = document.getElementById('btnAddEvenement');
-  if (bEv) bEv.addEventListener('click', addEvenement);
-  const bTa = document.getElementById('btnAddTache');
-  if (bTa) bTa.addEventListener('click', addTache);
-  const tDay = document.getElementById('sTacheDate');
-  if (tDay) { tDay.value = suiviToday(); tDay.addEventListener('change', renderTaches); }
-  const rev = document.getElementById('sRevenu');
-  if (rev) {
-    const p = ls('profile', {});
-    rev.value = p.revenuDisponible || 0;
-    rev.addEventListener('change', () => {
-      const pp = ls('profile', {});
-      pp.revenuDisponible = parseFloat(rev.value) || 0;
-      sv('profile', pp);
-      renderRecommandations();
-    });
-  }
-  suiviGo('dettes');
-}
-
-function suiviGo(tab) {
-  document.querySelectorAll('.suivi-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  document.querySelectorAll('.suivi-panel').forEach(p => p.style.display = (p.dataset.panel === tab ? 'block' : 'none'));
-  if (tab === 'dettes')    { renderDettes(); renderRecommandations(); }
-  if (tab === 'agenda')    renderAgendaSuivi();
-  if (tab === 'taches')    renderTaches();
-  if (tab === 'objectifs') renderObjectifsConsolides();
-}
-
-/* ══ DETTES ══ */
-function addDette() {
-  const dettes = ls('dettes', []);
-  dettes.push({ id: Date.now(), nom: 'Nouvelle dette', montant: 0, taux: 0, echeance: suiviToday(), paye: false, note: '' });
-  sv('dettes', dettes);
-  renderDettes(); renderRecommandations();
-}
-function updateDette(id, field, val) {
-  const dettes = ls('dettes', []);
-  const d = dettes.find(x => x.id === id);
-  if (!d) return;
-  d[field] = field === 'montant' || field === 'taux' ? parseFloat(val) || 0 : val;
-  sv('dettes', dettes);
-  renderDettes(); renderRecommandations(); renderAgendaSuivi();
-}
-function toggleDettePaye(id) {
-  const dettes = ls('dettes', []);
-  const d = dettes.find(x => x.id === id);
-  if (!d) return;
-  d.paye = !d.paye;
-  sv('dettes', dettes);
-  renderDettes(); renderRecommandations(); renderAgendaSuivi();
-  if (d.paye) toast('Dette marquée payée !');
-}
-function removeDette(id) {
-  if (!confirm('Supprimer cette dette ?')) return;
-  sv('dettes', ls('dettes', []).filter(x => x.id !== id));
-  renderDettes(); renderRecommandations(); renderAgendaSuivi();
-}
-
-function renderDettes() {
-  const dettes = ls('dettes', []), p = ls('profile', {}), cur = p.currency || '€';
-  const total = dettes.filter(d => !d.paye).reduce((s, d) => s + (d.montant || 0), 0);
-  txt('sTotalDettes', fmt(total, cur));
-
-  const lst = document.getElementById('dettesList'); if (!lst) return;
-  if (!dettes.length) { lst.innerHTML = '<div class="empty">Aucune dette enregistrée.</div>'; return; }
-
-  lst.innerHTML = dettes.map(d => {
-    const jrs = suiviJoursRestants(d.echeance);
-    const enRetard = !d.paye && jrs < 0;
-    const proche = !d.paye && jrs >= 0 && jrs <= 7;
-    const cls = d.paye ? 'sd-paye' : enRetard ? 'sd-retard' : proche ? 'sd-proche' : '';
-    return `<div class="sd-item ${cls}">
-      <input class="sd-nom" value="${d.nom}" onchange="updateDette(${d.id},'nom',this.value)"/>
-      <input class="sd-montant" type="number" value="${d.montant}" onchange="updateDette(${d.id},'montant',this.value)"/>
-      <input class="sd-taux" type="number" value="${d.taux||0}" onchange="updateDette(${d.id},'taux',this.value)" title="Taux %"/>
-      <input class="sd-echeance" type="date" value="${d.echeance}" onchange="updateDette(${d.id},'echeance',this.value||'${suiviToday()}')"/>
-      <button class="sd-paye-btn ${d.paye?'on':''}" onclick="toggleDettePaye(${d.id})">${d.paye ? '✓' : ''}</button>
-      <button class="sd-del" onclick="removeDette(${d.id})">✕</button>
-    </div>`;
-  }).join('');
-}
-
-/* ── Recommandations (méthode avalanche + analyse pro) ── */
-function suiviPlanDette(d) {
-  const jrs = suiviJoursRestants(d.echeance);
-  const montant = d.montant || 0, taux = d.taux || 0;
-  const coutMensuel = taux > 0 ? (montant * (taux/100)) / 12 : 0;
-  let niveau, conseil, montantMensuelEstime;
-
-  if (jrs < 0) {
-    niveau = 'urgent';
-    conseil = `En retard de ${Math.abs(jrs)} j — paie au moins un acompte aujourd'hui.` +
-      (taux >= 15 ? ` À ${taux}%, chaque mois de retard coûte ~${fmt(coutMensuel)} en intérêts.` : '');
-    montantMensuelEstime = montant;
-  } else if (jrs <= 30) {
-    niveau = taux >= 15 || montant > 1500 ? 'complexe' : 'moderee';
-    const semaines = Math.max(Math.ceil(jrs/7), 1);
-    conseil = `${semaines} semaine(s) restantes. Vire ${fmt(montant/semaines)}/semaine.` +
-      (taux >= 15 ? ` Taux élevé (${taux}%) — priorise-la sur les dettes à 0%.` : '');
-    montantMensuelEstime = montant;
-  } else {
-    niveau = taux >= 15 || montant > 2000 ? 'complexe' : 'simple';
-    const mois = Math.max(Math.ceil(jrs/30), 1);
-    conseil = `Marge large (${mois} mois). ${fmt(montant/mois)}/mois suffit.` +
-      (taux >= 15 ? ` Mais coûte ${fmt(coutMensuel)}/mois en intérêts — ne la laisse pas traîner.` : '');
-    montantMensuelEstime = montant / mois;
-  }
-  return { niveau, conseil, taux, coutMensuel, montantMensuelEstime };
-}
-
-function suiviPriorite(dettes) {
-  const impayees = dettes.filter(d => !d.paye);
-  if (impayees.length < 2) return null;
-  return [...impayees].sort((a,b) => {
-    const ra = suiviJoursRestants(a.echeance) < 0, rb = suiviJoursRestants(b.echeance) < 0;
-    if (ra !== rb) return ra ? -1 : 1;
-    if ((a.taux||0) !== (b.taux||0)) return (b.taux||0) - (a.taux||0);
-    return (b.montant||0) - (a.montant||0);
-  });
-}
-
-function renderRecommandations() {
-  const box = document.getElementById('sRecommandations'); if (!box) return;
-  const dettes = ls('dettes', []).filter(d => !d.paye);
-  const goals = ls('goals', []);
-  const p = ls('profile', {});
-  const revenu = p.revenuDisponible || 0;
-
-  if (!dettes.length) { box.innerHTML = ''; return; }
-
-  const chargeMensuelle = dettes.reduce((s,d) => s + suiviPlanDette(d).montantMensuelEstime, 0);
-  const coutInteret = dettes.reduce((s,d) => s + suiviPlanDette(d).coutMensuel, 0);
-  const ratio = revenu > 0 ? chargeMensuelle / revenu : null;
-  const cher = dettes.filter(d => (d.taux||0) >= 15);
-
-  let analyse = '';
-  if (ratio !== null) {
-    if (ratio > 1) analyse += `<div class="sr-alerte">Le remboursement estimé (${fmt(chargeMensuelle)}/mois) dépasse ta trésorerie disponible (${fmt(revenu)}). Renégocie des délais ou réduis d'autres dépenses.</div>`;
-    else if (ratio > 0.7) analyse += `<div class="sr-attention">Tu utilises ${Math.round(ratio*100)}% de ta trésorerie pour rembourser — c'est serré.</div>`;
-    else analyse += `<div class="sr-succes">Charge de remboursement raisonnable : ${Math.round(ratio*100)}% de ta trésorerie disponible.</div>`;
-  }
-  if (coutInteret > 5) analyse += `<div class="sr-attention">Coût des intérêts : ~${fmt(coutInteret)}/mois si rien ne bouge.</div>`;
-  if (cher.length >= 2) analyse += `<div class="sr-alerte">${cher.length} dettes à taux élevé (≥15%) — envisage une consolidation.</div>`;
-
-  const ordre = suiviPriorite(ls('dettes', []));
-  const ordreHtml = ordre ? `<div class="sr-ordre">
-      <strong>Ordre de priorité (avalanche) :</strong>
-      <ol>${ordre.map(d => `<li>${d.nom} — ${fmt(d.montant)} (${d.taux||0}%)${suiviJoursRestants(d.echeance)<0?' · en retard':''}</li>`).join('')}</ol>
-    </div>` : '';
-
-  const cartes = dettes.map(d => {
-    const plan = suiviPlanDette(d);
-    return `<div class="sr-carte sr-${plan.niveau}">
-      <strong>${d.nom}</strong>${d.taux ? ' — '+d.taux+'%' : ''}
-      <p>${plan.conseil}</p>
-    </div>`;
-  }).join('');
-
-  box.innerHTML = analyse + ordreHtml + cartes;
-}
-
-/* ══ AGENDA (échéances dettes + rendez-vous manuels) ══ */
-function addEvenement() {
-  const titre = document.getElementById('sEvTitre')?.value.trim();
-  const date  = document.getElementById('sEvDate')?.value || suiviToday();
-  if (!titre) { toast('Titre du rendez-vous manquant.'); return; }
-  const ev = ls('evenements', []);
-  ev.push({ id: Date.now(), titre, date });
-  sv('evenements', ev);
-  document.getElementById('sEvTitre').value = '';
-  renderAgendaSuivi();
-}
-function removeEvenement(id) {
-  sv('evenements', ls('evenements', []).filter(e => e.id !== id));
-  renderAgendaSuivi();
-}
-
-function renderAgendaSuivi() {
-  const dettes = ls('dettes', []).filter(d => !d.paye);
-  const ev = ls('evenements', []);
-  const items = [
-    ...dettes.map(d => ({ id:'d'+d.id, titre:d.nom, date:d.echeance, source:'dette', montant:d.montant })),
-    ...ev.map(e => ({ id:'e'+e.id, titre:e.titre, date:e.date, source:'manuel' })),
-  ].sort((a,b) => new Date(a.date) - new Date(b.date));
-
-  const lst = document.getElementById('agendaList'); if (!lst) return;
-  if (!items.length) { lst.innerHTML = '<div class="empty">Aucun rendez-vous.</div>'; return; }
-
-  lst.innerHTML = items.map(it => {
-    const jrs = suiviJoursRestants(it.date);
-    const cls = jrs < 0 ? 'sa-retard' : jrs <= 7 ? 'sa-proche' : '';
-    return `<div class="sa-item ${cls}">
-      <strong>${it.titre}</strong>
-      <span>${new Date(it.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})} · ${jrs<0?'en retard':'dans '+jrs+' j'}${it.montant?' · '+fmt(it.montant):''}</span>
-      ${it.source==='manuel' ? `<button onclick="removeEvenement(${it.id.slice(1)})">✕</button>` : ''}
-    </div>`;
-  }).join('');
-}
-
-/* ══ TÂCHES JOURNALIÈRES ══ */
-function addTache() {
-  const titre = document.getElementById('sTacheTitre')?.value.trim();
-  const date = document.getElementById('sTacheDate')?.value || suiviToday();
-  if (!titre) return;
-  const t = ls('taches', []);
-  t.push({ id: Date.now(), date, titre, fait: false });
-  sv('taches', t);
-  document.getElementById('sTacheTitre').value = '';
-  renderTaches();
-}
-function toggleTache(id) {
-  const t = ls('taches', []);
-  const x = t.find(i => i.id === id);
-  if (x) { x.fait = !x.fait; sv('taches', t); renderTaches(); }
-}
-function removeTache(id) {
-  sv('taches', ls('taches', []).filter(t => t.id !== id));
-  renderTaches();
-}
-function renderTaches() {
-  const date = document.getElementById('sTacheDate')?.value || suiviToday();
-  const taches = ls('taches', []).filter(t => t.date === date);
-  const fait = taches.filter(t => t.fait).length;
-  txt('sTacheCompteur', taches.length ? `${fait}/${taches.length} faites` : 'aucune tâche');
-
-  const lst = document.getElementById('tachesList'); if (!lst) return;
-  if (!taches.length) { lst.innerHTML = '<div class="empty">Rien de prévu ce jour.</div>'; return; }
-  lst.innerHTML = taches.map(t => {
-    const enDanger = !t.fait && suiviJoursRestants(t.date) < 0;
-    return `<div class="st-item ${enDanger?'st-danger':''} ${t.fait?'st-fait':''}">
-      <button class="st-check" onclick="toggleTache(${t.id})">${t.fait?'✓':''}</button>
-      <span>${t.titre}</span>
-      <button class="st-del" onclick="removeTache(${t.id})">✕</button>
-    </div>`;
-  }).join('');
-}
-
-/* ══ OBJECTIFS CONSOLIDÉS ══
-   Utilise directement ls('goals') / sv('goals') — la même clé que
-   le reste de BudgetSmart (dashboard, page Objectifs existante).
-   Rien de dupliqué : ajouter un objectif ici = il apparaît partout. */
-function renderObjectifsConsolides() {
-  const goals = ls('goals', []);
-  const dettes = ls('dettes', []).filter(d => !d.paye);
-  const p = ls('profile', {}), cur = p.currency || '€';
-  const lst = document.getElementById('objectifsConsolides'); if (!lst) return;
-
-  const totalDettes = dettes.reduce((s,d) => s + (d.montant||0), 0);
-  const enteteHtml = `<div class="oc-resume">
-    <span>${goals.length} objectif(s) d'épargne · ${fmt(goals.reduce((s,g)=>s+(g.sav||0),0), cur)} économisés</span>
-    <span>${dettes.length} dette(s) en cours · ${fmt(totalDettes, cur)} restant</span>
-  </div>`;
-
-  if (!goals.length) { lst.innerHTML = enteteHtml + '<div class="empty">Aucun objectif — ajoute-en un depuis la page Objectifs.</div>'; return; }
-
-  lst.innerHTML = enteteHtml + goals.map(g => {
-    const pct = Math.min(100, Math.round(((g.sav||0)/g.target)*100)) || 0;
-    return `<div class="oc-item">
-      <strong>${g.name}</strong>
-      <div class="pb-bar"><div class="pb-fill" style="width:${pct}%"></div></div>
-      <span>${fmt(g.sav||0,cur)} / ${fmt(g.target,cur)} — ${pct}%</span>
-    </div>`;
-  }).join('');
-}
-
-/* ══ AUTO-DÉMARRAGE ══
-   Se déclenche tout seul dès que l'utilisateur est connecté
-   (classe 'authed' sur <body>), sans avoir besoin d'ajouter
-   suiviInit() dans initApp() dans script.js. */
-let _suiviDejaLance = false;
-function _suiviTenterDemarrage() {
-  if (_suiviDejaLance) return;
-  if (document.body.classList.contains('authed') && document.getElementById('p-suivi')) {
-    _suiviDejaLance = true;
-    suiviInit();
-  }
-}
-new MutationObserver(_suiviTenterDemarrage).observe(document.body, { attributes: true, attributeFilter: ['class'] });
-document.addEventListener('DOMContentLoaded', () => setTimeout(_suiviTenterDemarrage, 300));
-
-/* ══════════════════════════════════════════════════════════════
-   DÉBLOCAGE AUTOMATIQUE DES PLANS (Stripe → Supabase)
-   ══════════════════════════════════════════════════════════════ */
-
-let currentPlan = "gratuit";
-
-function getStripeLinkAvecIdentite(nomPlan) {
-  const base = getStripeLink(nomPlan);
-  if (!currentUser) return base;
-  const url = new URL(base);
-  url.searchParams.set("client_reference_id", currentUser.id);
-  if (currentUser.email) url.searchParams.set("prefilled_email", currentUser.email);
-  return url.toString();
-}
-
-async function chargerAbonnement() {
-  if (!currentUser) return;
-  const { data, error } = await sbClient
-    .from("subscriptions")
-    .select("plan, status")
-    .eq("user_id", currentUser.id)
-    .single();
-
-  if (error || !data || data.status !== "active") {
-    currentPlan = "gratuit";
-  } else {
-    currentPlan = data.plan;
-  }
-  appliquerDeblocagePlan();
-}
-
-function appliquerDeblocagePlan() {
-  const estAdmin = ls('bs_admin') === ADMIN_PWD;
-  const debloquePremium = estAdmin || currentPlan === "premium" || currentPlan === "business";
-
-  const labels = { gratuit: "Plan Gratuit", basic: "Plan Basic", premium: "Plan Premium", business: "Plan Business" };
-  const labelAffiche = estAdmin ? "Admin — Accès Complet" : (labels[currentPlan] || "Plan Gratuit");
-  txt("spPlan", labelAffiche);
-  txt("sbPlan", labelAffiche.toUpperCase());
-
-  window._objectifsIllimites = estAdmin || currentPlan !== "gratuit";
-
-  document.querySelectorAll(".ob-lock").forEach((el) => {
-    el.style.display = debloquePremium ? "none" : "block";
-  });
-}
-
-function initAdminPlanPreview() {
-  const sel = document.getElementById("adminPlanPreview");
-  if (!sel) return;
-  sel.addEventListener("change", () => {
-    const estAdminReel = ls('bs_admin') === ADMIN_PWD;
-    if (!estAdminReel) return;
-    window._previewPlan = sel.value;
-    const debloquePremium = sel.value === "premium" || sel.value === "business";
-    window._objectifsIllimites = sel.value !== "gratuit";
-    document.querySelectorAll(".ob-lock").forEach((el) => {
-      el.style.display = debloquePremium ? "none" : "block";
-    });
-    txt("spPlan", "Aperçu : " + sel.value);
-    toast("Prévisualisation : plan " + sel.value + " (ton vrai abonnement n'a pas changé)");
-  });
 }

@@ -4,32 +4,18 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BudgetSmart</title>
-<link rel="stylesheet" href="style.css?v=2"/>
-<link rel="stylesheet" href="suivi-style.css?v=2"/>
-<script src="suivi-module.js?v=2" defer></script>
-<script src="rappels-module.js" defer></script>
+<link rel="stylesheet" href="style.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
-<meta name="theme-color" content="#E8631C"/>
+<meta name="theme-color" content="#2E7D5E"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="BudgetSmart"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    regs.forEach(reg => reg.unregister());
-  });
-}
-if ('caches' in window) {
-  caches.keys().then(names => {
-    names.forEach(name => caches.delete(name));
-  });
-}
-</script>
 </head>
 <body>
 
+<!-- ÉCRAN CONNEXION / INSCRIPTION -->
 <div class="auth-screen" id="authScreen">
   <div class="auth-box">
     <img src="icons/logo.png" class="auth-logo" onerror="this.style.display='none'"/>
@@ -43,6 +29,7 @@ if ('caches' in window) {
 
     <div id="authError" class="auth-error" style="display:none"></div>
 
+    <!-- LOGIN -->
     <div id="loginForm">
       <div class="fg"><label>Email</label><input type="email" id="loginEmail" class="inp" placeholder="votre@email.com"/></div>
       <div class="fg"><label>Mot de passe</label><input type="password" id="loginPwd" class="inp" placeholder="••••••••"/></div>
@@ -50,6 +37,7 @@ if ('caches' in window) {
       <a href="#" class="auth-forgot" id="btnForgot">Mot de passe oublié ?</a>
     </div>
 
+    <!-- SIGNUP -->
     <div id="signupForm" style="display:none">
       <div class="fg"><label>Prénom</label><input type="text" id="signupName" class="inp" placeholder="Votre prénom"/></div>
       <div class="fg"><label>Email</label><input type="email" id="signupEmail" class="inp" placeholder="votre@email.com"/></div>
@@ -61,6 +49,7 @@ if ('caches' in window) {
   </div>
 </div>
 
+<!-- SIDEBAR -->
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <img src="icons/logo.png" class="logo-img" onerror="this.style.display='none'"/>
@@ -79,12 +68,10 @@ if ('caches' in window) {
   <ul class="nav">
     <li><a class="ni active" data-p="dashboard">Tableau de bord</a></li>
     <li><a class="ni" data-p="daily">Dépenses quotidiennes</a></li>
-    <li class="ns">SUIVI</li>
-    <li><a class="ni" data-p="suivi">📋 Suivi complet</a></li>
     <li class="ns">MES OBJECTIFS</li>
     <li><a class="ni" data-p="goals">Objectif Personnel</a></li>
     <li><a class="ni" data-p="business">Projet Business <span class="nb">Premium</span></a></li>
-    <li><a class="ni" data-p="couple">Patrimoine Commun <span class="nb">Premium</span></a></li>
+    <li><a class="ni" data-p="couple">Projet Couple <span class="nb">Premium</span></a></li>
     <li class="ns">ÉPARGNE</li>
     <li><a class="ni" data-p="tips">Conseils financiers</a></li>
     <li><a class="ni" data-p="defis">Défis d'épargne</a></li>
@@ -102,6 +89,7 @@ if ('caches' in window) {
   </div>
 </nav>
 
+<!-- MOBILE HEADER -->
 <header class="mh">
   <button id="menuBtn">☰</button>
   <div class="mh-logo">Budget<em>Smart</em></div>
@@ -109,14 +97,17 @@ if ('caches' in window) {
 </header>
 <div class="ov" id="ov"></div>
 
+<!-- MAIN -->
 <main class="main">
 
+<!-- DASHBOARD -->
 <section class="page active" id="p-dashboard">
   <div class="ph">
     <div><h1 class="pt">Tableau de bord</h1><p class="ps">La sérénité financière, enfin accessible.</p></div>
     <div class="ph-date" id="phDate"></div>
   </div>
 
+  <!-- PWA BANNER - HAUT - CLIGNOTE -->
   <div class="pwa-banner" id="pwaBanner">
     <div class="pwa-ico">📲</div>
     <div class="pwa-txt">
@@ -127,6 +118,7 @@ if ('caches' in window) {
     <button class="pwa-x" id="btnPWAClose">✕</button>
   </div>
 
+  <!-- KPI -->
   <div class="kpi-row">
     <div class="kpi k-g"><div class="kl">Solde actuel</div><div class="kv" id="kBal">0,00 €</div><div class="ks up">En bonne santé</div></div>
     <div class="kpi k-b"><div class="kl">Revenus du mois</div><div class="kv" id="kInc">0,00 €</div><div class="ks">Ce mois-ci</div></div>
@@ -136,6 +128,7 @@ if ('caches' in window) {
 
   <div class="alert" id="alertBox" style="display:none"><span id="alertMsg"></span></div>
 
+  <!-- 3 OBJECTIFS -->
   <div class="obj-row">
     <div class="obj ob-g" id="oPersonal">
       <div class="ob-ico">🎯</div>
@@ -152,13 +145,14 @@ if ('caches' in window) {
     </div>
     <div class="obj ob-go" id="oCouple">
       <div class="ob-lock">🔒</div>
-      <div class="ob-ico">🤝</div>
-      <div class="ob-name">Patrimoine Commun</div>
-      <div class="ob-sub">Immobilier · Investissements · Projets à deux</div>
+      <div class="ob-ico">💑</div>
+      <div class="ob-name">Projet Couple</div>
+      <div class="ob-sub">Mariage · Maison · Bébé</div>
       <div class="ob-tag prem">Voir les plans</div>
     </div>
   </div>
 
+  <!-- COACHING CTA -->
   <div class="co-cta" id="coCta">
     <div class="coc-left">
       <div class="coc-t">Coaching Financier Personnalisé</div>
@@ -167,6 +161,7 @@ if ('caches' in window) {
     <div class="coc-btn">Réserver maintenant</div>
   </div>
 
+  <!-- GRAPHIQUES -->
   <div class="charts-row">
     <div class="chart-card">
       <div class="chart-title">Répartition des dépenses</div>
@@ -179,21 +174,26 @@ if ('caches' in window) {
     </div>
   </div>
 
+  <!-- TRANSACTIONS -->
   <div class="card"><div class="ct">Dernières transactions</div><div id="recentTx"><div class="empty">Aucune transaction encore.</div></div></div>
 
+  <!-- DÉFIS ACTIFS -->
   <div class="card" id="activeDefiCard" style="display:none">
     <div class="ct">Mes défis en cours</div>
     <div id="activeDefiList"></div>
   </div>
 
+  <!-- OBJECTIFS DASHBOARD -->
   <div class="card" id="goalEvoCard" style="display:none">
     <div class="ct">Mes objectifs d'épargne</div>
     <div id="goalEvoList"></div>
     <a class="see-all" id="btnSeeGoals">Voir mes objectifs →</a>
   </div>
 
+  <!-- TIP -->
   <div class="tip-strip"><span id="dashTip">Chargement du conseil…</span></div>
 
+  <!-- PAIEMENTS -->
   <div class="pay-strip">
     <span class="pay-lbl">Paiements sécurisés :</span>
     <span class="pb visa">Visa</span>
@@ -202,12 +202,14 @@ if ('caches' in window) {
     <span class="pb soon">Mobile Money bientôt</span>
   </div>
 
+  <!-- UPSELL -->
   <div class="upsell" id="upsellBar">
     Fonctionnalités Premium — Business, Couple, Famille, Coaching…
     <span class="upsell-cta">Voir les plans</span>
   </div>
 </section>
 
+<!-- DÉPENSES -->
 <section class="page" id="p-daily">
   <div class="ph"><div><h1 class="pt">Dépenses quotidiennes</h1><p class="ps">Enregistrez vos revenus et dépenses</p></div></div>
   <div class="card">
@@ -240,63 +242,7 @@ if ('caches' in window) {
   <div class="card"><div class="ct">Historique</div><div id="entriesList"><div class="empty">Aucune fiche encore.</div></div></div>
 </section>
 
-<section class="page" id="p-suivi">
-  <div class="ph">
-    <div><h1 class="pt">Suivi <em>complet</em></h1><p class="ps">Dettes, agenda, tâches et objectifs — tout au même endroit.</p></div>
-  </div>
-
-  <div class="suivi-tabs">
-    <button class="suivi-tab active" data-tab="dettes">Dettes</button>
-    <button class="suivi-tab" data-tab="agenda">Agenda</button>
-    <button class="suivi-tab" data-tab="taches">Tâches</button>
-    <button class="suivi-tab" data-tab="objectifs">Objectifs</button>
-  </div>
-
-  <div class="suivi-panel" data-panel="dettes">
-    <div class="sd-header">
-      <span>Total restant dû : <strong id="sTotalDettes">0 €</strong></span>
-      <label>Trésorerie mensuelle disponible
-        <input type="number" id="sRevenu"/>
-      </label>
-    </div>
-    <div class="sd-chart-card">
-      <canvas id="dettesChart" width="180" height="180"></canvas>
-      <div id="dettesChartLeg"></div>
-    </div>
-    <div id="sRepartitionType"></div>
-    <div id="dettesList"></div>
-    <button id="btnAddDette" class="btn-g">+ Ajouter une dette</button>
-    <div id="sRecommandations" class="sr-box"></div>
-  </div>
-
-  <div class="suivi-panel card" data-panel="agenda" style="display:none">
-    <div class="ct">Rendez-vous &amp; échéances</div>
-    <div class="sa-form">
-      <input type="text" class="inp" id="sEvTitre" placeholder="Nouveau rendez-vous…"/>
-      <input type="date" class="inp" id="sEvDate" style="max-width:170px"/>
-      <button id="btnAddEvenement" class="btn-g">+ Ajouter</button>
-    </div>
-    <div id="agendaList"></div>
-  </div>
-
-  <div class="suivi-panel card" data-panel="taches" style="display:none">
-    <div class="ct">Tâches du jour</div>
-    <div class="st-form">
-      <input type="date" class="inp" id="sTacheDate" style="max-width:170px"/>
-      <span id="sTacheCompteur"></span>
-    </div>
-    <div class="st-form">
-      <input type="text" class="inp" id="sTacheTitre" placeholder="Tâche à faire…"/>
-      <button id="btnAddTache" class="btn-g">+ Ajouter</button>
-    </div>
-    <div id="tachesList"></div>
-  </div>
-
-  <div class="suivi-panel" data-panel="objectifs" style="display:none">
-    <div id="objectifsConsolides"></div>
-  </div>
-</section>
-
+<!-- OBJECTIF PERSONNEL -->
 <section class="page" id="p-goals">
   <div class="ph"><div><h1 class="pt">Objectif Personnel</h1><p class="ps">Définissez vos rêves et suivez votre progression</p></div></div>
   <div class="card">
@@ -321,10 +267,11 @@ if ('caches' in window) {
   <div id="goalsList"><div class="empty">Aucun objectif. Commencez à rêver grand !</div></div>
   <div class="ug-row">
     <div class="ug" id="ugBusiness"><strong>💼 Projet Business</strong><p>Objectifs professionnels illimités</p><span>Débloquer →</span></div>
-    <div class="ug" id="ugCouple"><strong>🤝 Patrimoine Commun</strong><p>Budget partagé à deux</p><span>Débloquer →</span></div>
+    <div class="ug" id="ugCouple"><strong>💑 Projet Couple</strong><p>Budget partagé à deux</p><span>Débloquer →</span></div>
   </div>
 </section>
 
+<!-- PROJET BUSINESS -->
 <section class="page" id="p-business">
   <div class="ph"><div><h1 class="pt">Projet Business</h1><p class="ps">Choisissez votre plan et lancez votre activité</p></div></div>
   <div class="proj-card"><h3>Ce que vous débloquez</h3>
@@ -338,10 +285,11 @@ if ('caches' in window) {
   </div>
 </section>
 
+<!-- PROJET COUPLE -->
 <section class="page" id="p-couple">
-  <div class="ph"><div><h1 class="pt">Patrimoine Commun</h1><p class="ps">Bâtissez et suivez vos investissements à deux</p></div></div>
+  <div class="ph"><div><h1 class="pt">Projet Couple</h1><p class="ps">Construisez votre avenir ensemble</p></div></div>
   <div class="proj-card"><h3>Ce que vous débloquez</h3>
-    <div class="proj-feats"><span>Objectifs illimités</span><span>Budget partagé</span><span>Immobilier &amp; investissements</span><span>Suivi des contributions</span><span>Projections financières</span><span>Planification long terme</span></div>
+    <div class="proj-feats"><span>Objectifs couple illimités</span><span>Budget partagé</span><span>Mariage · Maison</span><span>Suivi contributions</span><span>Projections</span><span>Arrivée bébé</span></div>
   </div>
   <p class="plan-lbl">Sélectionnez votre plan pour accéder immédiatement</p>
   <div class="pricing-grid" id="pgCouple"></div>
@@ -351,17 +299,20 @@ if ('caches' in window) {
   </div>
 </section>
 
+<!-- CONSEILS -->
 <section class="page" id="p-tips">
   <div class="ph"><div><h1 class="pt">Conseils Financiers</h1><p class="ps">Sagesse quotidienne pour maîtriser votre argent</p></div></div>
   <div class="tip-hero"><div class="th-lbl">Conseil du Jour</div><div class="th-txt" id="tipText">Chargement…</div><button class="btn-w" id="btnNewTip">Nouveau conseil</button></div>
   <div class="tips-grid" id="tipsGrid"></div>
 </section>
 
+<!-- DÉFIS -->
 <section class="page" id="p-defis">
   <div class="ph"><div><h1 class="pt">Défis d'Épargne</h1><p class="ps">11 défis pour booster vos économies</p></div></div>
   <div class="defis-grid" id="defiGrid"></div>
 </section>
 
+<!-- FAMILLE -->
 <section class="page" id="p-family">
   <div class="ph"><div><h1 class="pt">Mode Famille</h1><p class="ps">Gérez le budget de tout votre foyer</p></div></div>
   <div class="gate">
@@ -376,6 +327,7 @@ if ('caches' in window) {
   </div>
 </section>
 
+<!-- ABONNEMENTS -->
 <section class="page" id="p-pricing">
   <div class="ph"><div><h1 class="pt">Abonnements</h1><p class="ps">Choisissez le plan qui vous correspond</p></div></div>
   <div class="tog-row">
@@ -417,6 +369,7 @@ if ('caches' in window) {
   </div>
 </section>
 
+<!-- COACHING -->
 <section class="page" id="p-coaching">
   <div class="ph"><div><h1 class="pt">Coaching Premium</h1><p class="ps">Payez votre séance puis réservez votre créneau</p></div></div>
   <div class="steps-bar">
@@ -448,7 +401,7 @@ if ('caches' in window) {
   </div>
   <div id="cs2" style="display:none">
     <div class="card" style="padding:26px">
-      <div class="ct">Offre : <span id="coOffer" style="color:#E8631C"></span> — <span id="coPrice" style="color:#D98C12"></span></div>
+      <div class="ct">Offre : <span id="coOffer" style="color:#2E7D5E"></span> — <span id="coPrice" style="color:#C8922A"></span></div>
       <div class="fg2">
         <div class="fg"><label>Prénom et Nom</label><input type="text" id="coName" class="inp" placeholder="Votre nom complet"/></div>
         <div class="fg"><label>Email</label><input type="email" id="coEmail" class="inp" placeholder="votre@email.com"/></div>
@@ -476,6 +429,7 @@ if ('caches' in window) {
   </div>
 </section>
 
+<!-- PROFIL -->
 <section class="page" id="p-profile">
   <div class="ph"><div><h1 class="pt">Mon Profil</h1><p class="ps">Personnalisez votre expérience BudgetSmart</p></div></div>
   <div class="card" style="padding:26px">
@@ -484,7 +438,7 @@ if ('caches' in window) {
       <div>
         <label for="photoInput" class="btn-out" style="cursor:pointer;display:inline-block">Changer la photo</label>
         <input type="file" id="photoInput" accept="image/*" style="display:none"/>
-        <p style="font-size:0.78rem;color:#6B5F52;margin-top:6px">JPG ou PNG — Max 2MB</p>
+        <p style="font-size:0.78rem;color:#6B7280;margin-top:6px">JPG ou PNG — Max 2MB</p>
       </div>
     </div>
     <div class="fg2">
@@ -508,7 +462,7 @@ if ('caches' in window) {
   </div>
   <div class="card">
     <div class="ct">Données</div>
-    <p style="font-size:0.9rem;color:#6B5F52;margin-bottom:14px">Données stockées localement sur votre appareil.</p>
+    <p style="font-size:0.9rem;color:#6B7280;margin-bottom:14px">Données stockées localement sur votre appareil.</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn-out" id="btnExport">Exporter mes données</button>
       <button class="btn-danger" id="btnClear">Effacer tout</button>
@@ -516,12 +470,13 @@ if ('caches' in window) {
   </div>
 </section>
 
+<!-- PARTAGER -->
 <section class="page" id="p-share">
   <div class="ph"><div><h1 class="pt">Partager l'app</h1><p class="ps">Invitez vos proches à rejoindre BudgetSmart</p></div></div>
   <div class="card">
     <div class="ct">Votre lien</div>
     <div class="share-link-box">
-      <div class="slb-url">https://misswaxbeautycare.github.io/budgetsmart-app-v2</div>
+      <div class="slb-url">https://misswaxbeautycare.github.io/budgetsmart</div>
       <button class="btn-g" id="btnCopyLink">Copier</button>
     </div>
   </div>
@@ -549,11 +504,12 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 
 🎁 7 jours gratuits !
 
-👉 https://misswaxbeautycare.github.io/budgetsmart-app-v2</div>
+👉 https://misswaxbeautycare.github.io/budgetsmart</div>
     <button class="btn-g" id="btnCopyMsg" style="margin-top:12px">Copier ce message</button>
   </div>
 </section>
 
+<!-- PARAMÈTRES -->
 <section class="page" id="p-settings">
   <div class="ph"><div><h1 class="pt">Paramètres</h1><p class="ps">Configurez votre expérience</p></div></div>
   <div class="card">
@@ -588,14 +544,32 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
   </div>
 </section>
 
+<!-- ADMIN -->
 <section class="page" id="p-admin">
-  <div class="ph"><div><h1 class="pt">Espace Admin</h1><p class="ps">Accès propriétaire — tous les plans débloqués</p></div><div class="admin-badge">Propriétaire</div></div>
+  <div class="ph">
+    <div><h1 class="pt">Espace Admin</h1><p class="ps">Gérez tous vos utilisateurs et leurs plans</p></div>
+    <div class="admin-badge">👑 Propriétaire</div>
+  </div>
+
+  <!-- STATS GLOBALES -->
   <div class="admin-stats">
-    <div class="as as-g"><div class="as-ico">💰</div><div class="as-l">Économies totales</div><div class="as-v" id="adSav">0,00 €</div></div>
+    <div class="as as-g"><div class="as-ico">👥</div><div class="as-l">Utilisateurs total</div><div class="as-v" id="adTotalUsers">0</div></div>
     <div class="as as-b"><div class="as-ico">📊</div><div class="as-l">Dépenses ce mois</div><div class="as-v" id="adExp">0,00 €</div></div>
     <div class="as as-go"><div class="as-ico">🎯</div><div class="as-l">Objectifs actifs</div><div class="as-v" id="adGoals">0</div></div>
     <div class="as as-o"><div class="as-ico">🔥</div><div class="as-l">Défis en cours</div><div class="as-v" id="adDefis">0</div></div>
   </div>
+
+  <!-- GESTION UTILISATEURS -->
+  <div class="card">
+    <div class="ct">Gestion des utilisateurs et plans</div>
+    <div class="admin-search-row">
+      <input type="text" class="inp" id="adSearchUser" placeholder="Rechercher par email ou nom…" style="flex:1"/>
+      <button class="btn-g" id="btnRefreshUsers">🔄 Actualiser</button>
+    </div>
+    <div id="adUsersList"><div class="empty">Chargement des utilisateurs…</div></div>
+  </div>
+
+  <!-- ACCÈS RAPIDE -->
   <div class="card">
     <div class="ct">Accès rapide</div>
     <div class="admin-nav">
@@ -611,25 +585,15 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
       <button class="anb" data-p="coaching">Coaching</button>
     </div>
   </div>
-  <div class="card">
-    <div class="ct">Prévisualiser un plan</div>
-    <p style="font-size:0.9rem;color:#6B5F52;margin-bottom:14px">
-      Voir l'app comme un client de chaque plan, sans changer ton propre abonnement.
-    </p>
-    <select id="adminPlanPreview" class="inp">
-      <option value="gratuit">Vue Gratuit</option>
-      <option value="basic">Vue Basic</option>
-      <option value="premium">Vue Premium</option>
-      <option value="business">Vue Business</option>
-    </select>
+
+  <div class="card" style="text-align:center">
+    <button class="btn-danger" id="btnLogout">Quitter le mode Admin</button>
   </div>
-  <div class="card"><div class="ct">Mon Épargne</div><div id="adGoalsList"><div class="empty">Aucun objectif.</div></div></div>
-  <div class="card"><div class="ct">Dépenses récentes</div><div id="adEntries"><div class="empty">Aucune entrée.</div></div></div>
-  <div class="card" style="text-align:center"><button class="btn-danger" id="btnLogout">Quitter le mode Admin</button></div>
 </section>
 
 </main>
 
+<!-- MODAL -->
 <div class="modal" id="modal">
   <div class="modal-box">
     <div class="modal-ico" id="mIco">🔒</div>
@@ -644,6 +608,6 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=2"></script>
+<script src="script.js"></script>
 </body>
 </html>
