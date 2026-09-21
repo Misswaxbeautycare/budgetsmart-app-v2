@@ -230,7 +230,328 @@ function initApp() {
   initAdmin();
   initPWA();
   initNotif();
+  suiviInit();
 }
+
+
+/* ══ MODULE SUIVI COMPLET AMÉLIORÉ ══ */
+function suiviToday() { return new Date().toISOString().slice(0,10); }
+function suiviJoursRestants(dateStr) {
+  const t=new Date(); t.setHours(0,0,0,0);
+  const d=new Date(dateStr); if(isNaN(d.getTime())) return 999;
+  d.setHours(0,0,0,0);
+  return Math.round((d-t)/86400000);
+}
+
+let calCurrentDate = new Date();
+
+function renderSuivi() { suiviGo('dettes'); }
+
+function suiviInit() {
+  document.querySelectorAll('.suivi-tab').forEach(btn =>
+    btn.addEventListener('click', () => suiviGo(btn.dataset.tab))
+  );
+  const b=(id,fn)=>{const el=document.getElementById(id);if(el)el.addEventListener('click',fn);};
+  b('btnAddDette',         addDette);
+  b('btnAddEvenement',     addEvenement);
+  b('btnAddTache',         addTache);
+  b('btnSuiviAddGoal',     () => go('goals'));
+  b('calPrev',             () => { calCurrentDate.setMonth(calCurrentDate.getMonth()-1); renderCalendar(); });
+  b('calNext',             () => { calCurrentDate.setMonth(calCurrentDate.getMonth()+1); renderCalendar(); });
+  b('btnTacheAujourdhui',  () => { const d=document.getElementById('sTacheDate'); if(d){d.value=suiviToday();renderTaches();} });
+
+  const tDay=document.getElementById('sTacheDate');
+  if(tDay){tDay.value=suiviToday();tDay.addEventListener('change',renderTaches);}
+  const rev=document.getElementById('sRevenu');
+  if(rev){
+    const p=ls('profile',{}); rev.value=p.revenuDisponible||'';
+    rev.addEventListener('change',()=>{const pp=ls('profile',{});pp.revenuDisponible=parseFloat(rev.value)||0;sv('profile',pp);renderRecommandations();});
+  }
+}
+
+function suiviGo(tab) {
+  document.querySelectorAll('.suivi-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  document.querySelectorAll('.suivi-panel').forEach(p=>p.style.display=p.dataset.panel===tab?'block':'none');
+  if(tab==='dettes')    {renderDettes();renderRecommandations();}
+  if(tab==='agenda')    renderCalendar();
+  if(tab==='taches')    {renderTaches();renderTaskStats();}
+  if(tab==='objectifs') {renderObjectifsConsolides();renderProjections();}
+}
+
+/* ══ DETTES AMÉLIORÉES ══ */
+function addDette() {
+  const dettes=ls('dettes',[]);
+  dettes.push({id:Date.now(),nom:'Nouvelle dette',montant:0,taux:0,echeance:suiviToday(),paye:false,mensualite:0});
+  sv('dettes',dettes); renderDettes(); renderRecommandations(); toast('Dette ajoutée !');
+}
+function updateDette(id,field,val) {
+  const dettes=ls('dettes',[]),d=dettes.find(x=>x.id===id); if(!d) return;
+  d[field]=(field==='montant'||field==='taux'||field==='mensualite')?parseFloat(val)||0:val;
+  sv('dettes',dettes); renderDettes(); renderRecommandations();
+}
+function toggleDettePaye(id) {
+  const dettes=ls('dettes',[]),d=dettes.find(x=>x.id===id); if(!d) return;
+  d.paye=!d.paye; sv('dettes',dettes); renderDettes(); renderRecommandations();
+  toast(d.paye?'✅ Dette payée !':'Dette remise en attente.');
+}
+function removeDette(id) {
+  if(!confirm('Supprimer ?')) return;
+  sv('dettes',ls('dettes',[]).filter(x=>x.id!==id)); renderDettes(); renderRecommandations();
+}
+function calcMensualite(montant, taux, mois) {
+  if(!taux) return montant/Math.max(mois,1);
+  const r=taux/100/12;
+  return (montant*r*Math.pow(1+r,mois))/(Math.pow(1+r,mois)-1);
+}
+function renderDettes() {
+  const dettes=ls('dettes',[]),p=ls('profile',{}),cur=p.currency||'€';
+  const impayees=dettes.filter(d=>!d.paye);
+  const payees=dettes.filter(d=>d.paye);
+  const retard=impayees.filter(d=>suiviJoursRestants(d.echeance)<0);
+  txt('sTotalDettes',fmt(impayees.reduce((s,d)=>s+(d.montant||0),0),cur));
+  txt('sTotalPayees',fmt(payees.reduce((s,d)=>s+(d.montant||0),0),cur));
+  txt('sNbRetard',retard.length.toString());
+  const lst=document.getElementById('dettesList'); if(!lst) return;
+  if(!dettes.length){lst.innerHTML='<div class="empty">Aucune dette enregistrée.</div>';return;}
+  lst.innerHTML=dettes.map(d=>{
+    const jrs=suiviJoursRestants(d.echeance);
+    const moisRestants=Math.max(Math.ceil(jrs/30),1);
+    const mensualite=calcMensualite(d.montant,d.taux,moisRestants);
+    const cls=d.paye?'sd-paye':jrs<0?'sd-retard':jrs<=7?'sd-proche':'';
+    return `<div class="sd-item ${cls}">
+      <div class="sd-main">
+        <input class="inp sd-nom" value="${d.nom}" onchange="updateDette(${d.id},'nom',this.value)" placeholder="Nom de la dette"/>
+        <div class="sd-fields">
+          <div class="sd-field"><label>Montant (€)</label><input class="inp" type="number" value="${d.montant}" onchange="updateDette(${d.id},'montant',this.value)"/></div>
+          <div class="sd-field"><label>Taux (%)</label><input class="inp" type="number" value="${d.taux||0}" onchange="updateDette(${d.id},'taux',this.value)"/></div>
+          <div class="sd-field"><label>Échéance</label><input class="inp" type="date" value="${d.echeance}" onchange="updateDette(${d.id},'echeance',this.value)"/></div>
+          <div class="sd-field sd-mensualite"><label>Mensualité conseillée</label><div class="sd-calc">${fmt(mensualite,cur)}/mois</div></div>
+        </div>
+      </div>
+      <div class="sd-actions">
+        <div class="sd-info">${jrs<0?'<span style="color:#E8631C">⚠️ En retard de '+Math.abs(jrs)+' j</span>':jrs===0?'<span style="color:#E8631C">⚠️ Échéance aujourd'hui</span>':jrs<=7?'<span style="color:#D98C12">⏰ Dans '+jrs+' j</span>':'<span style="color:#6B5F52">Dans '+jrs+' j ('+moisRestants+' mois)</span>'}</div>
+        <div class="sd-btns">
+          <button class="sd-paye-btn ${d.paye?'on':''}" onclick="toggleDettePaye(${d.id})">${d.paye?'✓ Payée':'Marquer payée'}</button>
+          <button class="tx-del" onclick="removeDette(${d.id})">✕</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function renderRecommandations() {
+  const box=document.getElementById('sRecommandations'); if(!box) return;
+  const dettes=ls('dettes',[]).filter(d=>!d.paye);
+  const p=ls('profile',{}),cur=p.currency||'€';
+  if(!dettes.length){box.innerHTML='<div class="sr-succes">✅ Aucune dette en cours — continuez comme ça !</div>';return;}
+  const enRetard=dettes.filter(d=>suiviJoursRestants(d.echeance)<0);
+  const cher=dettes.filter(d=>(d.taux||0)>=15);
+  const totalMensuel=dettes.reduce((s,d)=>{
+    const mois=Math.max(Math.ceil(suiviJoursRestants(d.echeance)/30),1);
+    return s+calcMensualite(d.montant,d.taux,mois);
+  },0);
+  const revenu=p.revenuDisponible||0;
+  let html='<div class="sr-titre">💡 Analyse & recommandations</div>';
+  if(enRetard.length) html+=`<div class="sr-carte sr-urgent">⚠️ ${enRetard.length} dette(s) en retard — réglez-les immédiatement !</div>`;
+  if(cher.length) html+=`<div class="sr-carte sr-complexe">💸 ${cher.length} dette(s) à taux ≥15% — priorité absolue (méthode avalanche)</div>`;
+  if(revenu>0){
+    const ratio=totalMensuel/revenu;
+    if(ratio>0.5) html+=`<div class="sr-carte sr-urgent">📊 Vos dettes représentent ${Math.round(ratio*100)}% de votre trésorerie — c'est critique. Renégociez des délais.</div>`;
+    else if(ratio>0.3) html+=`<div class="sr-carte sr-complexe">📊 Charge de remboursement : ${Math.round(ratio*100)}% de votre trésorerie — c'est serré.</div>`;
+    else html+=`<div class="sr-carte sr-simple">📊 Charge de remboursement raisonnable : ${Math.round(ratio*100)}% de votre trésorerie.</div>`;
+  }
+  html+=`<div class="sr-carte sr-simple">💰 Mensualités totales conseillées : <strong>${fmt(totalMensuel,cur)}/mois</strong></div>`;
+  const sorted=[...dettes].sort((a,b)=>{const ra=suiviJoursRestants(a.echeance)<0,rb=suiviJoursRestants(b.echeance)<0;if(ra!==rb)return ra?-1:1;return(b.taux||0)-(a.taux||0);});
+  html+='<div class="sr-titre" style="margin-top:14px">🏆 Ordre de remboursement conseillé</div><ol class="sr-ordre">'+sorted.map((d,i)=>`<li><strong>${d.nom}</strong> — ${fmt(d.montant,cur)} ${d.taux?'('+d.taux+'%)':''} ${suiviJoursRestants(d.echeance)<0?'⚠️ en retard':''}</li>`).join('')+'</ol>';
+  box.innerHTML=html;
+}
+
+/* ══ AGENDA CALENDRIER ══ */
+const EV_COLORS={'personnel':'#2E7DD6','finance':'#E8631C','sante':'#1F9D6B','travail':'#D98C12','dette':'#E8631C'};
+
+function addEvenement() {
+  const titre=document.getElementById('sEvTitre')?.value.trim();
+  const date=document.getElementById('sEvDate')?.value||suiviToday();
+  const heure=document.getElementById('sEvHeure')?.value||'09:00';
+  const type=document.getElementById('sEvType')?.value||'personnel';
+  const rappel=parseInt(document.getElementById('sEvRappel')?.value)||0;
+  if(!titre){toast('Saisissez un titre.');return;}
+  const ev=ls('evenements',[]); ev.push({id:Date.now(),titre,date,heure,type,rappel});
+  sv('evenements',ev);
+  document.getElementById('sEvTitre').value='';
+  renderCalendar(); toast('Rendez-vous ajouté !');
+  if(rappel>0&&Notification.permission==='granted'){
+    const evDate=new Date(date+'T'+heure); const rappelDate=new Date(evDate); rappelDate.setDate(rappelDate.getDate()-rappel);
+    if(rappelDate>new Date()) toast('Rappel programmé '+rappel+' jour(s) avant !');
+  }
+}
+function removeEvenement(id) {
+  sv('evenements',ls('evenements',[]).filter(e=>e.id!==id)); renderCalendar();
+}
+function renderCalendar() {
+  const y=calCurrentDate.getFullYear(), m=calCurrentDate.getMonth();
+  const monthNames=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  txt('calMonthLabel',monthNames[m]+' '+y);
+  const firstDay=new Date(y,m,1).getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const today=new Date(); today.setHours(0,0,0,0);
+  const ev=ls('evenements',[]);
+  const dettes=ls('dettes',[]).filter(d=>!d.paye);
+  const grid=document.getElementById('calGrid'); if(!grid) return;
+  const days=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  let html=days.map(d=>`<div class="cal-header-cell">${d}</div>`).join('');
+  const startDay=(firstDay+6)%7;
+  for(let i=0;i<startDay;i++) html+='<div class="cal-cell cal-empty"></div>';
+  for(let day=1;day<=daysInMonth;day++){
+    const dateStr=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const dayDate=new Date(y,m,day);
+    const isToday=dayDate.getTime()===today.getTime();
+    const dayEv=ev.filter(e=>e.date===dateStr);
+    const dayDettes=dettes.filter(d=>d.echeance===dateStr);
+    const total=dayEv.length+dayDettes.length;
+    html+=`<div class="cal-cell ${isToday?'cal-today':''} ${total?'cal-has-events':''}" onclick="calSelectDay('${dateStr}')">
+      <div class="cal-day-num">${day}</div>
+      ${dayEv.slice(0,2).map(e=>`<div class="cal-ev-dot" style="background:${EV_COLORS[e.type]||'#E8631C'}" title="${e.titre}"></div>`).join('')}
+      ${dayDettes.slice(0,1).map(d=>`<div class="cal-ev-dot" style="background:#E8631C" title="💳 ${d.nom}"></div>`).join('')}
+      ${total>3?`<div class="cal-more">+${total-2}</div>`:''}
+    </div>`;
+  }
+  grid.innerHTML=html;
+}
+function calSelectDay(dateStr) {
+  const ev=ls('evenements',[]).filter(e=>e.date===dateStr);
+  const dettes=ls('dettes',[]).filter(d=>d.paye===false&&d.echeance===dateStr);
+  const panel=document.getElementById('calDayEvents');
+  const title=document.getElementById('calDayTitle');
+  const list=document.getElementById('calDayList');
+  if(!panel||!title||!list) return;
+  const d=new Date(dateStr);
+  title.textContent=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  if(!ev.length&&!dettes.length){list.innerHTML='<div class="empty">Aucun événement ce jour.</div>';panel.style.display='block';return;}
+  list.innerHTML=[
+    ...ev.map(e=>`<div class="sa-item" style="border-color:${EV_COLORS[e.type]||'#E8631C'}">
+      <div class="sa-info">
+        <div class="sa-titre">${e.titre}</div>
+        <div class="sa-date">${e.heure||''} · ${e.type} ${e.rappel?'· Rappel '+e.rappel+'j avant':''}</div>
+      </div>
+      <button class="tx-del" onclick="removeEvenement(${e.id})">✕</button>
+    </div>`),
+    ...dettes.map(d=>`<div class="sa-item sd-retard"><div class="sa-info"><div class="sa-titre">💳 Échéance : ${d.nom}</div><div class="sa-date">${fmt(d.montant)} — ${suiviJoursRestants(d.echeance)<0?'En retard !':'Aujourd'hui !'}</div></div></div>`)
+  ].join('');
+  panel.style.display='block';
+}
+
+/* ══ TÂCHES AMÉLIORÉES ══ */
+function addTache() {
+  const titre=document.getElementById('sTacheTitre')?.value.trim();
+  const date=document.getElementById('sTacheDate')?.value||suiviToday();
+  const prio=document.getElementById('sTachePrio')?.value||'normal';
+  const cat=document.getElementById('sTacheCat')?.value||'perso';
+  if(!titre) return;
+  const t=ls('taches',[]); t.push({id:Date.now(),date,titre,fait:false,prio,cat});
+  sv('taches',t); document.getElementById('sTacheTitre').value=''; renderTaches(); renderTaskStats();
+}
+function toggleTache(id) {
+  const t=ls('taches',[]),x=t.find(i=>i.id===id);
+  if(x){x.fait=!x.fait;sv('taches',t);renderTaches();renderTaskStats();}
+}
+function removeTache(id) {
+  sv('taches',ls('taches',[]).filter(t=>t.id!==id)); renderTaches(); renderTaskStats();
+}
+function renderTaches() {
+  const date=document.getElementById('sTacheDate')?.value||suiviToday();
+  const taches=ls('taches',[]).filter(t=>t.date===date);
+  const fait=taches.filter(t=>t.fait).length;
+  const pct=taches.length?Math.round(fait/taches.length*100):0;
+  const el=document.getElementById('sTacheCompteur');
+  if(el) el.innerHTML=taches.length?`<span style="color:${pct===100?'#1F9D6B':'#E8631C'}">${fait}/${taches.length} (${pct}%)</span>`:'';
+  const lst=document.getElementById('tachesList'); if(!lst) return;
+  if(!taches.length){lst.innerHTML='<div class="empty">Aucune tâche pour ce jour.</div>';return;}
+  const prioColors={'urgent':'#E8631C','normal':'#2E7DD6','faible':'#6B5F52'};
+  const catIcons={'perso':'👤','finance':'💰','travail':'💼','autre':'📦'};
+  const sorted=[...taches].sort((a,b)=>{const p={'urgent':0,'normal':1,'faible':2};return p[a.prio]-p[b.prio];});
+  lst.innerHTML=sorted.map(t=>`
+    <div class="st-item ${t.fait?'st-fait':''} st-prio-${t.prio}">
+      <button class="st-check ${t.fait?'on':''}" onclick="toggleTache(${t.id})">${t.fait?'✓':''}</button>
+      <div class="st-body">
+        <span class="st-titre">${t.titre}</span>
+        <div class="st-meta">
+          <span style="color:${prioColors[t.prio]||'#6B5F52'};font-size:0.78rem;font-weight:800">${t.prio.toUpperCase()}</span>
+          <span style="font-size:0.78rem;color:#6B5F52">${catIcons[t.cat]||'📦'} ${t.cat}</span>
+        </div>
+      </div>
+      <button class="tx-del" onclick="removeTache(${t.id})">✕</button>
+    </div>`).join('');
+}
+function renderTaskStats() {
+  const el=document.getElementById('taskStatsRow'); if(!el) return;
+  const taches=ls('taches',[]);
+  const today=suiviToday();
+  const thisWeek=new Date(); thisWeek.setDate(thisWeek.getDate()-7);
+  const todayT=taches.filter(t=>t.date===today);
+  const weekT=taches.filter(t=>new Date(t.date)>=thisWeek);
+  const todayPct=todayT.length?Math.round(todayT.filter(t=>t.fait).length/todayT.length*100):0;
+  const weekPct=weekT.length?Math.round(weekT.filter(t=>t.fait).length/weekT.length*100):0;
+  el.innerHTML=`
+    <div class="task-stat"><span>Aujourd'hui</span><strong>${todayT.filter(t=>t.fait).length}/${todayT.length}</strong><div class="ts-bar"><div class="ts-fill" style="width:${todayPct}%"></div></div></div>
+    <div class="task-stat"><span>Cette semaine</span><strong>${weekT.filter(t=>t.fait).length}/${weekT.length}</strong><div class="ts-bar"><div class="ts-fill" style="width:${weekPct}%"></div></div></div>
+    <div class="task-stat"><span>Urgent en attente</span><strong style="color:#E8631C">${taches.filter(t=>!t.fait&&t.prio==='urgent').length}</strong></div>
+    <div class="task-stat"><span>Total complétées</span><strong style="color:#1F9D6B">${taches.filter(t=>t.fait).length}</strong></div>
+  `;
+}
+
+/* ══ OBJECTIFS + PROJECTIONS ══ */
+function renderObjectifsConsolides() {
+  const goals=ls('goals',[]),dettes=ls('dettes',[]).filter(d=>!d.paye);
+  const entries=ls('entries',[]);
+  const p=ls('profile',{}),cur=p.currency||'€';
+  const lst=document.getElementById('objectifsConsolides'); if(!lst) return;
+  const totalEp=goals.reduce((s,g)=>s+(g.sav||0),0);
+  const totalDt=dettes.reduce((s,d)=>s+(d.montant||0),0);
+  let html=`<div class="oc-resume">
+    <div class="oc-stat"><span>Épargne totale</span><strong style="color:#1F9D6B">${fmt(totalEp,cur)}</strong></div>
+    <div class="oc-stat"><span>Dettes restantes</span><strong style="color:#E8631C">${fmt(totalDt,cur)}</strong></div>
+    <div class="oc-stat"><span>Solde net</span><strong style="color:${totalEp-totalDt>=0?'#1F9D6B':'#E8631C'}">${fmt(totalEp-totalDt,cur)}</strong></div>
+  </div>`;
+  if(!goals.length){lst.innerHTML=html+'<div class="empty">Aucun objectif créé.</div>';return;}
+  html+=goals.map(g=>{
+    const pct=Math.min(100,Math.round(((g.sav||0)/g.target)*100))||0;
+    const restant=Math.max(0,g.target-(g.sav||0));
+    return `<div class="oc-item">
+      <div class="sgi-hd"><div class="sgi-name">${g.name} ${pct>=100?'🏆':''}</div><div class="sgi-pct" style="color:${pct>=100?'#1F9D6B':'#E8631C'}">${pct}%</div></div>
+      <div class="pb-bar"><div class="pb-fill" style="width:${pct}%"></div></div>
+      <div class="sgi-meta">${fmt(g.sav||0,cur)} / ${fmt(g.target,cur)} — Restant : ${fmt(restant,cur)}</div>
+    </div>`;
+  }).join('');
+  lst.innerHTML=html;
+}
+function renderProjections() {
+  const goals=ls('goals',[]);
+  const entries=ls('entries',[]);
+  const p=ls('profile',{}),cur=p.currency||'€';
+  const el=document.getElementById('projectionsContent'); if(!el) return;
+  if(!goals.length){el.innerHTML='<div class="empty">Créez des objectifs pour voir les projections.</div>';return;}
+  const now=new Date(),thisMonth=now.getMonth(),thisYear=now.getFullYear();
+  const lastMonth=entries.filter(e=>{const d=new Date(e.date);return d.getMonth()===thisMonth&&d.getFullYear()===thisYear;});
+  const mSav=lastMonth.reduce((s,e)=>s+(e.sav||0),0);
+  el.innerHTML=goals.filter(g=>(g.sav||0)<g.target).map(g=>{
+    const restant=g.target-(g.sav||0);
+    if(mSav<=0) return `<div class="proj-item"><div class="proj-name">${g.name}</div><div class="proj-conseil">Enregistrez vos économies mensuelles pour obtenir une projection.</div></div>`;
+    const moisEstimes=Math.ceil(restant/mSav);
+    const dateEstimee=new Date(); dateEstimee.setMonth(dateEstimee.getMonth()+moisEstimes);
+    const cible=g.date?new Date(g.date):null;
+    const enAvance=cible&&dateEstimee<=cible;
+    return `<div class="proj-item ${enAvance?'proj-ok':'proj-warn'}">
+      <div class="proj-name">${g.name}</div>
+      <div class="proj-data">
+        <span>Rythme actuel : <strong>${fmt(mSav,cur)}/mois</strong></span>
+        <span>Objectif atteint dans : <strong>${moisEstimes} mois</strong> (${dateEstimee.toLocaleDateString('fr-FR',{month:'long',year:'numeric'})})</span>
+        ${cible?`<span style="color:${enAvance?'#1F9D6B':'#E8631C'}">${enAvance?'✅ Vous serez en avance sur votre date cible !':'⚠️ À ce rythme, vous dépasserez votre date cible.'}</span>`:''}
+      </div>
+      <div class="proj-conseil">${moisEstimes<=3?'Excellent rythme — continuez !':moisEstimes<=12?'Bon rythme — restez régulier.':'Augmentez vos économies mensuelles pour atteindre cet objectif plus vite.'}</div>
+    </div>`;
+  }).join('');
+}
+
 
 /* ══ NAVIGATION ══ */
 function initNav() {
@@ -248,8 +569,9 @@ function go(page) {
   document.querySelectorAll('.ni').forEach(i => i.classList.toggle('active', i.dataset.p === page));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'p-' + page));
   window.scrollTo(0, 0);
-  if (page === 'admin' && ls('bs_admin') === ADMIN_PWD) renderAdmin();
+  if (page === 'admin') renderAdmin();
   if (page === 'dashboard') { renderDash(); initPWABanner(); }
+  if (page === 'suivi') { renderSuivi(); suiviInit(); }
 }
 
 function initMobile() {
@@ -274,10 +596,19 @@ function initAllButtons() {
   b('oPersonal',    () => go('goals'));
   b('oBusiness',    () => go('business'));
   b('oCouple',      () => go('couple'));
-  b('btnSeeGoals',  () => go('goals'));
+  b('btnSeeGoals',      () => go('goals'));
+  b('btnSeeAllDefis',   () => go('defis'));
+  b('btnSeeAllGoals',   () => go('goals'));
+  b('btnSuiviAddGoal',  () => go('goals'));
+  b('btnSuiviAddDefi',  () => go('defis'));
 
   /* PWA Banner */
   b('btnPWA',       pwaInstall);
+
+  /* Coaching buttons */
+  b('coBack', () => coStep(1));
+  b('coCard', () => payCoaching('card'));
+  b('coPP',   () => payCoaching('paypal'));
   b('btnPWAClose',  () => { const bn = document.getElementById('pwaBanner'); if (bn) bn.style.display = 'none'; });
 
   /* Daily */

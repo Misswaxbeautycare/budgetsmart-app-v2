@@ -73,6 +73,7 @@
     <li><a class="ni" data-p="business">Projet Business <span class="nb">Premium</span></a></li>
     <li><a class="ni" data-p="couple">Projet Couple <span class="nb">Premium</span></a></li>
     <li class="ns">ÉPARGNE</li>
+    <li><a class="ni" data-p="suivi">Suivi</a></li>
     <li><a class="ni" data-p="tips">Conseils financiers</a></li>
     <li><a class="ni" data-p="defis">Défis d'épargne</a></li>
     <li><a class="ni" data-p="family">Mode Famille</a></li>
@@ -296,6 +297,73 @@
   <div class="pay-choice" id="pcCouple" style="display:none">
     <div class="pc-t">Mode de paiement</div>
     <div class="pc-btns"><button class="btn-card" id="pcCCard">Payer par carte bancaire</button><button class="btn-pp" id="pcCPP">Payer avec PayPal</button></div>
+  </div>
+</section>
+
+<!-- SUIVI COMPLET -->
+<section class="page" id="p-suivi">
+  <div class="ph"><div><h1 class="pt">Suivi complet</h1><p class="ps">Dettes · Agenda · Tâches · Objectifs</p></div></div>
+
+  <!-- SOUS-ONGLETS -->
+  <div class="suivi-tabs">
+    <button class="suivi-tab active" data-tab="dettes">💳 Dettes</button>
+    <button class="suivi-tab" data-tab="agenda">📅 Agenda</button>
+    <button class="suivi-tab" data-tab="taches">✅ Tâches</button>
+    <button class="suivi-tab" data-tab="objectifs">🎯 Objectifs</button>
+  </div>
+
+  <!-- DETTES -->
+  <div class="suivi-panel" data-panel="dettes">
+    <div class="card">
+      <div class="sd-header">
+        <div>Total restant dû : <strong id="sTotalDettes">0 €</strong></div>
+        <div class="sd-revenu-row">
+          <label>Trésorerie disponible (€/mois) :</label>
+          <input type="number" class="inp" id="sRevenu" style="width:120px;display:inline"/>
+        </div>
+      </div>
+      <div id="dettesList"><div class="empty">Aucune dette enregistrée.</div></div>
+      <button class="btn-g" id="btnAddDette" style="margin-top:14px">+ Ajouter une dette</button>
+      <div id="sRecommandations" class="sr-box"></div>
+    </div>
+  </div>
+
+  <!-- AGENDA -->
+  <div class="suivi-panel" data-panel="agenda" style="display:none">
+    <div class="card">
+      <div class="ct">Rendez-vous & échéances</div>
+      <div class="sa-form">
+        <input type="text" class="inp" id="sEvTitre" placeholder="Nouveau rendez-vous…" style="flex:1"/>
+        <input type="date" class="inp" id="sEvDate" style="width:160px"/>
+        <button class="btn-g" id="btnAddEvenement">+ Ajouter</button>
+      </div>
+      <div id="agendaList"><div class="empty">Aucun rendez-vous.</div></div>
+    </div>
+  </div>
+
+  <!-- TÂCHES -->
+  <div class="suivi-panel" data-panel="taches" style="display:none">
+    <div class="card">
+      <div class="ct">Tâches journalières</div>
+      <div class="st-form">
+        <input type="date" class="inp" id="sTacheDate" style="width:160px"/>
+        <span class="st-compteur" id="sTacheCompteur"></span>
+      </div>
+      <div class="st-form" style="margin-top:10px">
+        <input type="text" class="inp" id="sTacheTitre" placeholder="Tâche à faire…" style="flex:1"/>
+        <button class="btn-g" id="btnAddTache">+ Ajouter</button>
+      </div>
+      <div id="tachesList" style="margin-top:14px"><div class="empty">Rien de prévu.</div></div>
+    </div>
+  </div>
+
+  <!-- OBJECTIFS CONSOLIDÉS -->
+  <div class="suivi-panel" data-panel="objectifs" style="display:none">
+    <div class="card">
+      <div class="ct">Objectifs & dettes consolidés</div>
+      <div id="objectifsConsolides"><div class="empty">Aucun objectif.</div></div>
+      <button class="btn-g" id="btnSuiviAddGoal" style="margin-top:14px">+ Créer un objectif</button>
+    </div>
   </div>
 </section>
 
