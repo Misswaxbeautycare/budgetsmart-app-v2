@@ -2,14 +2,16 @@
    BUDGETSMART — CSS FINAL PROPRE
 ══════════════════════════════════════════ */
 :root {
-  --bg:#EFECEA; --card:#fff; --sid:#1A2332; --sh:#243348;
-  --g:#2E7D5E; --gl:#3A9E78; --gp:#E6F4EE;
-  --go:#C8922A; --gol:#E5B040; --gop:#FBF4E5;
-  --bl:#1E5A9C; --or:#D4621A; --re:#C0392B; --rep:#FDECEA;
-  --tx:#0D1117; --mid:#1E293B; --mu:#4B5563; --bo:#D4D0C8;
-  --s1:0 2px 16px rgba(26,35,50,0.08);
-  --s2:0 8px 36px rgba(26,35,50,0.13);
-  --r:14px; --rs:9px; --sw:268px; --tr:0.2s ease;
+  --bg:#FFFCF7; --card:#fff; --sid:#fff; --sh:#FFF7E8;
+  --or:#E8631C; --orl:#FF7A33; --orp:#FFF1E6;
+  --go:#D98C12; --gol:#F0AB35; --gop:#FFF6E3;
+  --bl:#2E7DD6; --blp:#EAF3FE;
+  --g:#1F9D6B; --gp:#E8FAF1;
+  --re:#D6432E; --rep:#FDECEA;
+  --tx:#1A1410; --mid:#2E2620; --mu:#6B5F52; --bo:#F0DFC4;
+  --s1:0 2px 18px rgba(232,99,28,0.07);
+  --s2:0 10px 38px rgba(232,99,28,0.14);
+  --r:16px; --rs:11px; --sw:280px; --tr:0.2s ease;
   --ft:'Cormorant Garamond',Georgia,serif;
   --fb:'DM Sans',system-ui,sans-serif;
 }
@@ -21,7 +23,7 @@ button{cursor:pointer;border:none;font-family:var(--fb);font-weight:700;}
 input,select{font-family:var(--fb);}
 
 /* ── SIDEBAR ── */
-.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sw);background:var(--sid);display:flex;flex-direction:column;z-index:100;overflow-y:auto;transition:transform var(--tr);}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sw);background:var(--sid);border-right:3px solid var(--or);display:flex;flex-direction:column;z-index:100;overflow-y:auto;transition:transform var(--tr);box-shadow:4px 0 24px rgba(232,99,28,0.06);}
 .sidebar-logo{display:flex;align-items:center;gap:11px;padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,0.08);}
 .logo-img{width:42px;height:42px;border-radius:10px;object-fit:cover;flex-shrink:0;}
 .logo-text{font-family:var(--ft);font-size:1.35rem;font-weight:800;color:#fff;display:block;line-height:1.1;}
