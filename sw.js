@@ -1,4 +1,4 @@
-const CACHE = 'budgetsmart-v2';
+const CACHE = 'budgetsmart-v3';
 const FILES = [
   './index.html',
   './style.css',
