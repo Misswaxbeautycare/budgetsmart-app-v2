@@ -132,12 +132,14 @@ function hideAuthError()    { const el=document.getElementById('authError'); if(
 
 async function initAuth() {
   initAuthUI();
-  const { data } = await sbClient.auth.getSession();
-  if (data.session) {
-    onAuthSuccess(data.session.user);
-  } else {
-    document.body.classList.remove('authed');
-  }
+  try {
+    const { data } = await sbClient.auth.getSession();
+    if (data && data.session) {
+      onAuthSuccess(data.session.user);
+      return;
+    }
+  } catch(e) { console.log('Session check:', e.message); }
+  document.body.classList.remove('authed');
   sbClient.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' && session) onAuthSuccess(session.user);
     if (event === 'SIGNED_OUT') { document.body.classList.remove('authed'); }
@@ -148,12 +150,27 @@ async function doLogin() {
   hideAuthError();
   const email = document.getElementById('loginEmail')?.value.trim();
   const pwd   = document.getElementById('loginPwd')?.value;
-  if (!email || !pwd) { showAuthError('Remplissez tous les champs.'); return; }
-  const btn = document.getElementById('btnLogin'); if(btn){btn.disabled=true;btn.textContent='Connexion…';}
-  const { data, error } = await sbClient.auth.signInWithPassword({ email, password: pwd });
-  if (btn){btn.disabled=false;btn.textContent='Se connecter';}
-  if (error) { showAuthError(error.message==='Invalid login credentials'?'Email ou mot de passe incorrect.':error.message); return; }
-  onAuthSuccess(data.user);
+  if (!email || !pwd) { showAuthError('Remplissez votre email et mot de passe.'); return; }
+  const btn = document.getElementById('btnLogin');
+  if(btn){btn.disabled=true;btn.textContent='Connexion en cours…';}
+  try {
+    const { data, error } = await sbClient.auth.signInWithPassword({ email, password: pwd });
+    if(btn){btn.disabled=false;btn.textContent='Se connecter';}
+    if (error) {
+      if(error.message.includes('Invalid login credentials')||error.message.includes('invalid_credentials')) {
+        showAuthError('Email ou mot de passe incorrect. Vérifiez vos informations.');
+      } else if(error.message.includes('Email not confirmed')) {
+        showAuthError('Veuillez confirmer votre email avant de vous connecter. Vérifiez votre boîte mail.');
+      } else {
+        showAuthError('Erreur: ' + error.message);
+      }
+      return;
+    }
+    if(data && data.user) onAuthSuccess(data.user);
+  } catch(e) {
+    if(btn){btn.disabled=false;btn.textContent='Se connecter';}
+    showAuthError('Erreur de connexion. Vérifiez votre connexion internet.');
+  }
 }
 
 async function doSignup() {
@@ -163,16 +180,31 @@ async function doSignup() {
   const pwd   = document.getElementById('signupPwd')?.value;
   if (!name || !email || !pwd) { showAuthError('Remplissez tous les champs.'); return; }
   if (pwd.length < 6) { showAuthError('Le mot de passe doit contenir au moins 6 caractères.'); return; }
-  const btn = document.getElementById('btnSignup'); if(btn){btn.disabled=true;btn.textContent='Création…';}
-  const { data, error } = await sbClient.auth.signUp({ email, password: pwd, options:{ data:{ name } } });
-  if (btn){btn.disabled=false;btn.textContent='Créer mon compte';}
-  if (error) { showAuthError(error.message.includes('already')?'Cet email a déjà un compte. Connectez-vous.':error.message); return; }
-  if (data.user && !data.session) {
-    showAuthError('');
-    showEmailConfirmScreen(email);
-    return;
+  const btn = document.getElementById('btnSignup');
+  if(btn){btn.disabled=true;btn.textContent='Création en cours…';}
+  try {
+    const { data, error } = await sbClient.auth.signUp({
+      email, password: pwd,
+      options:{ data:{ name }, emailRedirectTo: 'https://misswaxbeautycare.github.io/budgetsmart-app-v2' }
+    });
+    if(btn){btn.disabled=false;btn.textContent='Créer mon compte';}
+    if (error) {
+      if(error.message.includes('already registered')||error.message.includes('already')) {
+        showAuthError('Cet email est déjà utilisé. Cliquez sur "Connexion".');
+      } else {
+        showAuthError('Erreur: ' + error.message);
+      }
+      return;
+    }
+    if (data.user && !data.session) {
+      showEmailConfirmScreen(email);
+      return;
+    }
+    if (data.session) onAuthSuccess(data.user);
+  } catch(e) {
+    if(btn){btn.disabled=false;btn.textContent='Créer mon compte';}
+    showAuthError('Erreur. Vérifiez votre connexion internet.');
   }
-  if (data.session) onAuthSuccess(data.user);
 }
 
 async function doForgotPassword() {
