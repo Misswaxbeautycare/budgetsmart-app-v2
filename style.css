@@ -482,7 +482,7 @@ input,select{font-family:var(--fb);}
 }
 
 /* ══ AUTH SCREEN ══ */
-.auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1A2332,#243348);display:flex;align-items:center;justify-content:center;z-index:5000;padding:20px;}
+.auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#E8631C,#D98C12);display:flex;align-items:center;justify-content:center;z-index:7000;padding:20px;}
 .auth-box{background:#fff;border-radius:18px;padding:34px 30px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.35);text-align:center;}
 .auth-logo{width:56px;height:56px;border-radius:14px;margin-bottom:11px;object-fit:cover;}
 .auth-title{font-family:var(--ft);font-size:1.7rem;font-weight:800;color:var(--tx);}
@@ -490,12 +490,15 @@ input,select{font-family:var(--fb);}
 .auth-sub{font-size:0.78rem;color:var(--mu);margin-bottom:20px;}
 .auth-tabs{display:flex;gap:6px;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:18px;}
 .auth-tab{flex:1;padding:9px;border-radius:9px;font-size:0.86rem;font-weight:700;color:var(--mu);background:none;border:none;cursor:pointer;transition:all var(--tr);}
+.auth-tab{flex:1;padding:12px;border-radius:10px;font-size:1rem;font-weight:800;color:#888;background:none;border:none;cursor:pointer;transition:all 0.2s;}
 .auth-tab.active{background:var(--g);color:#fff;}
 .auth-box .fg{text-align:left;margin-bottom:11px;}
 .auth-error{background:var(--rep);border:1.5px solid #F5C6C0;border-radius:var(--rs);padding:9px 13px;font-size:0.82rem;color:var(--re);font-weight:700;margin-bottom:13px;text-align:left;}
 .auth-forgot{display:block;text-align:center;font-size:0.8rem;color:var(--mu);margin-top:13px;text-decoration:underline;}
 .auth-trial{font-size:0.78rem;color:var(--mu);margin-top:18px;font-weight:600;}
-body.authed .auth-screen{display:none;}
+body.authed .auth-screen{display:none!important;}
+.auth-screen .auth-tab{cursor:pointer!important;pointer-events:all!important;z-index:8000!important;position:relative!important;}
+.auth-screen .btn-g{cursor:pointer!important;pointer-events:all!important;}
 body:not(.authed) .sidebar,body:not(.authed) .main,body:not(.authed) .mh{display:none!important;}
 
 /* ══ ADMIN USERS PANEL ══ */
