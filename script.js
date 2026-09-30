@@ -120,6 +120,68 @@ function showEmailConfirmScreen(email) {
   if (btn) btn.addEventListener('click', () => location.reload());
 }
 
+
+async function doLogin() {
+  hideAuthError();
+  const email = document.getElementById('loginEmail')?.value.trim();
+  const pwd   = document.getElementById('loginPwd')?.value;
+  if (!email || !pwd) { showAuthError('Remplissez votre email et mot de passe.'); return; }
+  const btn = document.getElementById('btnLogin');
+  if(btn){btn.disabled=true;btn.textContent='Connexion…';}
+  const localUsers = JSON.parse(localStorage.getItem('bs_users')||'[]');
+  const found = localUsers.find(u => u.email===email && u.pwd===btoa(pwd));
+  if (found) {
+    const user = {id:found.id, email, user_metadata:{name:found.name}};
+    localStorage.setItem('bs_local_user', JSON.stringify(user));
+    if(btn){btn.disabled=false;btn.textContent='Se connecter';}
+    onAuthSuccess(user); return;
+  }
+  try {
+    const { data, error } = await sbClient.auth.signInWithPassword({email, password:pwd});
+    if(btn){btn.disabled=false;btn.textContent='Se connecter';}
+    if (error) { showAuthError('Email ou mot de passe incorrect.'); return; }
+    if(data?.user) onAuthSuccess(data.user);
+  } catch(e) {
+    if(btn){btn.disabled=false;btn.textContent='Se connecter';}
+    showAuthError('Email ou mot de passe incorrect.');
+  }
+}
+
+async function doSignup() {
+  hideAuthError();
+  const name  = document.getElementById('signupName')?.value.trim();
+  const email = document.getElementById('signupEmail')?.value.trim();
+  const pwd   = document.getElementById('signupPwd')?.value;
+  if (!name||!email||!pwd) { showAuthError('Remplissez tous les champs.'); return; }
+  if (pwd.length < 6) { showAuthError('Mot de passe minimum 6 caractères.'); return; }
+  const btn = document.getElementById('btnSignup');
+  if(btn){btn.disabled=true;btn.textContent='Création…';}
+  const localUsers = JSON.parse(localStorage.getItem('bs_users')||'[]');
+  if (localUsers.find(u => u.email===email)) {
+    if(btn){btn.disabled=false;btn.textContent='Créer mon compte';}
+    showAuthError('Cet email est déjà utilisé. Connectez-vous.'); return;
+  }
+  const newUser = {id:'local_'+Date.now(), email, name, pwd:btoa(pwd)};
+  localUsers.push(newUser);
+  localStorage.setItem('bs_users', JSON.stringify(localUsers));
+  const user = {id:newUser.id, email, user_metadata:{name}};
+  localStorage.setItem('bs_local_user', JSON.stringify(user));
+  try { await sbClient.auth.signUp({email, password:pwd, options:{data:{name}}}); } catch(e) {}
+  if(btn){btn.disabled=false;btn.textContent='Créer mon compte';}
+  onAuthSuccess(user);
+  toast('✅ Compte créé !');
+}
+
+async function doForgotPassword() {
+  const email = document.getElementById('loginEmail')?.value.trim();
+  if (!email) { showAuthError('Entrez votre email ci-dessus.'); return; }
+  try {
+    await sbClient.auth.resetPasswordForEmail(email, {redirectTo:'https://misswaxbeautycare.github.io/budgetsmart-app-v2'});
+    showAuthError('');
+    alert('Email de réinitialisation envoyé à ' + email);
+  } catch(e) { showAuthError('Erreur envoi email.'); }
+}
+
 function switchAuthTab(tab) {
   document.getElementById('tabLogin').classList.toggle('active', tab==='login');
   document.getElementById('tabSignup').classList.toggle('active', tab==='signup');
