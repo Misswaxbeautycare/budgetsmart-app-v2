@@ -7,7 +7,126 @@
 <meta http-equiv="Expires" content="0"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BudgetSmart</title>
-<link rel="stylesheet" href="style.css?v=1790804567"/>
+<link rel="stylesheet" href="style.css?v=1790804598"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#2E7D5E"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="BudgetSmart"/>
+<link rel="apple-touch-icon" href="icons/icon-192.png"/>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<!-- MODAL SCANNER REÇU -->
+<div class="modal" id="scanModal">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-ico">📸</div>
+    <div class="modal-title">Scanner un reçu</div>
+    <div class="scan-preview" id="scanPreview">
+      <div class="scan-placeholder">Cliquez pour prendre une photo ou choisir une image</div>
+      <img id="scanImg" src="" style="display:none;max-width:100%;border-radius:var(--rs);margin-top:10px"/>
+    </div>
+    <label class="btn-out scan-upload-btn" for="scanFile" style="display:block;text-align:center;margin:12px 0;cursor:pointer">📷 Choisir une photo</label>
+    <input type="file" id="scanFile" accept="image/*" capture="environment" style="display:none"/>
+    <div class="fg" style="margin-top:12px"><label>Montant (€)</label><input type="number" class="inp" id="scanMontant" placeholder="Ex: 24.50" step="0.01"/></div>
+    <div class="fg"><label>Catégorie</label>
+      <select class="inp" id="scanCat">
+        <option value="nourriture">Nourriture</option><option value="transport">Transport</option>
+        <option value="shopping">Shopping</option><option value="sante">Santé</option>
+        <option value="factures">Factures</option><option value="autre">Autre</option>
+      </select>
+    </div>
+    <div class="fg"><label>Note</label><input type="text" class="inp" id="scanNote" placeholder="Description du reçu…"/></div>
+    <div class="pc-btns" style="margin-top:14px">
+      <button class="btn-g" id="btnScanSave" style="flex:1">Enregistrer la dépense</button>
+      <button class="btn-out" id="btnScanClose">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RAPPORT PDF -->
+<div class="modal" id="pdfModal">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-ico">📄</div>
+    <div class="modal-title">Rapport mensuel PDF</div>
+    <div class="fg"><label>Mois</label>
+      <select class="inp" id="pdfMois">
+        <option value="0">Janvier</option><option value="1">Février</option>
+        <option value="2">Mars</option><option value="3">Avril</option>
+        <option value="4">Mai</option><option value="5">Juin</option>
+        <option value="6">Juillet</option><option value="7">Août</option>
+        <option value="8">Septembre</option><option value="9">Octobre</option>
+        <option value="10">Novembre</option><option value="11">Décembre</option>
+      </select>
+    </div>
+    <div class="fg"><label>Année</label><input type="number" class="inp" id="pdfAnnee" value="2026"/></div>
+    <div class="pc-btns" style="margin-top:16px">
+      <button class="btn-g" id="btnPdfGenerate" style="flex:1">📥 Générer le PDF</button>
+      <button class="btn-out" id="btnPdfClose">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ÉCRAN CONNEXION / INSCRIPTION -->
+<div class="auth-screen" id="authScreen" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#E8631C,#D98C12);display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:20px;padding:36px 30px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;">
+    <div style="font-family:Georgia,serif;font-size:2rem;font-weight:800;color:#1A1410;margin-bottom:4px;">Budget<span style="color:#E8631C">Smart</span></div>
+    <div style="font-size:0.9rem;color:#888;margin-bottom:22px;">Gérez vos finances facilement</div>
+
+    <!-- ONGLETS -->
+    <div style="display:flex;gap:6px;background:#f5f5f5;border-radius:12px;padding:5px;margin-bottom:20px;">
+      <button id="tabLogin"
+        style="flex:1;padding:12px;border-radius:9px;border:none;font-size:1rem;font-weight:800;cursor:pointer;background:#E8631C;color:#fff;transition:all 0.2s;"
+        onclick="document.getElementById('loginForm').style.display='block';document.getElementById('signupForm').style.display='none';document.getElementById('tabLogin').style.background='#E8631C';document.getElementById('tabLogin').style.color='#fff';document.getElementById('tabSignup').style.background='none';document.getElementById('tabSignup').style.color='#888';">
+        Connexion
+      </button>
+      <button id="tabSignup"
+        style="flex:1;padding:12px;border-radius:9px;border:none;font-size:1rem;font-weight:800;cursor:pointer;background:none;color:#888;transition:all 0.2s;"
+        onclick="document.getElementById('signupForm').style.display='block';document.getElementById('loginForm').style.display='none';document.getElementById('tabSignup').style.background='#E8631C';document.getElementById('tabSignup').style.color='#fff';document.getElementById('tabLogin').style.background='none';document.getElementById('tabLogin').style.color='#888';">
+        Créer un compte
+      </button>
+    </div>
+
+    <div id="authError" style="display:none;background:#fdecea;border:2px solid #f5c6c0;border-radius:9px;padding:10px 14px;font-size:0.9rem;color:#c0392b;font-weight:700;margin-bottom:14px;text-align:left;"></div>
+
+    <!-- CONNEXION -->
+    <div id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Votre email"
+        style="width:100%;padding:13px 15px;border:2px solid #e0d4c0;border-radius:10px;font-size:1rem;margin-bottom:12px;outline:none;box-sizing:border-box;"/>
+      <input type="password" id="loginPwd" placeholder="Mot de passe"
+        style="width:100%;padding:13px 15px;border:2px solid #e0d4c0;border-radius:10px;font-size:1rem;margin-bottom:16px;outline:none;box-sizing:border-box;"/>
+      <button onclick="doLogin()"
+        style="width:100%;padding:15px;background:#E8631C;color:#fff;border:none;border-radius:12px;font-size:1.1rem;font-weight:800;cursor:pointer;margin-bottom:10px;">
+        Se connecter →
+      </button>
+    </div>
+
+    <!-- INSCRIPTION -->
+    <div id="signupForm" style="display:none;">
+      <input type="text" id="signupName" placeholder="Votre prénom"
+        style="width:100%;padding:13px 15px;border:2px solid #e0d4c0;border-radius:10px;font-size:1rem;margin-bottom:12px;outline:none;box-sizing:border-box;"/>
+      <input type="email" id="signupEmail" placeholder="Votre email"
+        style="width:100%;padding:13px 15px;border:2px solid #e0d4c0;border-radius:10px;font-size:1rem;margin-bottom:12px;outline:none;box-sizing:border-box;"/>
+      <input type="password" id="signupPwd" placeholder="Mot de passe (min. 6 caractères)"
+        style="width:100%;padding:13px 15px;border:2px solid #e0d4c0;border-radius:10px;font-size:1rem;margin-bottom:16px;outline:none;box-sizing:border-box;"/>
+      <button onclick="doSignup()"
+        style="width:100%;padding:15px;background:#1F9D6B;color:#fff;border:none;border-radius:12px;font-size:1.1rem;font-weight:800;cursor:pointer;margin-bottom:10px;">
+        Créer mon compte ✓
+      </button>
+    </div>
+
+  </div>
+</div>TYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BudgetSmart</title>
+<link rel="stylesheet" href="style.css?v=1790804598"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#2E7D5E"/>
@@ -989,6 +1108,6 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1790804567"></script>
+<script src="script.js?v=1790804598"></script>
 </body>
 </html>
