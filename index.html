@@ -2,1112 +2,163 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
-<meta http-equiv="Pragma" content="no-cache"/>
-<meta http-equiv="Expires" content="0"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>BudgetSmart</title>
-<link rel="stylesheet" href="style.css?v=1790804598"/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<link rel="manifest" href="manifest.json"/>
-<meta name="theme-color" content="#2E7D5E"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-title" content="BudgetSmart"/>
-<link rel="apple-touch-icon" href="icons/icon-192.png"/>
-<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BudgetSmart — Connexion</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+  font-family: Arial, sans-serif; 
+  background: linear-gradient(135deg, #E8631C, #D98C12);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.box {
+  background: white;
+  border-radius: 20px;
+  padding: 40px 32px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+h1 { font-size: 1.8rem; color: #E8631C; margin-bottom: 6px; text-align: center; }
+p { color: #888; text-align: center; margin-bottom: 24px; font-size: 0.95rem; }
+.tabs { display: flex; gap: 6px; background: #f5f5f5; border-radius: 12px; padding: 5px; margin-bottom: 20px; }
+.tab { 
+  flex: 1; padding: 13px; border-radius: 9px; border: none;
+  font-size: 1rem; font-weight: 800; cursor: pointer;
+  transition: all 0.2s;
+}
+.tab.active { background: #E8631C; color: white; }
+.tab.inactive { background: none; color: #888; }
+input {
+  width: 100%; padding: 14px 16px;
+  border: 2px solid #e0d4c0; border-radius: 12px;
+  font-size: 1rem; margin-bottom: 12px;
+  outline: none; display: block;
+}
+input:focus { border-color: #E8631C; }
+.btn-orange {
+  width: 100%; padding: 16px;
+  background: #E8631C; color: white;
+  border: none; border-radius: 12px;
+  font-size: 1.1rem; font-weight: 800;
+  cursor: pointer; margin-bottom: 10px;
+}
+.btn-green {
+  width: 100%; padding: 16px;
+  background: #1F9D6B; color: white;
+  border: none; border-radius: 12px;
+  font-size: 1.1rem; font-weight: 800;
+  cursor: pointer; margin-bottom: 10px;
+}
+.error {
+  display: none;
+  background: #fdecea; border: 2px solid #f5c6c0;
+  border-radius: 9px; padding: 12px 14px;
+  color: #c0392b; font-weight: 700;
+  margin-bottom: 14px; font-size: 0.92rem;
+}
+#loginForm, #signupForm { display: none; }
+</style>
 </head>
 <body>
+<div class="box">
+  <h1>BudgetSmart</h1>
+  <p>L'intelligence financière pour tous</p>
 
-<!-- MODAL SCANNER REÇU -->
-<div class="modal" id="scanModal">
-  <div class="modal-box" style="max-width:480px">
-    <div class="modal-ico">📸</div>
-    <div class="modal-title">Scanner un reçu</div>
-    <div class="scan-preview" id="scanPreview">
-      <div class="scan-placeholder">Cliquez pour prendre une photo ou choisir une image</div>
-      <img id="scanImg" src="" style="display:none;max-width:100%;border-radius:var(--rs);margin-top:10px"/>
-    </div>
-    <label class="btn-out scan-upload-btn" for="scanFile" style="display:block;text-align:center;margin:12px 0;cursor:pointer">📷 Choisir une photo</label>
-    <input type="file" id="scanFile" accept="image/*" capture="environment" style="display:none"/>
-    <div class="fg" style="margin-top:12px"><label>Montant (€)</label><input type="number" class="inp" id="scanMontant" placeholder="Ex: 24.50" step="0.01"/></div>
-    <div class="fg"><label>Catégorie</label>
-      <select class="inp" id="scanCat">
-        <option value="nourriture">Nourriture</option><option value="transport">Transport</option>
-        <option value="shopping">Shopping</option><option value="sante">Santé</option>
-        <option value="factures">Factures</option><option value="autre">Autre</option>
-      </select>
-    </div>
-    <div class="fg"><label>Note</label><input type="text" class="inp" id="scanNote" placeholder="Description du reçu…"/></div>
-    <div class="pc-btns" style="margin-top:14px">
-      <button class="btn-g" id="btnScanSave" style="flex:1">Enregistrer la dépense</button>
-      <button class="btn-out" id="btnScanClose">Annuler</button>
-    </div>
+  <div class="tabs">
+    <button class="tab active" id="tabLogin" onclick="showLogin()">Connexion</button>
+    <button class="tab inactive" id="tabSignup" onclick="showSignup()">Créer un compte</button>
   </div>
+
+  <div id="errMsg" class="error"></div>
+
+  <!-- CONNEXION -->
+  <div id="loginForm">
+    <input type="email" id="loginEmail" placeholder="Votre email"/>
+    <input type="password" id="loginPwd" placeholder="Mot de passe"/>
+    <button class="btn-orange" onclick="doLogin()">Se connecter →</button>
+  </div>
+
+  <!-- INSCRIPTION -->
+  <div id="signupForm">
+    <input type="text" id="signupName" placeholder="Votre prénom"/>
+    <input type="email" id="signupEmail" placeholder="Votre email"/>
+    <input type="password" id="signupPwd" placeholder="Mot de passe (min. 6 caractères)"/>
+    <button class="btn-green" onclick="doSignup()">Créer mon compte ✓</button>
+  </div>
+
 </div>
 
-<!-- MODAL RAPPORT PDF -->
-<div class="modal" id="pdfModal">
-  <div class="modal-box" style="max-width:460px">
-    <div class="modal-ico">📄</div>
-    <div class="modal-title">Rapport mensuel PDF</div>
-    <div class="fg"><label>Mois</label>
-      <select class="inp" id="pdfMois">
-        <option value="0">Janvier</option><option value="1">Février</option>
-        <option value="2">Mars</option><option value="3">Avril</option>
-        <option value="4">Mai</option><option value="5">Juin</option>
-        <option value="6">Juillet</option><option value="7">Août</option>
-        <option value="8">Septembre</option><option value="9">Octobre</option>
-        <option value="10">Novembre</option><option value="11">Décembre</option>
-      </select>
-    </div>
-    <div class="fg"><label>Année</label><input type="number" class="inp" id="pdfAnnee" value="2026"/></div>
-    <div class="pc-btns" style="margin-top:16px">
-      <button class="btn-g" id="btnPdfGenerate" style="flex:1">📥 Générer le PDF</button>
-      <button class="btn-out" id="btnPdfClose">Annuler</button>
-    </div>
-  </div>
-</div>
-
-<!-- ÉCRAN CONNEXION / INSCRIPTION -->
-<div class="auth-screen" id="authScreen" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#E8631C,#D98C12);display:flex;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:#fff;border-radius:20px;padding:36px 30px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;">
-    <div style="font-family:Georgia,serif;font-size:2rem;font-weight:800;color:#1A1410;margin-bottom:4px;">Budget<span style="color:#E8631C">Smart</span></div>
-    <div style="font-size:0.9rem;color:#888;margin-bottom:22px;">Gérez vos finances facilement</div>
-
-    <!-- ONGLETS -->
-    <div style="display:flex;gap:6px;background:#f5f5f5;border-radius:12px;padding:5px;margin-bottom:20px;">
-      <button id="tabLogin"
-        style="flex:1;padding:12px;border-radius:9px;border:none;font-size:1rem;font-weight:800;cursor:pointer;background:#E8631C;color:#fff;transition:all 0.2s;"
-        onclick="document.getElementById('loginForm').style.display='block';document.getElementById('signupForm').style.display='none';document.getElementById('tabLogin').style.background='#E8631C';document.getElementById('tabLogin').style.color='#fff';document.getElementById('tabSignup').style.background='none';document.getElementById('tabSignup').style.color='#888';">
-        Connexion
-      </button>
-      <button id="tabSignup"
-        style="flex:1;padding:12px;border-radius:9px;border:none;font-size:1rem;font-weight:800;cursor:pointer;background:none;color:#888;transition:all 0.2s;"
-        onclick="document.getElementById('signupForm').style.display='block';document.getElementById('loginForm').style.display='none';document.getElementById('tabSignup').style.background='#E8631C';document.getElementById('tabSignup').style.color='#fff';document.getElementById('tabLogin').style.background='none';document.getElementById('tabLogin').style.color='#888';">
-        Créer un compte
-      </button>
-    </div>
-
-    <div id="authError" style="display:none;background:#fdecea;border:2px solid #f5c6c0;border-radius:9px;padding:10px 14px;font-size:0.9rem;color:#c0392b;font-weight:700;margin-bottom:14px;text-align:left;"></div>
-
-    <!-- CONNEXION -->
-    <div id="loginForm">
-      <input type="email" id="loginEmail" placeholder="Votre email"
-        style="width:100%;padding:13px 15px;border:2px solid #e0d4c0;border-radius:10px;font-size:1rem;margin-bottom:12px;outline:none;box-sizing:border-box;"/>
-      <input type="password" id="loginPwd" placeholder="Mot de passe"
-        style="width:100%;padding:13px 15px;border:2px solid #e0d4c0;border-radius:10px;font-size:1rem;margin-bottom:16px;outline:none;box-sizing:border-box;"/>
-      <button onclick="doLogin()"
-        style="width:100%;padding:15px;background:#E8631C;color:#fff;border:none;border-radius:12px;font-size:1.1rem;font-weight:800;cursor:pointer;margin-bottom:10px;">
-        Se connecter →
-      </button>
-    </div>
-
-    <!-- INSCRIPTION -->
-    <div id="signupForm" style="display:none;">
-      <input type="text" id="signupName" placeholder="Votre prénom"
-        style="width:100%;padding:13px 15px;border:2px solid #e0d4c0;border-radius:10px;font-size:1rem;margin-bottom:12px;outline:none;box-sizing:border-box;"/>
-      <input type="email" id="signupEmail" placeholder="Votre email"
-        style="width:100%;padding:13px 15px;border:2px solid #e0d4c0;border-radius:10px;font-size:1rem;margin-bottom:12px;outline:none;box-sizing:border-box;"/>
-      <input type="password" id="signupPwd" placeholder="Mot de passe (min. 6 caractères)"
-        style="width:100%;padding:13px 15px;border:2px solid #e0d4c0;border-radius:10px;font-size:1rem;margin-bottom:16px;outline:none;box-sizing:border-box;"/>
-      <button onclick="doSignup()"
-        style="width:100%;padding:15px;background:#1F9D6B;color:#fff;border:none;border-radius:12px;font-size:1.1rem;font-weight:800;cursor:pointer;margin-bottom:10px;">
-        Créer mon compte ✓
-      </button>
-    </div>
-
-  </div>
-</div>TYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8"/>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
-<meta http-equiv="Pragma" content="no-cache"/>
-<meta http-equiv="Expires" content="0"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>BudgetSmart</title>
-<link rel="stylesheet" href="style.css?v=1790804598"/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<link rel="manifest" href="manifest.json"/>
-<meta name="theme-color" content="#2E7D5E"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-title" content="BudgetSmart"/>
-<link rel="apple-touch-icon" href="icons/icon-192.png"/>
-<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-</head>
-<body>
-
-<!-- MODAL SCANNER REÇU -->
-<div class="modal" id="scanModal">
-  <div class="modal-box" style="max-width:480px">
-    <div class="modal-ico">📸</div>
-    <div class="modal-title">Scanner un reçu</div>
-    <div class="scan-preview" id="scanPreview">
-      <div class="scan-placeholder">Cliquez pour prendre une photo ou choisir une image</div>
-      <img id="scanImg" src="" style="display:none;max-width:100%;border-radius:var(--rs);margin-top:10px"/>
-    </div>
-    <label class="btn-out scan-upload-btn" for="scanFile" style="display:block;text-align:center;margin:12px 0;cursor:pointer">📷 Choisir une photo</label>
-    <input type="file" id="scanFile" accept="image/*" capture="environment" style="display:none"/>
-    <div class="fg" style="margin-top:12px"><label>Montant (€)</label><input type="number" class="inp" id="scanMontant" placeholder="Ex: 24.50" step="0.01"/></div>
-    <div class="fg"><label>Catégorie</label>
-      <select class="inp" id="scanCat">
-        <option value="nourriture">Nourriture</option><option value="transport">Transport</option>
-        <option value="shopping">Shopping</option><option value="sante">Santé</option>
-        <option value="factures">Factures</option><option value="autre">Autre</option>
-      </select>
-    </div>
-    <div class="fg"><label>Note</label><input type="text" class="inp" id="scanNote" placeholder="Description du reçu…"/></div>
-    <div class="pc-btns" style="margin-top:14px">
-      <button class="btn-g" id="btnScanSave" style="flex:1">Enregistrer la dépense</button>
-      <button class="btn-out" id="btnScanClose">Annuler</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL RAPPORT PDF -->
-<div class="modal" id="pdfModal">
-  <div class="modal-box" style="max-width:460px">
-    <div class="modal-ico">📄</div>
-    <div class="modal-title">Rapport mensuel PDF</div>
-    <div class="fg"><label>Mois</label>
-      <select class="inp" id="pdfMois">
-        <option value="0">Janvier</option><option value="1">Février</option>
-        <option value="2">Mars</option><option value="3">Avril</option>
-        <option value="4">Mai</option><option value="5">Juin</option>
-        <option value="6">Juillet</option><option value="7">Août</option>
-        <option value="8">Septembre</option><option value="9">Octobre</option>
-        <option value="10">Novembre</option><option value="11">Décembre</option>
-      </select>
-    </div>
-    <div class="fg"><label>Année</label><input type="number" class="inp" id="pdfAnnee" value="2026"/></div>
-    <div class="pc-btns" style="margin-top:16px">
-      <button class="btn-g" id="btnPdfGenerate" style="flex:1">📥 Générer le PDF</button>
-      <button class="btn-out" id="btnPdfClose">Annuler</button>
-    </div>
-  </div>
-</div>
-
-<!-- ÉCRAN CONNEXION / INSCRIPTION -->
-<div class="auth-screen" id="authScreen">
-  <div class="auth-box">
-    <img src="icons/logo.png" class="auth-logo" onerror="this.style.display='none'"/>
-    <div class="auth-title">Budget<em>Smart</em></div>
-    <div class="auth-sub">L'intelligence financière pour tous</div>
-
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLogin">Connexion</button>
-      <button class="auth-tab" id="tabSignup">Créer un compte</button>
-    </div>
-
-    <div id="authError" class="auth-error" style="display:none"></div>
-
-    <!-- LOGIN -->
-    <div id="loginForm">
-      <div class="fg"><label>Email</label><input type="email" id="loginEmail" class="inp" placeholder="votre@email.com"/></div>
-      <div class="fg"><label>Mot de passe</label><input type="password" id="loginPwd" class="inp" placeholder="••••••••"/></div>
-      <button class="btn-g" id="btnLogin" style="width:100%;margin-top:8px">Se connecter</button>
-      <a href="#" class="auth-forgot" id="btnForgot">Mot de passe oublié ?</a>
-    </div>
-
-    <!-- SIGNUP -->
-    <div id="signupForm" style="display:none">
-      <div class="fg"><label>Prénom</label><input type="text" id="signupName" class="inp" placeholder="Votre prénom"/></div>
-      <div class="fg"><label>Email</label><input type="email" id="signupEmail" class="inp" placeholder="votre@email.com"/></div>
-      <div class="fg"><label>Mot de passe</label><input type="password" id="signupPwd" class="inp" placeholder="6 caractères minimum"/></div>
-      <button class="btn-g" id="btnSignup" style="width:100%;margin-top:8px">Créer mon compte</button>
-    </div>
-
-    <div class="auth-trial">🎁 7 jours d'essai gratuit · Sans engagement</div>
-  </div>
-</div>
-
-<!-- SIDEBAR -->
-<nav class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <img src="icons/logo.png" class="logo-img" onerror="this.style.display='none'"/>
-    <div>
-      <div class="logo-text">Budget<em>Smart</em></div>
-      <div class="logo-sub">L'intelligence financière pour tous</div>
-    </div>
-  </div>
-  <div class="sp" id="sp">
-    <div class="sp-av" id="spAv">U</div>
-    <div>
-      <div class="sp-name" id="spName">Mon Profil</div>
-      <div class="sp-plan" id="spPlan">Plan Gratuit — 7 jours</div>
-    </div>
-  </div>
-  <ul class="nav">
-    <li><a class="ni active" data-p="dashboard">Tableau de bord</a></li>
-    <li><a class="ni" data-p="daily">Dépenses quotidiennes</a></li>
-    <li class="ns">MES OBJECTIFS</li>
-    <li><a class="ni" data-p="goals">Objectif Personnel</a></li>
-    <li><a class="ni" data-p="business">Projet Business <span class="nb">Premium</span></a></li>
-    <li><a class="ni" data-p="couple">Projet Couple <span class="nb">Premium</span></a></li>
-    <li class="ns">ÉPARGNE</li>
-    <li><a class="ni" data-p="suivi">Suivi</a></li>
-    <li><a class="ni" data-p="tips">Conseils financiers</a></li>
-    <li><a class="ni" data-p="defis">Défis d'épargne</a></li>
-    <li><a class="ni" data-p="family">Mode Famille</a></li>
-    <li class="ns">COMPTE</li>
-    <li><a class="ni" data-p="pricing">Abonnements</a></li>
-    <li><a class="ni" data-p="coaching">Coaching Premium</a></li>
-    <li><a class="ni" data-p="facturation">📄 Facturation</a></li>
-    <li><a class="ni" data-p="share">Partager l'app</a></li>
-    <li><a class="ni" data-p="settings">Paramètres</a></li>
-    <li id="adminLi" style="display:none"><a class="ni nav-admin" data-p="admin">Espace Admin</a></li>
-  </ul>
-  <div class="sb">
-    <div class="sb-plan" id="sbPlan">Plan Gratuit — Essai 7 jours</div>
-    <a class="sb-up" data-p="pricing">Passer à Premium</a>
-    <button id="btnDarkModeSide" class="dark-toggle-btn">🌙 Mode sombre</button>
-  </div>
-</nav>
-
-<!-- MOBILE HEADER -->
-<header class="mh">
-  <button id="menuBtn">☰</button>
-  <div class="mh-logo">Budget<em>Smart</em></div>
-  <div class="mh-av" id="mhAv">U</div>
-  <button id="btnDarkMode" class="mh-dark" title="Mode sombre">🌙</button>
-</header>
-<div class="ov" id="ov"></div>
-
-<!-- MAIN -->
-<main class="main">
-
-<!-- DASHBOARD -->
-<section class="page active" id="p-dashboard">
-  <div class="ph">
-    <div><h1 class="pt">Tableau de bord</h1><p class="ps">La sérénité financière, enfin accessible.</p></div>
-    <div class="ph-date" id="phDate"></div>
-  </div>
-
-  <!-- PWA BANNER - HAUT - CLIGNOTE -->
-  <div class="pwa-banner" id="pwaBanner">
-    <div class="pwa-ico">📲</div>
-    <div class="pwa-txt">
-      <div class="pwa-t">Installez BudgetSmart sur votre téléphone</div>
-      <div class="pwa-s">Gratuit · Hors ligne · Sur votre écran d'accueil</div>
-    </div>
-    <button class="pwa-btn" id="btnPWA">Installer</button>
-    <button class="pwa-x" id="btnPWAClose">✕</button>
-  </div>
-
-  <!-- KPI -->
-  <div class="kpi-row">
-    <div class="kpi k-g"><div class="kl">Solde actuel</div><div class="kv" id="kBal">0,00 €</div><div class="ks up">En bonne santé</div></div>
-    <div class="kpi k-b"><div class="kl">Revenus du mois</div><div class="kv" id="kInc">0,00 €</div><div class="ks">Ce mois-ci</div></div>
-    <div class="kpi k-o"><div class="kl">Dépenses du mois</div><div class="kv" id="kExp">0,00 €</div><div class="ks">Ce mois-ci</div></div>
-    <div class="kpi k-go"><div class="kl">Économisé</div><div class="kv" id="kSav">0,00 €</div><div class="ks up">Excellent !</div></div>
-  </div>
-
-  <div class="alert" id="alertBox" style="display:none"><span id="alertMsg"></span></div>
-
-  <!-- 3 OBJECTIFS -->
-  <div class="obj-row">
-    <div class="obj ob-g" id="oPersonal">
-      <div class="ob-ico">🎯</div>
-      <div class="ob-name">Objectif Personnel</div>
-      <div class="ob-val" id="oPersonalVal">0,00 €</div>
-      <div class="ob-tag free">Inclus gratuit</div>
-    </div>
-    <div class="obj ob-b" id="oBusiness">
-      <div class="ob-lock">🔒</div>
-      <div class="ob-ico">💼</div>
-      <div class="ob-name">Projet Business</div>
-      <div class="ob-sub">Lancez votre activité</div>
-      <div class="ob-tag prem">Voir les plans</div>
-    </div>
-    <div class="obj ob-go" id="oCouple">
-      <div class="ob-lock">🔒</div>
-      <div class="ob-ico">💑</div>
-      <div class="ob-name">Projet Couple</div>
-      <div class="ob-sub">Mariage · Maison · Bébé</div>
-      <div class="ob-tag prem">Voir les plans</div>
-    </div>
-  </div>
-
-  <!-- COACHING CTA -->
-  <div class="co-cta" id="coCta">
-    <div class="coc-left">
-      <div class="coc-t">Coaching Financier Personnalisé</div>
-      <div class="coc-s">Séance privée avec notre experte · Dès 49,99 €</div>
-    </div>
-    <div class="coc-btn">Réserver maintenant</div>
-  </div>
-
-  <!-- GRAPHIQUES -->
-  <div class="charts-row">
-    <div class="chart-card">
-      <div class="chart-title">Répartition des dépenses</div>
-      <canvas id="donut" width="180" height="180"></canvas>
-      <div id="donutLeg"></div>
-    </div>
-    <div class="chart-card chart-wide">
-      <div class="chart-title">Évolution 6 mois</div>
-      <canvas id="barC" width="380" height="180"></canvas>
-    </div>
-  </div>
-
-  <!-- TRANSACTIONS -->
-  <div class="card"><div class="ct">Dernières transactions</div><div id="recentTx"><div class="empty">Aucune transaction encore.</div></div></div>
-
-  <!-- DÉFIS ACTIFS -->
-  <div class="card" id="activeDefiCard" style="display:none">
-    <div class="ct">Mes défis en cours</div>
-    <div id="activeDefiList"></div>
-  </div>
-
-  <!-- OBJECTIFS DASHBOARD -->
-  <div class="card" id="goalEvoCard" style="display:none">
-    <div class="ct">Mes objectifs d'épargne</div>
-    <div id="goalEvoList"></div>
-    <a class="see-all" id="btnSeeGoals">Voir mes objectifs →</a>
-  </div>
-
-  <!-- TIP -->
-  <div class="tip-strip"><span id="dashTip">Chargement du conseil…</span></div>
-
-  <!-- PAIEMENTS -->
-  <div class="pay-strip">
-    <span class="pay-lbl">Paiements sécurisés :</span>
-    <span class="pb visa">Visa</span>
-    <span class="pb mc">Mastercard</span>
-    <span class="pb pp">PayPal</span>
-    <span class="pb soon">Mobile Money bientôt</span>
-  </div>
-
-  <!-- UPSELL -->
-  <div class="upsell" id="upsellBar">
-    Fonctionnalités Premium — Business, Couple, Famille, Coaching…
-    <span class="upsell-cta">Voir les plans</span>
-  </div>
-</section>
-
-<!-- DÉPENSES -->
-<section class="page" id="p-daily">
-  <div class="ph"><div><h1 class="pt">Dépenses quotidiennes</h1><p class="ps">Enregistrez vos revenus et dépenses</p></div></div>
-  <div class="card">
-    <div class="ct">Nouvelle entrée</div>
-    <div class="fg"><label>Date</label><input type="date" id="eDate" class="inp"/></div>
-    <div class="fg2">
-      <div class="fg"><label>Revenu (€)</label><input type="number" id="eInc" class="inp" placeholder="0.00" min="0" step="0.01"/></div>
-      <div class="fg"><label>Dépense (€)</label><input type="number" id="eExp" class="inp" placeholder="0.00" min="0" step="0.01"/></div>
-      <div class="fg"><label>Catégorie</label>
-        <select id="eCat" class="inp">
-          <option value="nourriture">Nourriture</option><option value="transport">Transport</option>
-          <option value="loyer">Loyer</option><option value="factures">Factures</option>
-          <option value="shopping">Shopping</option><option value="sante">Santé</option>
-          <option value="enfants">Enfants</option><option value="business">Business</option>
-          <option value="loisirs">Loisirs</option><option value="epargne">Épargne</option>
-          <option value="dettes">Dettes</option><option value="autre">Autre</option>
-        </select>
-      </div>
-      <div class="fg"><label>Économisé (€)</label><input type="number" id="eSav" class="inp" placeholder="0.00" min="0" step="0.01"/></div>
-      <div class="fg full"><label>Note</label><input type="text" id="eNote" class="inp" placeholder="Ex : courses du soir…"/></div>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn-g" id="btnAddEntry">Enregistrer</button>
-      <button class="btn-out" id="btnScanReceipt">📸 Scanner un reçu</button>
-    </div>
-  </div>
-  <div class="tot-row">
-    <div class="tot"><div class="tl">Aujourd'hui</div><div class="tv" id="tDay">0,00 €</div></div>
-    <div class="tot"><div class="tl">Cette semaine</div><div class="tv" id="tWeek">0,00 €</div></div>
-    <div class="tot"><div class="tl">Ce mois</div><div class="tv" id="tMonth">0,00 €</div></div>
-    <div class="tot tot-s"><div class="tl">Économies cumulées</div><div class="tv" id="tSaved">0,00 €</div></div>
-  </div>
-  <div class="card"><div class="ct">Historique</div><div id="entriesList"><div class="empty">Aucune fiche encore.</div></div></div>
-</section>
-
-<!-- OBJECTIF PERSONNEL -->
-<section class="page" id="p-goals">
-  <div class="ph"><div><h1 class="pt">Objectif Personnel</h1><p class="ps">Définissez vos rêves et suivez votre progression</p></div></div>
-  <div class="card">
-    <div class="ct">Créer mon objectif</div>
-    <div class="fg2">
-      <div class="fg"><label>Objectif</label>
-        <select id="gName" class="inp">
-          <option>Acheter une voiture</option><option>Voyager</option>
-          <option>Acheter une maison</option><option>Fonds d'urgence</option>
-          <option>Financer les études</option><option>Acheter un smartphone</option>
-          <option>Mon mariage</option><option>Console de jeux</option>
-          <option>Budget beauté</option><option>Autre</option>
-        </select>
-      </div>
-      <div class="fg"><label>Nom personnalisé</label><input type="text" id="gCustom" class="inp" placeholder="Mon projet…"/></div>
-      <div class="fg"><label>Montant cible (€)</label><input type="number" id="gTarget" class="inp" placeholder="5000"/></div>
-      <div class="fg"><label>Déjà économisé (€)</label><input type="number" id="gSaved" class="inp" placeholder="0"/></div>
-      <div class="fg"><label>Date cible</label><input type="date" id="gDate" class="inp"/></div>
-    </div>
-    <button class="btn-g" id="btnAddGoal">Créer l'objectif</button>
-  </div>
-  <div id="goalsList"><div class="empty">Aucun objectif. Commencez à rêver grand !</div></div>
-  <div class="ug-row">
-    <div class="ug" id="ugBusiness"><strong>💼 Projet Business</strong><p>Objectifs professionnels illimités</p><span>Débloquer →</span></div>
-    <div class="ug" id="ugCouple"><strong>💑 Projet Couple</strong><p>Budget partagé à deux</p><span>Débloquer →</span></div>
-  </div>
-</section>
-
-<!-- PROJET BUSINESS -->
-<section class="page" id="p-business">
-  <div class="ph"><div><h1 class="pt">Projet Business</h1><p class="ps">Choisissez votre plan et lancez votre activité</p></div></div>
-  <div class="proj-card"><h3>Ce que vous débloquez</h3>
-    <div class="proj-feats"><span>Objectifs business illimités</span><span>Suivi revenus/dépenses pro</span><span>Trésorerie</span><span>Rapports avancés</span><span>Budget matériel</span><span>Prévisions financières</span></div>
-  </div>
-  <p class="plan-lbl">Sélectionnez votre plan pour accéder immédiatement</p>
-  <div class="pricing-grid" id="pgBusiness"></div>
-  <div class="pay-choice" id="pcBusiness" style="display:none">
-    <div class="pc-t">Mode de paiement</div>
-    <div class="pc-btns"><button class="btn-card" id="pcBCard">Payer par carte bancaire</button><button class="btn-pp" id="pcBPP">Payer avec PayPal</button></div>
-  </div>
-</section>
-
-<!-- PROJET COUPLE -->
-<section class="page" id="p-couple">
-  <div class="ph"><div><h1 class="pt">Projet Couple</h1><p class="ps">Construisez votre avenir ensemble</p></div></div>
-  <div class="proj-card"><h3>Ce que vous débloquez</h3>
-    <div class="proj-feats"><span>Objectifs couple illimités</span><span>Budget partagé</span><span>Mariage · Maison</span><span>Suivi contributions</span><span>Projections</span><span>Arrivée bébé</span></div>
-  </div>
-  <p class="plan-lbl">Sélectionnez votre plan pour accéder immédiatement</p>
-  <div class="pricing-grid" id="pgCouple"></div>
-  <div class="pay-choice" id="pcCouple" style="display:none">
-    <div class="pc-t">Mode de paiement</div>
-    <div class="pc-btns"><button class="btn-card" id="pcCCard">Payer par carte bancaire</button><button class="btn-pp" id="pcCPP">Payer avec PayPal</button></div>
-  </div>
-</section>
-
-<!-- SUIVI COMPLET -->
-<section class="page" id="p-suivi">
-  <div class="ph"><div><h1 class="pt">Suivi complet</h1><p class="ps">Dettes · Agenda · Tâches · Objectifs</p></div></div>
-
-  <!-- SOUS-ONGLETS -->
-  <div class="suivi-tabs">
-    <button class="suivi-tab active" data-tab="dettes">💳 Dettes</button>
-    <button class="suivi-tab" data-tab="agenda">📅 Agenda</button>
-    <button class="suivi-tab" data-tab="taches">✅ Tâches</button>
-    <button class="suivi-tab" data-tab="objectifs">🎯 Objectifs</button>
-  </div>
-
-  <!-- DETTES -->
-  <div class="suivi-panel" data-panel="dettes">
-    <div class="card">
-      <div class="sd-header">
-        <div>Total restant dû : <strong id="sTotalDettes">0 €</strong></div>
-        <div class="sd-revenu-row">
-          <label>Trésorerie disponible (€/mois) :</label>
-          <input type="number" class="inp" id="sRevenu" style="width:120px;display:inline"/>
-        </div>
-      </div>
-      <div id="dettesList"><div class="empty">Aucune dette enregistrée.</div></div>
-      <button class="btn-g" id="btnAddDette" style="margin-top:14px">+ Ajouter une dette</button>
-      <div id="sRecommandations" class="sr-box"></div>
-    </div>
-  </div>
-
-  <!-- AGENDA -->
-  <div class="suivi-panel" data-panel="agenda" style="display:none">
-    <div class="card">
-      <div class="ct">Rendez-vous & échéances</div>
-      <div class="sa-form">
-        <input type="text" class="inp" id="sEvTitre" placeholder="Nouveau rendez-vous…" style="flex:1"/>
-        <input type="date" class="inp" id="sEvDate" style="width:160px"/>
-        <button class="btn-g" id="btnAddEvenement">+ Ajouter</button>
-      </div>
-      <div id="agendaList"><div class="empty">Aucun rendez-vous.</div></div>
-    </div>
-  </div>
-
-  <!-- TÂCHES -->
-  <div class="suivi-panel" data-panel="taches" style="display:none">
-    <div class="card">
-      <div class="ct">Tâches journalières</div>
-      <div class="st-form">
-        <input type="date" class="inp" id="sTacheDate" style="width:160px"/>
-        <span class="st-compteur" id="sTacheCompteur"></span>
-      </div>
-      <div class="st-form" style="margin-top:10px">
-        <input type="text" class="inp" id="sTacheTitre" placeholder="Tâche à faire…" style="flex:1"/>
-        <button class="btn-g" id="btnAddTache">+ Ajouter</button>
-      </div>
-      <div id="tachesList" style="margin-top:14px"><div class="empty">Rien de prévu.</div></div>
-    </div>
-  </div>
-
-  <!-- OBJECTIFS CONSOLIDÉS -->
-  <div class="suivi-panel" data-panel="objectifs" style="display:none">
-    <div class="card">
-      <div class="ct">Objectifs & dettes consolidés</div>
-      <div id="objectifsConsolides"><div class="empty">Aucun objectif.</div></div>
-      <button class="btn-g" id="btnSuiviAddGoal" style="margin-top:14px">+ Créer un objectif</button>
-    </div>
-  </div>
-</section>
-
-<!-- CONSEILS -->
-<section class="page" id="p-tips">
-  <div class="ph"><div><h1 class="pt">Conseils Financiers</h1><p class="ps">Sagesse quotidienne pour maîtriser votre argent</p></div></div>
-  <div class="tip-hero"><div class="th-lbl">Conseil du Jour</div><div class="th-txt" id="tipText">Chargement…</div><button class="btn-w" id="btnNewTip">Nouveau conseil</button></div>
-  <div class="tips-grid" id="tipsGrid"></div>
-</section>
-
-<!-- DÉFIS -->
-<section class="page" id="p-defis">
-  <div class="ph"><div><h1 class="pt">Défis d'Épargne</h1><p class="ps">11 défis pour booster vos économies</p></div></div>
-  <div class="defis-grid" id="defiGrid"></div>
-</section>
-
-<!-- FAMILLE -->
-<section class="page" id="p-family">
-  <div class="ph"><div><h1 class="pt">Mode Famille</h1><p class="ps">Gérez le budget de tout votre foyer</p></div></div>
-  <div class="gate">
-    <div class="gate-ico">👨‍👩‍👧‍👦</div><h2>Fonctionnalité Premium</h2>
-    <p>Gérez les dépenses du foyer, courses, factures en un endroit.</p>
-    <div class="gate-feats"><span>Budget du foyer</span><span>Dépenses enfants</span><span>Courses communes</span><span>Rapports famille</span></div>
-    <div class="pc-btns" style="margin-top:20px">
-      <button class="btn-card" id="btnFamCard">Payer par carte — 9,99 €/mois</button>
-      <button class="btn-pp" id="btnFamPP">Payer avec PayPal — 9,99 €/mois</button>
-    </div>
-    <p class="gate-note">7 jours d'essai gratuit · Sans engagement</p>
-  </div>
-</section>
-
-<!-- ABONNEMENTS -->
-<section class="page" id="p-pricing">
-  <div class="ph"><div><h1 class="pt">Abonnements</h1><p class="ps">Choisissez le plan qui vous correspond</p></div></div>
-  <div class="tog-row">
-    <button class="tog active" id="togEU">Europe</button>
-    <button class="tog" id="togAF">Afrique</button>
-  </div>
-  <div class="trial-bar">7 jours d'essai gratuit sur tous les plans payants · Sans engagement</div>
-  <div class="sel-bar" id="selBar" style="display:none">
-    <div class="sel-l"><div class="sel-ck">✓</div><span>Plan sélectionné : <strong id="selName">Premium</strong> — <strong id="selPrice">5,99 €/mois</strong></span></div>
-    <div class="pc-btns">
-      <button class="btn-card" id="selCard">Payer par carte bancaire</button>
-      <button class="btn-pp" id="selPP">Payer avec PayPal</button>
-    </div>
-  </div>
-  <div class="pricing-grid" id="pgMain"></div>
-  <div class="pay-section">
-    <div class="pay-sec-t">Modes de paiement</div>
-    <div class="pay-groups">
-      <div>
-        <div class="pay-gl">Disponibles</div>
-        <div class="pay-row">
-          <div class="pay-item"><span class="pb visa">Visa</span><span>Visa</span></div>
-          <div class="pay-item"><span class="pb mc">Mastercard</span><span>Mastercard</span></div>
-          <div class="pay-item"><span class="pb pp">PayPal</span><span>PayPal</span></div>
-        </div>
-      </div>
-      <div>
-        <div class="pay-gl muted">Bientôt disponibles</div>
-        <div class="pay-row">
-          <div class="pay-item op"><span class="pb wave">Wave</span><span>Bientôt</span></div>
-          <div class="pay-item op"><span class="pb orange">Orange</span><span>Bientôt</span></div>
-          <div class="pay-item op"><span class="pb mtn">MTN</span><span>Bientôt</span></div>
-          <div class="pay-item op"><span class="pb mpesa">M-Pesa</span><span>Bientôt</span></div>
-          <div class="pay-item op"><span class="pb airtel">Airtel</span><span>Bientôt</span></div>
-        </div>
-      </div>
-    </div>
-    <div class="pay-secure">Paiements 100% sécurisés · Données cryptées · Sans engagement</div>
-  </div>
-</section>
-
-<!-- COACHING -->
-<section class="page" id="p-coaching">
-  <div class="ph"><div><h1 class="pt">Coaching Premium</h1><p class="ps">Payez votre séance puis réservez votre créneau</p></div></div>
-  <div class="steps-bar">
-    <div class="step active" id="st1"><span class="sn">1</span>Choisir</div>
-    <div class="sa">→</div>
-    <div class="step" id="st2"><span class="sn">2</span>Payer</div>
-    <div class="sa">→</div>
-    <div class="step" id="st3"><span class="sn">3</span>Réserver</div>
-  </div>
-  <div id="cs1">
-    <div class="co-grid">
-      <div class="co-card">
-        <div class="co-name">Séance Découverte</div><div class="co-price">49,99 €</div><div class="co-dur">45 minutes</div>
-        <ul class="co-list"><li>Analyse de votre situation</li><li>Conseils personnalisés</li><li>Plan d'action</li><li>Suivi 7 jours</li></ul>
-        <button class="btn-g co-btn" data-offer="Séance Découverte" data-price="49,99 €">Choisir cette offre</button>
-      </div>
-      <div class="co-card co-feat">
-        <div class="co-badge">Populaire</div>
-        <div class="co-name">Coaching Complet</div><div class="co-price">79,99 €</div><div class="co-dur">90 minutes</div>
-        <ul class="co-list"><li>Analyse approfondie</li><li>Plan épargne sur mesure</li><li>Plan BudgetSmart idéal</li><li>Feuille de route 12 mois</li><li>Suivi 30 jours</li></ul>
-        <button class="btn-g co-btn" data-offer="Coaching Complet" data-price="79,99 €">Choisir cette offre</button>
-      </div>
-      <div class="co-card">
-        <div class="co-name">Coaching Famille</div><div class="co-price">99,99 €</div><div class="co-dur">2 heures</div>
-        <ul class="co-list"><li>Budget familial complet</li><li>Plan couple et enfants</li><li>Mode famille offert</li><li>Suivi 60 jours</li></ul>
-        <button class="btn-g co-btn" data-offer="Coaching Famille" data-price="99,99 €">Choisir cette offre</button>
-      </div>
-    </div>
-  </div>
-  <div id="cs2" style="display:none">
-    <div class="card" style="padding:26px">
-      <div class="ct">Offre : <span id="coOffer" style="color:#2E7D5E"></span> — <span id="coPrice" style="color:#C8922A"></span></div>
-      <div class="fg2">
-        <div class="fg"><label>Prénom et Nom</label><input type="text" id="coName" class="inp" placeholder="Votre nom complet"/></div>
-        <div class="fg"><label>Email</label><input type="email" id="coEmail" class="inp" placeholder="votre@email.com"/></div>
-        <div class="fg"><label>Téléphone / WhatsApp</label><input type="tel" id="coPhone" class="inp" placeholder="+32 ..."/></div>
-        <div class="fg"><label>Votre situation</label><input type="text" id="coSit" class="inp" placeholder="Ex : 2500€/mois, objectif maison…"/></div>
-      </div>
-      <div class="total-row">Total : <strong id="coTotal">79,99 €</strong></div>
-      <div class="pc-btns" style="margin-bottom:10px">
-        <button class="btn-card" id="coCard">Payer par carte bancaire</button>
-        <button class="btn-pp" id="coPP">Payer avec PayPal</button>
-      </div>
-      <button class="btn-out" id="coBack">← Retour</button>
-    </div>
-  </div>
-  <div id="cs3" style="display:none">
-    <div class="success-card">
-      <div class="sc-ico">✅</div><h2>Paiement confirmé !</h2>
-      <p id="scDesc">Votre séance est payée.</p>
-      <div class="sc-cal">
-        <p>Choisissez maintenant votre date et heure :</p>
-        <a href="https://calendly.com/missnyungedigitalservices/echange-projet-digital-ecommerce" target="_blank" class="btn-cal">📅 Réserver mon créneau</a>
-        <p class="sc-note">Confirmation par email après réservation.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- PROFIL -->
-<section class="page" id="p-profile">
-  <div class="ph"><div><h1 class="pt">Mon Profil</h1><p class="ps">Personnalisez votre expérience BudgetSmart</p></div></div>
-  <div class="card" style="padding:26px">
-    <div class="photo-row">
-      <div class="photo-circle" id="photoCircle"><span id="photoLetter">U</span><img id="photoImg" src="" style="display:none"/></div>
-      <div>
-        <label for="photoInput" class="btn-out" style="cursor:pointer;display:inline-block">Changer la photo</label>
-        <input type="file" id="photoInput" accept="image/*" style="display:none"/>
-        <p style="font-size:0.78rem;color:#6B7280;margin-top:6px">JPG ou PNG — Max 2MB</p>
-      </div>
-    </div>
-    <div class="fg2">
-      <div class="fg"><label>Prénom</label><input type="text" id="profName" class="inp" placeholder="Votre prénom"/></div>
-      <div class="fg"><label>Email</label><input type="email" id="profEmail" class="inp" placeholder="votre@email.com"/></div>
-      <div class="fg"><label>Devise</label>
-        <select id="profCur" class="inp">
-          <option value="€">Euro (€)</option><option value="$">Dollar ($)</option>
-          <option value="FCFA">FCFA</option><option value="MAD">Dirham (MAD)</option>
-        </select>
-      </div>
-      <div class="fg"><label>Objectif épargne/mois</label><input type="number" id="profGoal" class="inp" placeholder="500"/></div>
-      <div class="fg"><label>Revenu mensuel</label><input type="number" id="profInc" class="inp" placeholder="2000"/></div>
-      <div class="fg"><label>Plan actuel</label><input type="text" class="inp" value="Plan Gratuit" disabled/></div>
-    </div>
-    <button class="btn-g" id="btnSaveProfile">Enregistrer le profil</button>
-  </div>
-  <div class="card" id="adminCard" style="display:none">
-    <div class="ct">Accès Propriétaire</div>
-    <button class="btn-gold" id="btnAdmin" style="width:100%">Connexion Admin</button>
-  </div>
-  <div class="card">
-    <div class="ct">Données</div>
-    <p style="font-size:0.9rem;color:#6B7280;margin-bottom:14px">Données stockées localement sur votre appareil.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn-out" id="btnExport">Exporter mes données</button>
-      <button class="btn-danger" id="btnClear">Effacer tout</button>
-    </div>
-  </div>
-</section>
-
-<!-- FACTURATION -->
-<section class="page" id="p-facturation">
-  <div class="ph">
-    <div><h1 class="pt">Facturation</h1><p class="ps">Créez, modifiez et partagez vos factures</p></div>
-    <button class="btn-g" id="btnNewFacture">+ Nouvelle facture</button>
-  </div>
-
-  <!-- ONGLETS -->
-  <div class="suivi-tabs">
-    <button class="suivi-tab active" data-tab="liste">📋 Mes factures</button>
-    <button class="suivi-tab" data-tab="creer">✏️ Créer/Modifier</button>
-    <button class="suivi-tab" data-tab="upload">📤 Importer PDF</button>
-  </div>
-
-  <!-- LISTE DES FACTURES -->
-  <div class="suivi-panel" data-panel="liste">
-    <div class="card">
-      <div class="fact-search-row">
-        <input type="text" class="inp" id="factSearch" placeholder="Rechercher une facture…" style="flex:1"/>
-        <select class="inp" id="factFilter" style="width:160px">
-          <option value="all">Toutes</option>
-          <option value="brouillon">Brouillons</option>
-          <option value="envoyee">Envoyées</option>
-          <option value="payee">Payées</option>
-        </select>
-      </div>
-      <div id="facturesList"><div class="empty">Aucune facture. Cliquez sur "+ Nouvelle facture" pour commencer.</div></div>
-    </div>
-  </div>
-
-  <!-- CRÉER / MODIFIER -->
-  <div class="suivi-panel" data-panel="creer" style="display:none">
-
-    <!-- CHOIX DU MODÈLE -->
-    <div class="card" id="templateSelector">
-      <div class="ct">Choisissez un modèle</div>
-      <div class="template-grid">
-
-        <div class="tpl-card active" data-tpl="moderne">
-          <div class="tpl-preview" style="background:linear-gradient(135deg,#E8631C,#FF8C42)">
-            <div class="tpl-lines"><div></div><div style="width:60%"></div><div style="width:80%"></div></div>
-          </div>
-          <div class="tpl-name">Moderne Orange</div>
-          <div class="tpl-desc">Coloré · Dynamique · Startup</div>
-        </div>
-
-        <div class="tpl-card" data-tpl="corporate">
-          <div class="tpl-preview" style="background:linear-gradient(135deg,#1E3A5F,#2E5A8E)">
-            <div class="tpl-lines"><div></div><div style="width:60%"></div><div style="width:80%"></div></div>
-          </div>
-          <div class="tpl-name">Corporate Bleu</div>
-          <div class="tpl-desc">Sérieux · Professionnel · Entreprise</div>
-        </div>
-
-        <div class="tpl-card" data-tpl="elegant">
-          <div class="tpl-preview" style="background:linear-gradient(135deg,#2C1654,#4A2480)">
-            <div class="tpl-lines"><div></div><div style="width:60%"></div><div style="width:80%"></div></div>
-          </div>
-          <div class="tpl-name">Élégant Violet</div>
-          <div class="tpl-desc">Luxe · Créatif · Agence</div>
-        </div>
-
-        <div class="tpl-card" data-tpl="nature">
-          <div class="tpl-preview" style="background:linear-gradient(135deg,#1F9D6B,#2ECC8E)">
-            <div class="tpl-lines"><div></div><div style="width:60%"></div><div style="width:80%"></div></div>
-          </div>
-          <div class="tpl-name">Nature Vert</div>
-          <div class="tpl-desc">Frais · Écologique · Santé</div>
-        </div>
-
-        <div class="tpl-card" data-tpl="gold">
-          <div class="tpl-preview" style="background:linear-gradient(135deg,#1A1410,#2E2620)">
-            <div class="tpl-lines" style="border-color:#D98C12"><div style="background:#D98C12"></div><div style="width:60%;background:#D98C12"></div><div style="width:80%;background:#D98C12"></div></div>
-          </div>
-          <div class="tpl-name">Premium Or</div>
-          <div class="tpl-desc">Prestige · Haut de gamme · VIP</div>
-        </div>
-
-        <div class="tpl-card" data-tpl="minimal">
-          <div class="tpl-preview" style="background:#fff;border:2px solid #E0D4C0">
-            <div class="tpl-lines" style="border-color:#1A1410"><div style="background:#1A1410"></div><div style="width:60%;background:#E0D4C0"></div><div style="width:80%;background:#E0D4C0"></div></div>
-          </div>
-          <div class="tpl-name">Minimaliste</div>
-          <div class="tpl-desc">Simple · Épuré · Sans design</div>
-        </div>
-
-        <div class="tpl-card" data-tpl="simple">
-          <div class="tpl-preview" style="background:#F8F8F8;border:2px solid #E0D4C0">
-            <div class="tpl-lines" style="border-color:#333"><div style="background:#333;height:2px"></div><div style="width:70%;background:#999;height:1px"></div><div style="width:90%;background:#999;height:1px"></div></div>
-          </div>
-          <div class="tpl-name">Simple sans design</div>
-          <div class="tpl-desc">Texte seul · Noir & blanc · Rapide</div>
-        </div>
-
-        <div class="tpl-card" data-tpl="afrique">
-          <div class="tpl-preview" style="background:linear-gradient(135deg,#C8390A,#E8631C)">
-            <div class="tpl-lines" style="border-color:#F0AB35"><div style="background:#F0AB35"></div><div style="width:60%;background:#F0AB35"></div><div style="width:80%;background:rgba(255,255,255,0.5)"></div></div>
-          </div>
-          <div class="tpl-name">Afrique Business</div>
-          <div class="tpl-desc">Chaleureux · Africain · Dynamique</div>
-        </div>
-
-      </div>
-      <div style="text-align:center;margin-top:16px">
-        <button class="btn-g" id="btnSelectTemplate">Utiliser ce modèle →</button>
-        <button class="btn-out" id="btnSkipTemplate" style="margin-left:10px">Partir de zéro</button>
-      </div>
-    </div>
-
-    <div class="card" id="factFormCard" style="display:none">
-      <div class="fact-header-form">
-        <!-- Entreprise émettrice -->
-        <div class="fact-col">
-          <div class="ct">Votre entreprise</div>
-          <div class="fg"><label>Nom de l'entreprise</label><input type="text" class="inp" id="fEntreprise" placeholder="Votre entreprise…"/></div>
-          <div class="fg"><label>Adresse</label><input type="text" class="inp" id="fAdresse" placeholder="Rue, ville, pays…"/></div>
-          <div class="fg"><label>Email</label><input type="email" class="inp" id="fEmail" placeholder="votre@email.com"/></div>
-          <div class="fg"><label>Téléphone</label><input type="tel" class="inp" id="fTel" placeholder="+32 …"/></div>
-          <div class="fg"><label>Logo</label>
-            <label for="fLogo" class="btn-out" style="cursor:pointer;display:block;text-align:center">📷 Uploader votre logo</label>
-            <input type="file" id="fLogo" accept="image/*" style="display:none"/>
-            <img id="fLogoPreview" src="" style="display:none;max-height:60px;margin-top:8px;border-radius:8px"/>
-          </div>
-        </div>
-        <!-- Info facture -->
-        <div class="fact-col">
-          <div class="ct">Détails facture</div>
-          <div class="fg"><label>N° Facture</label><input type="text" class="inp" id="fNumero" placeholder="FAC-001"/></div>
-          <div class="fg"><label>Date</label><input type="date" class="inp" id="fDate"/></div>
-          <div class="fg"><label>Date d'échéance</label><input type="date" class="inp" id="fEcheance"/></div>
-          <div class="fg"><label>Devise</label>
-            <select class="inp" id="fDevise">
-              <option value="€">Euro (€)</option>
-              <option value="$">Dollar ($)</option>
-              <option value="FCFA">FCFA</option>
-              <option value="MAD">Dirham (MAD)</option>
-            </select>
-          </div>
-          <div class="fg"><label>Couleur principale</label>
-            <div class="fact-colors">
-              <div class="fc-swatch active" data-color="#E8631C" style="background:#E8631C" title="Orange"></div>
-              <div class="fc-swatch" data-color="#1E5A9C" style="background:#1E5A9C" title="Bleu marine"></div>
-              <div class="fc-swatch" data-color="#1F9D6B" style="background:#1F9D6B" title="Vert"></div>
-              <div class="fc-swatch" data-color="#2C1654" style="background:#2C1654" title="Violet"></div>
-              <div class="fc-swatch" data-color="#D98C12" style="background:#D98C12" title="Or"></div>
-              <div class="fc-swatch" data-color="#1A1410" style="background:#1A1410" title="Noir"></div>
-            </div>
-            <input type="hidden" id="fCouleur" value="#E8631C"/>
-          </div>
-        </div>
-        <!-- Client -->
-        <div class="fact-col">
-          <div class="ct">Client</div>
-          <div class="fg"><label>Nom du client</label><input type="text" class="inp" id="fClientNom" placeholder="Nom ou entreprise…"/></div>
-          <div class="fg"><label>Adresse client</label><input type="text" class="inp" id="fClientAdresse" placeholder="Adresse…"/></div>
-          <div class="fg"><label>Email client</label><input type="email" class="inp" id="fClientEmail" placeholder="client@email.com"/></div>
-          <div class="fg"><label>Téléphone client</label><input type="tel" class="inp" id="fClientTel" placeholder="+32 …"/></div>
-        </div>
-      </div>
-
-      <!-- LIGNES DE FACTURE -->
-      <div class="ct" style="margin-top:20px">Articles / Services</div>
-      <div id="factLignes"></div>
-      <button class="btn-out" id="btnAddLigne" style="margin-top:10px">+ Ajouter une ligne</button>
-
-      <!-- TOTAUX -->
-      <div class="fact-totaux">
-        <div class="fg"><label>Remise (%)</label><input type="number" class="inp" id="fRemise" value="0" min="0" max="100" style="width:100px"/></div>
-        <div class="fg"><label>TVA (%)</label><input type="number" class="inp" id="fTVA" value="0" min="0" style="width:100px"/></div>
-        <div class="fact-total-box" id="factTotalBox">
-          <div class="ft-row"><span>Sous-total</span><span id="ftSousTotal">0,00 €</span></div>
-          <div class="ft-row"><span>Remise</span><span id="ftRemise">0,00 €</span></div>
-          <div class="ft-row"><span>TVA</span><span id="ftTVA">0,00 €</span></div>
-          <div class="ft-row ft-total"><span>TOTAL</span><span id="ftTotal">0,00 €</span></div>
-        </div>
-      </div>
-
-      <!-- NOTE -->
-      <div class="fg" style="margin-top:14px"><label>Note / Conditions de paiement</label>
-        <textarea class="inp" id="fNote" rows="2" placeholder="Ex: Paiement à 30 jours. Merci pour votre confiance !"></textarea>
-      </div>
-      <div class="fg"><label>Statut</label>
-        <select class="inp" id="fStatut" style="width:180px">
-          <option value="brouillon">Brouillon</option>
-          <option value="envoyee">Envoyée</option>
-          <option value="payee">Payée</option>
-        </select>
-      </div>
-
-      <!-- ACTIONS -->
-      <div class="pc-btns" style="margin-top:18px;flex-wrap:wrap">
-        <button class="btn-g" id="btnSaveFacture">💾 Sauvegarder</button>
-        <button class="btn-card" id="btnPreviewFacture">👁️ Prévisualiser</button>
-        <button class="btn-out" id="btnDownloadFacture">📥 Télécharger PDF</button>
-        <button class="btn-pp" id="btnShareWA">💬 WhatsApp</button>
-        <button class="btn-out" id="btnShareEmail">✉️ Email</button>
-        <button class="btn-out" id="btnChangeTemplate">🎨 Changer modèle</button>
-      </div>
-    </div>
-    </div>
-
-    <!-- PRÉVISUALISATION -->
-    <div id="factPreviewContainer" style="display:none">
-      <div class="card">
-        <div class="ct">Prévisualisation</div>
-        <div id="factPreview" class="fact-preview"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- IMPORTER PDF -->
-  <div class="suivi-panel" data-panel="upload" style="display:none">
-    <div class="card">
-      <div class="ct">📤 Importer une facture PDF existante</div>
-      <div class="pdf-upload-zone" id="pdfUploadZone">
-        <div class="puz-ico">📄</div>
-        <div class="puz-title">Glissez votre PDF ici</div>
-        <div class="puz-sub">ou cliquez pour choisir un fichier</div>
-        <label for="pdfUploadFile" class="btn-g" style="margin-top:14px;cursor:pointer;display:inline-block">Choisir un PDF</label>
-        <input type="file" id="pdfUploadFile" accept="application/pdf" style="display:none"/>
-      </div>
-      <div id="pdfExtracted" style="display:none">
-        <div class="ct" style="margin-top:18px">Contenu extrait — modifiez les champs</div>
-        <div class="fg"><label>Titre / Objet</label><input type="text" class="inp" id="pdfTitre" placeholder="Ex: Facture de services…"/></div>
-        <div class="fg"><label>Nom du client</label><input type="text" class="inp" id="pdfClient" placeholder="Nom du client…"/></div>
-        <div class="fg"><label>Montant total (€)</label><input type="number" class="inp" id="pdfMontant" placeholder="0.00" step="0.01"/></div>
-        <div class="fg"><label>Date</label><input type="date" class="inp" id="pdfDate"/></div>
-        <div class="fg"><label>Notes / Détails extraits</label>
-          <textarea class="inp" id="pdfNotes" rows="5" placeholder="Le texte extrait du PDF apparaîtra ici…"></textarea>
-        </div>
-        <div class="fg"><label>Votre logo</label>
-          <label for="pdfLogo" class="btn-out" style="cursor:pointer;display:inline-block">📷 Ajouter votre logo</label>
-          <input type="file" id="pdfLogo" accept="image/*" style="display:none"/>
-          <img id="pdfLogoPreview" src="" style="display:none;max-height:50px;margin-left:10px;border-radius:6px"/>
-        </div>
-        <div class="pc-btns" style="margin-top:18px">
-          <button class="btn-g" id="btnPdfRecreate">📥 Générer PDF modifié</button>
-          <button class="btn-pp" id="btnPdfShareWA">💬 WhatsApp</button>
-          <button class="btn-out" id="btnPdfShareEmail">✉️ Email</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- PARTAGER -->
-<section class="page" id="p-share">
-  <div class="ph"><div><h1 class="pt">Partager l'app</h1><p class="ps">Invitez vos proches à rejoindre BudgetSmart</p></div></div>
-  <div class="card">
-    <div class="ct">Votre lien</div>
-    <div class="share-link-box">
-      <div class="slb-url">https://misswaxbeautycare.github.io/budgetsmart</div>
-      <button class="btn-g" id="btnCopyLink">Copier</button>
-    </div>
-  </div>
-  <div class="card">
-    <div class="ct">Partager sur les réseaux</div>
-    <div class="share-grid">
-      <button class="shr-btn shr-wa" id="shareWA"><span>💬</span>WhatsApp</button>
-      <button class="shr-btn shr-fb" id="shareFB"><span>📘</span>Facebook</button>
-      <button class="shr-btn shr-ig" id="shareIG"><span>📸</span>Instagram</button>
-      <button class="shr-btn shr-tk" id="shareTK"><span>🎵</span>TikTok</button>
-      <button class="shr-btn shr-em" id="shareEM"><span>✉️</span>Email</button>
-      <button class="shr-btn shr-tw" id="shareTW"><span>🐦</span>Twitter/X</button>
-    </div>
-  </div>
-  <div class="card">
-    <div class="ct">Message prêt à envoyer</div>
-    <div class="share-msg" id="shareMsgBox">🌟 Découvrez BudgetSmart !
-
-L'app qui vous aide à gérer votre budget et épargner intelligemment.
-
-✅ Dépenses quotidiennes
-✅ Objectifs d'épargne
-✅ Défis d'épargne
-✅ Coaching financier
-
-🎁 7 jours gratuits !
-
-👉 https://misswaxbeautycare.github.io/budgetsmart</div>
-    <button class="btn-g" id="btnCopyMsg" style="margin-top:12px">Copier ce message</button>
-  </div>
-</section>
-
-<!-- PARAMÈTRES -->
-<section class="page" id="p-settings">
-  <div class="ph"><div><h1 class="pt">Paramètres</h1><p class="ps">Configurez votre expérience</p></div></div>
-  <div class="card">
-    <div class="ct">Mon compte</div>
-    <div class="set-item" id="setProfile"><div class="si-ico">👤</div><div class="si-inf"><div class="si-n">Mon Profil</div><div class="si-d">Nom, email, devise, photo</div></div><div class="si-a">→</div></div>
-    <div class="set-item" id="setNotif">
-      <div class="si-ico">🔔</div><div class="si-inf"><div class="si-n">Notifications</div><div class="si-d">Rappels quotidiens d'épargne</div></div>
-      <div class="si-tog" id="notifToggle"><div class="tog-ball"></div></div>
-    </div>
-    <div class="set-item" id="setPWA"><div class="si-ico">📲</div><div class="si-inf"><div class="si-n">Installer l'application</div><div class="si-d">Ajouter sur votre écran d'accueil</div></div><div class="si-a">→</div></div>
-    <div class="set-item danger" id="setLogout"><div class="si-ico">🚪</div><div class="si-inf"><div class="si-n">Se déconnecter</div><div class="si-d" id="userEmailDisplay">Connecté</div></div><div class="si-a">→</div></div>
-  </div>
-  <div class="card">
-    <div class="ct">Abonnement</div>
-    <div class="set-item" id="setPricing"><div class="si-ico">💳</div><div class="si-inf"><div class="si-n">Mes plans</div><div class="si-d">Voir et changer mon abonnement</div></div><div class="si-a">→</div></div>
-    <div class="set-item" id="setCoaching"><div class="si-ico">👑</div><div class="si-inf"><div class="si-n">Coaching Premium</div><div class="si-d">Réserver une séance avec l'experte</div></div><div class="si-a">→</div></div>
-  </div>
-  <div class="card">
-    <div class="ct">Application</div>
-    <div class="set-item" id="setShare"><div class="si-ico">📤</div><div class="si-inf"><div class="si-n">Partager l'application</div><div class="si-d">Inviter vos proches</div></div><div class="si-a">→</div></div>
-    <div class="set-item" id="setExport"><div class="si-ico">📊</div><div class="si-inf"><div class="si-n">Exporter mes données (JSON)</div><div class="si-d">Télécharger toutes vos données</div></div><div class="si-a">→</div></div>
-    <div class="set-item" id="setPDF"><div class="si-ico">📄</div><div class="si-inf"><div class="si-n">Rapport mensuel PDF</div><div class="si-d">Générer un rapport imprimable</div></div><div class="si-a">→</div></div>
-    <div class="set-item" id="setDark"><div class="si-ico">🌙</div><div class="si-inf"><div class="si-n">Mode sombre</div><div class="si-d">Changer l'apparence de l'app</div></div><div class="si-tog" id="darkToggle"><div class="tog-ball"></div></div></div>
-    <div class="set-item danger" id="setClear"><div class="si-ico">🗑</div><div class="si-inf"><div class="si-n">Effacer toutes les données</div><div class="si-d">Action irréversible</div></div><div class="si-a">→</div></div>
-  </div>
-  <div class="card">
-    <div class="ct">À propos</div>
-    <div class="about-box">
-      <img src="icons/logo.png" class="about-logo" onerror="this.style.display='none'"/>
-      <div class="about-name">BudgetSmart</div>
-      <div class="about-ver">Version 1.0 · L'intelligence financière pour tous</div>
-      <div class="about-copy">© 2025 Miss Nyunge Digital Services · Belgique</div>
-    </div>
-  </div>
-</section>
-
-<!-- ADMIN -->
-<section class="page" id="p-admin">
-  <div class="ph">
-    <div><h1 class="pt">Espace Admin</h1><p class="ps">Gérez tous vos utilisateurs et leurs plans</p></div>
-    <div class="admin-badge">👑 Propriétaire</div>
-  </div>
-
-  <!-- STATS GLOBALES -->
-  <div class="admin-stats">
-    <div class="as as-g"><div class="as-ico">👥</div><div class="as-l">Utilisateurs total</div><div class="as-v" id="adTotalUsers">0</div></div>
-    <div class="as as-go"><div class="as-ico">💰</div><div class="as-l">Revenus estimés/mois</div><div class="as-v" id="adRevenu">0 €</div></div>
-    <div class="as as-b"><div class="as-ico">👑</div><div class="as-l">Abonnés payants</div><div class="as-v" id="adPayants">0</div></div>
-    <div class="as as-o"><div class="as-ico">🔥</div><div class="as-l">Taux conversion</div><div class="as-v" id="adConversion">0%</div></div>
-  </div>
-  <!-- MESSAGE AUX UTILISATEURS -->
-  <div class="card">
-    <div class="ct">📢 Envoyer un message à tous les utilisateurs</div>
-    <div class="fg"><label>Message</label><textarea class="inp" id="adMessage" rows="3" placeholder="Ex: Nouvelle fonctionnalité disponible ! Découvrez le nouveau module Suivi…" style="resize:vertical"></textarea></div>
-    <button class="btn-g" id="btnSendMessage">📤 Envoyer à tous</button>
-    <div id="adMessageStatus" style="margin-top:10px"></div>
-  </div>
-
-  <!-- GESTION UTILISATEURS -->
-  <div class="card">
-    <div class="ct">Gestion des utilisateurs et plans</div>
-    <div class="admin-search-row">
-      <input type="text" class="inp" id="adSearchUser" placeholder="Rechercher par email ou nom…" style="flex:1"/>
-      <button class="btn-g" id="btnRefreshUsers">🔄 Actualiser</button>
-    </div>
-    <div id="adUsersList"><div class="empty">Chargement des utilisateurs…</div></div>
-  </div>
-
-  <!-- ACCÈS RAPIDE -->
-  <div class="card">
-    <div class="ct">Accès rapide</div>
-    <div class="admin-nav">
-      <button class="anb" data-p="dashboard">Dashboard</button>
-      <button class="anb" data-p="daily">Dépenses</button>
-      <button class="anb" data-p="goals">Objectif</button>
-      <button class="anb" data-p="business">Business</button>
-      <button class="anb" data-p="couple">Couple</button>
-      <button class="anb" data-p="tips">Conseils</button>
-      <button class="anb" data-p="defis">Défis</button>
-      <button class="anb" data-p="family">Famille</button>
-      <button class="anb" data-p="pricing">Plans</button>
-      <button class="anb" data-p="coaching">Coaching</button>
-    </div>
-  </div>
-
-  <div class="card" style="text-align:center">
-    <button class="btn-danger" id="btnLogout">Quitter le mode Admin</button>
-  </div>
-</section>
-
-</main>
-
-<!-- MODAL -->
-<div class="modal" id="modal">
-  <div class="modal-box">
-    <div class="modal-ico" id="mIco">🔒</div>
-    <div class="modal-title" id="mTitle">Fonctionnalité Premium</div>
-    <p class="modal-text" id="mText">Passez à un plan payant.</p>
-    <div class="pc-btns" style="margin-bottom:10px">
-      <button class="btn-card" id="mCard">Payer par carte bancaire</button>
-      <button class="btn-pp" id="mPP">Payer avec PayPal</button>
-    </div>
-    <button class="modal-close" id="mClose">Rester sur le plan gratuit</button>
-  </div>
-</div>
-
-<div id="toast"></div>
-<script src="script.js?v=1790804598"></script>
+<script>
+// Show login by default
+showLogin();
+
+function showLogin() {
+  document.getElementById('loginForm').style.display = 'block';
+  document.getElementById('signupForm').style.display = 'none';
+  document.getElementById('tabLogin').className = 'tab active';
+  document.getElementById('tabSignup').className = 'tab inactive';
+  hideErr();
+}
+
+function showSignup() {
+  document.getElementById('signupForm').style.display = 'block';
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('tabSignup').className = 'tab active';
+  document.getElementById('tabLogin').className = 'tab inactive';
+  hideErr();
+}
+
+function showErr(msg) {
+  var e = document.getElementById('errMsg');
+  e.textContent = msg;
+  e.style.display = 'block';
+}
+function hideErr() {
+  document.getElementById('errMsg').style.display = 'none';
+}
+
+function doLogin() {
+  var email = document.getElementById('loginEmail').value.trim();
+  var pwd   = document.getElementById('loginPwd').value;
+  if (!email || !pwd) { showErr('Remplissez votre email et mot de passe.'); return; }
+  
+  // Check saved users
+  var users = JSON.parse(localStorage.getItem('bs_users') || '[]');
+  var found = users.find(function(u) { return u.email === email && u.pwd === btoa(pwd); });
+  
+  if (found) {
+    localStorage.setItem('bs_user', JSON.stringify({email: found.email, name: found.name}));
+    window.location.href = 'app.html';
+  } else {
+    showErr('Email ou mot de passe incorrect.');
+  }
+}
+
+function doSignup() {
+  var name  = document.getElementById('signupName').value.trim();
+  var email = document.getElementById('signupEmail').value.trim();
+  var pwd   = document.getElementById('signupPwd').value;
+  
+  if (!name || !email || !pwd) { showErr('Remplissez tous les champs.'); return; }
+  if (pwd.length < 6) { showErr('Mot de passe minimum 6 caractères.'); return; }
+  
+  var users = JSON.parse(localStorage.getItem('bs_users') || '[]');
+  if (users.find(function(u) { return u.email === email; })) {
+    showErr('Cet email est déjà utilisé. Connectez-vous.'); return;
+  }
+  
+  users.push({email: email, name: name, pwd: btoa(pwd)});
+  localStorage.setItem('bs_users', JSON.stringify(users));
+  localStorage.setItem('bs_user', JSON.stringify({email: email, name: name}));
+  
+  alert('✅ Compte créé avec succès ! Bienvenue ' + name + ' !');
+  window.location.href = 'app.html';
+}
+</script>
 </body>
 </html>
