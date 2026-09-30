@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BudgetSmart</title>
-<link rel="stylesheet" href="style.css?v=1790804065"/>
+<link rel="stylesheet" href="style.css?v=1790804567"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#2E7D5E"/>
@@ -17,43 +17,6 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
-
-<!-- ONBOARDING -->
-<div class="onboarding-overlay" id="onboardingOverlay" style="display:none">
-  <div class="ob-box">
-    <div class="ob-steps-bar">
-      <div class="ob-step-dot active" id="obDot1"></div>
-      <div class="ob-step-dot" id="obDot2"></div>
-      <div class="ob-step-dot" id="obDot3"></div>
-    </div>
-    <!-- Étape 1 -->
-    <div class="ob-slide" id="obSlide1">
-      <div class="ob-ico">💰</div>
-      <div class="ob-title">Bienvenue sur BudgetSmart !</div>
-      <div class="ob-desc">L'intelligence financière pour tous. Gérez vos dépenses, épargnez plus et atteignez vos objectifs.</div>
-      <button class="btn-g ob-next" data-next="2">Commencer →</button>
-    </div>
-    <!-- Étape 2 -->
-    <div class="ob-slide" id="obSlide2" style="display:none">
-      <div class="ob-ico">📊</div>
-      <div class="ob-title">Suivez vos dépenses</div>
-      <div class="ob-desc">Enregistrez vos revenus et dépenses chaque jour. Voyez où va votre argent en un coup d'œil.</div>
-      <div class="ob-tip">💡 Conseil : enregistrez dès que vous dépensez — l'habitude se crée en 21 jours !</div>
-      <button class="btn-g ob-next" data-next="3">Suivant →</button>
-    </div>
-    <!-- Étape 3 -->
-    <div class="ob-slide" id="obSlide3" style="display:none">
-      <div class="ob-ico">🎯</div>
-      <div class="ob-title">Définissez vos objectifs</div>
-      <div class="ob-desc">Créez des objectifs d'épargne, relevez des défis et suivez votre progression semaine après semaine.</div>
-      <div class="ob-tip">💡 Conseil : commencez par un petit objectif atteignable pour prendre de l'élan !</div>
-      <div style="display:flex;gap:10px;justify-content:center">
-        <button class="btn-out ob-next" data-next="done">Passer</button>
-        <button class="btn-g ob-next" data-next="done">C'est parti ! 🚀</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- MODAL SCANNER REÇU -->
 <div class="modal" id="scanModal">
@@ -1026,6 +989,6 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1790804065"></script>
+<script src="script.js?v=1790804567"></script>
 </body>
 </html>
