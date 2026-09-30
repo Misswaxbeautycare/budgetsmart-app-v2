@@ -199,6 +199,7 @@ async function initAuth() {
   if (localUser) {
     try {
       currentUser = JSON.parse(localUser);
+      document.getElementById('authScreen')?.remove();
       document.body.classList.add('authed');
       initApp();
       return;
@@ -241,7 +242,7 @@ function initApp() {
   initNotif();
   suiviInit();
   initDarkMode();
-  initOnboarding();
+  setTimeout(initOnboarding, 500);
   initScanner();
   initPDF();
   checkAdminMessage();
@@ -600,7 +601,7 @@ function applyDark(on) {
 function initOnboarding() {
   if (localStorage.getItem('bs_onboarded') === '1') return;
   const overlay = document.getElementById('onboardingOverlay');
-  if (overlay) overlay.style.display = 'flex';
+  if (overlay) { overlay.style.display = 'flex'; overlay.style.zIndex = '4000'; }
   document.querySelectorAll('.ob-next').forEach(btn => {
     btn.addEventListener('click', () => {
       const next = btn.dataset.next;
