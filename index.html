@@ -133,7 +133,8 @@ function doLogin() {
   
   if (found) {
     localStorage.setItem('bs_user', JSON.stringify({email: found.email, name: found.name}));
-    window.location.href = 'app.html';
+    localStorage.setItem('bs_logged_in', '1');
+    document.querySelector('.box').innerHTML = '<div style="text-align:center;padding:20px"><div style="font-size:3rem">✅</div><h2 style="color:#1F9D6B;margin:16px 0">Connecté avec succès !</h2><p style="color:#888;margin-bottom:20px">Bienvenue ' + (typeof name !== 'undefined' ? name : email) + '</p><a href="https://misswaxbeautycare.github.io/budgetsmart-app-v2/" style="display:inline-block;padding:14px 28px;background:#E8631C;color:white;border-radius:12px;font-weight:800;font-size:1rem;text-decoration:none">Ouvrir BudgetSmart →</a></div>';
   } else {
     showErr('Email ou mot de passe incorrect.');
   }
@@ -157,7 +158,8 @@ function doSignup() {
   localStorage.setItem('bs_user', JSON.stringify({email: email, name: name}));
   
   alert('✅ Compte créé avec succès ! Bienvenue ' + name + ' !');
-  window.location.href = 'app.html';
+  localStorage.setItem('bs_logged_in', '1');
+    document.querySelector('.box').innerHTML = '<div style="text-align:center;padding:20px"><div style="font-size:3rem">✅</div><h2 style="color:#1F9D6B;margin:16px 0">Connecté avec succès !</h2><p style="color:#888;margin-bottom:20px">Bienvenue ' + (typeof name !== 'undefined' ? name : email) + '</p><a href="https://misswaxbeautycare.github.io/budgetsmart-app-v2/" style="display:inline-block;padding:14px 28px;background:#E8631C;color:white;border-radius:12px;font-weight:800;font-size:1rem;text-decoration:none">Ouvrir BudgetSmart →</a></div>';
 }
 </script>
 </body>
