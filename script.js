@@ -1,7 +1,7 @@
 'use strict';
 /* ══ SUPABASE ══ */
 const SUPABASE_URL = 'https://otpnegpmvsmutyhhmkvp.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90cG5lZ3BtdnNtdXR5aGhta3ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MzkxMzYsImV4cCI6MjA5NzIxNTEzNn0.n0BOebUlmZpMzygGAhNlRSyYnLiPNU0iM0xousqscHo';
+const SUPABASE_KEY = 'sb_publishable_TrwWbJEwRijrmgEcNtzOqw_aosdIv_E';
 const sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUser = null;
 
@@ -120,68 +120,6 @@ function showEmailConfirmScreen(email) {
   if (btn) btn.addEventListener('click', () => location.reload());
 }
 
-
-async function doLogin() {
-  hideAuthError();
-  const email = document.getElementById('loginEmail')?.value.trim();
-  const pwd   = document.getElementById('loginPwd')?.value;
-  if (!email || !pwd) { showAuthError('Remplissez votre email et mot de passe.'); return; }
-  const btn = document.getElementById('btnLogin');
-  if(btn){btn.disabled=true;btn.textContent='Connexion…';}
-  const localUsers = JSON.parse(localStorage.getItem('bs_users')||'[]');
-  const found = localUsers.find(u => u.email===email && u.pwd===btoa(pwd));
-  if (found) {
-    const user = {id:found.id, email, user_metadata:{name:found.name}};
-    localStorage.setItem('bs_local_user', JSON.stringify(user));
-    if(btn){btn.disabled=false;btn.textContent='Se connecter';}
-    onAuthSuccess(user); return;
-  }
-  try {
-    const { data, error } = await sbClient.auth.signInWithPassword({email, password:pwd});
-    if(btn){btn.disabled=false;btn.textContent='Se connecter';}
-    if (error) { showAuthError('Email ou mot de passe incorrect.'); return; }
-    if(data?.user) onAuthSuccess(data.user);
-  } catch(e) {
-    if(btn){btn.disabled=false;btn.textContent='Se connecter';}
-    showAuthError('Email ou mot de passe incorrect.');
-  }
-}
-
-async function doSignup() {
-  hideAuthError();
-  const name  = document.getElementById('signupName')?.value.trim();
-  const email = document.getElementById('signupEmail')?.value.trim();
-  const pwd   = document.getElementById('signupPwd')?.value;
-  if (!name||!email||!pwd) { showAuthError('Remplissez tous les champs.'); return; }
-  if (pwd.length < 6) { showAuthError('Mot de passe minimum 6 caractères.'); return; }
-  const btn = document.getElementById('btnSignup');
-  if(btn){btn.disabled=true;btn.textContent='Création…';}
-  const localUsers = JSON.parse(localStorage.getItem('bs_users')||'[]');
-  if (localUsers.find(u => u.email===email)) {
-    if(btn){btn.disabled=false;btn.textContent='Créer mon compte';}
-    showAuthError('Cet email est déjà utilisé. Connectez-vous.'); return;
-  }
-  const newUser = {id:'local_'+Date.now(), email, name, pwd:btoa(pwd)};
-  localUsers.push(newUser);
-  localStorage.setItem('bs_users', JSON.stringify(localUsers));
-  const user = {id:newUser.id, email, user_metadata:{name}};
-  localStorage.setItem('bs_local_user', JSON.stringify(user));
-  try { await sbClient.auth.signUp({email, password:pwd, options:{data:{name}}}); } catch(e) {}
-  if(btn){btn.disabled=false;btn.textContent='Créer mon compte';}
-  onAuthSuccess(user);
-  toast('✅ Compte créé !');
-}
-
-async function doForgotPassword() {
-  const email = document.getElementById('loginEmail')?.value.trim();
-  if (!email) { showAuthError('Entrez votre email ci-dessus.'); return; }
-  try {
-    await sbClient.auth.resetPasswordForEmail(email, {redirectTo:'https://misswaxbeautycare.github.io/budgetsmart-app-v2'});
-    showAuthError('');
-    alert('Email de réinitialisation envoyé à ' + email);
-  } catch(e) { showAuthError('Erreur envoi email.'); }
-}
-
 function switchAuthTab(tab) {
   document.getElementById('tabLogin').classList.toggle('active', tab==='login');
   document.getElementById('tabSignup').classList.toggle('active', tab==='signup');
@@ -194,34 +132,86 @@ function hideAuthError()    { const el=document.getElementById('authError'); if(
 
 async function initAuth() {
   initAuthUI();
-  // Check local session
-  const localUser = localStorage.getItem('bs_local_user');
-  if (localUser) {
-    try {
-      currentUser = JSON.parse(localUser);
-      document.getElementById('authScreen')?.remove();
-      document.body.classList.add('authed');
-      initApp();
-      return;
-    } catch(e) { localStorage.removeItem('bs_local_user'); }
+  const { data } = await sbClient.auth.getSession();
+  if (data.session) {
+    onAuthSuccess(data.session.user);
+  } else {
+    document.body.classList.remove('authed');
   }
-  // Try Supabase session
-  try {
-    const { data } = await sbClient.auth.getSession();
-    if (data && data.session) {
-      onAuthSuccess(data.session.user);
-      return;
-    }
-  } catch(e) { console.log('Supabase offline, using local auth'); }
-  document.body.classList.remove('authed');
   sbClient.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' && session) onAuthSuccess(session.user);
-    if (event === 'SIGNED_OUT') { 
-      localStorage.removeItem('bs_local_user');
-      document.body.classList.remove('authed'); 
-    }
+    if (event === 'SIGNED_OUT') { document.body.classList.remove('authed'); }
   });
 }
+
+async function doLogin() {
+  hideAuthError();
+  const email = document.getElementById('loginEmail')?.value.trim();
+  const pwd   = document.getElementById('loginPwd')?.value;
+  if (!email || !pwd) { showAuthError('Remplissez tous les champs.'); return; }
+  const btn = document.getElementById('btnLogin'); if(btn){btn.disabled=true;btn.textContent='Connexion…';}
+  const { data, error } = await sbClient.auth.signInWithPassword({ email, password: pwd });
+  if (btn){btn.disabled=false;btn.textContent='Se connecter';}
+  if (error) { showAuthError(error.message==='Invalid login credentials'?'Email ou mot de passe incorrect.':error.message); return; }
+  onAuthSuccess(data.user);
+}
+
+async function doSignup() {
+  hideAuthError();
+  const name  = document.getElementById('signupName')?.value.trim();
+  const email = document.getElementById('signupEmail')?.value.trim();
+  const pwd   = document.getElementById('signupPwd')?.value;
+  if (!name || !email || !pwd) { showAuthError('Remplissez tous les champs.'); return; }
+  if (pwd.length < 6) { showAuthError('Le mot de passe doit contenir au moins 6 caractères.'); return; }
+  const btn = document.getElementById('btnSignup'); if(btn){btn.disabled=true;btn.textContent='Création…';}
+  const { data, error } = await sbClient.auth.signUp({ email, password: pwd, options:{ data:{ name } } });
+  if (btn){btn.disabled=false;btn.textContent='Créer mon compte';}
+  if (error) { showAuthError(error.message.includes('already')?'Cet email a déjà un compte. Connectez-vous.':error.message); return; }
+  if (data.user && !data.session) {
+    showAuthError('');
+    showEmailConfirmScreen(email);
+    return;
+  }
+  if (data.session) onAuthSuccess(data.user);
+}
+
+async function doForgotPassword() {
+  const email = document.getElementById('loginEmail')?.value.trim();
+  if (!email) { showAuthError('Saisissez votre email d\'abord.'); return; }
+  const { error } = await sbClient.auth.resetPasswordForEmail(email);
+  if (error) { showAuthError(error.message); return; }
+  toast('Email de réinitialisation envoyé !');
+}
+
+async function doLogout() {
+  if(!confirm('Voulez-vous vous déconnecter ?')) return;
+  await sbClient.auth.signOut();
+  location.reload();
+}
+
+async function onAuthSuccess(user) {
+  currentUser = user;
+  document.body.classList.add('authed');
+  const name = user.user_metadata?.name || user.email.split('@')[0];
+  const p = ls('profile', {});
+  if (!p.name)  p.name  = name;
+  if (!p.email) p.email = user.email;
+  sv('profile', p);
+  txt('userEmailDisplay', user.email);
+
+  // Sync profile to Supabase (upsert)
+  try {
+    await sbClient.from('profiles').upsert({
+      id: user.id,
+      email: user.email,
+      name: name,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'id' });
+  } catch(e) { console.log('Profile sync:', e.message); }
+
+  initApp();
+}
+
 function initApp() {
   initNav();
   initMobile();
@@ -242,7 +232,7 @@ function initApp() {
   initNotif();
   suiviInit();
   initDarkMode();
-  setTimeout(initOnboarding, 500);
+  initOnboarding();
   initScanner();
   initPDF();
   checkAdminMessage();
@@ -601,7 +591,7 @@ function applyDark(on) {
 function initOnboarding() {
   if (localStorage.getItem('bs_onboarded') === '1') return;
   const overlay = document.getElementById('onboardingOverlay');
-  if (overlay) { overlay.style.display = 'flex'; overlay.style.zIndex = '4000'; }
+  if (overlay) overlay.style.display = 'flex';
   document.querySelectorAll('.ob-next').forEach(btn => {
     btn.addEventListener('click', () => {
       const next = btn.dataset.next;
@@ -1315,27 +1305,17 @@ async function handlePDFUpload(e) {
 }
 
 function extractTextFromPDF(uint8) {
-  try {
-    const str = new TextDecoder('latin1').decode(uint8);
-    const results = [];
-    let i = 0;
-    while (i < str.length) {
-      if (str[i] === '(') {
-        let j = i + 1;
-        let word = '';
-        while (j < str.length && str[j] !== ')' && j - i < 100) {
-          word += str[j]; j++;
-        }
-        if (word.length > 3 && /[a-zA-ZÀ-ÿ0-9€]/.test(word)) {
-          results.push(word.replace(/\n/g, ' ').trim());
-        }
-        i = j + 1;
-      } else { i++; }
-    }
-    return results.join(' ') || 'Vérifiez et complétez manuellement.';
-  } catch(e) {
-    return 'Contenu extrait — vérifiez et complétez manuellement.';
-  }
+  // Simple PDF text extraction — looks for readable text strings
+  let text = '';
+  const str = new TextDecoder('latin1').decode(uint8);
+  const matches = str.match(/\(([^)]{2,80})\)/g)||[];
+  matches.forEach(m => {
+    const t = m.slice(1,-1).replace(/\n/g,'
+').replace(/\/g,'');
+    if(/[a-zA-ZÀ-ÿ0-9€.,\s]{3,}/.test(t)) text += t + '
+';
+  });
+  return text || 'Contenu extrait — vérifiez et complétez manuellement.';
 }
 
 function pdfRecreate() {
