@@ -132,7 +132,11 @@
     <div id="signupForm" style="display:none">
       <div class="fg"><label>Prénom</label><input type="text" id="signupName" class="inp" placeholder="Votre prénom"/></div>
       <div class="fg"><label>Email</label><input type="email" id="signupEmail" class="inp" placeholder="votre@email.com"/></div>
-      <div class="fg"><label>Mot de passe</label><input type="password" id="signupPwd" class="inp" placeholder="6 caractères minimum"/></div>
+      <div class="fg"><label>Mot de passe</label>
+      <div style="position:relative">
+        <input type="password" id="signupPwd" class="inp" placeholder="6 caractères minimum" style="padding-right:48px"/>
+        <button type="button" onclick="togglePwd('signupPwd',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.2rem;color:#888;padding:4px;">👁️</button>
+      </div></div>
       <button class="btn-g" id="btnSignup" style="width:100%;margin-top:8px">Créer mon compte</button>
     </div>
 
