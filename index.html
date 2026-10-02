@@ -3,164 +3,129 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>BudgetSmart — Connexion</title>
+<title>BudgetSmart</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { 
-  font-family: Arial, sans-serif; 
-  background: linear-gradient(135deg, #E8631C, #D98C12);
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-.box {
-  background: white;
-  border-radius: 20px;
-  padding: 40px 32px;
-  max-width: 420px;
-  width: 100%;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-}
-h1 { font-size: 1.8rem; color: #E8631C; margin-bottom: 6px; text-align: center; }
-p { color: #888; text-align: center; margin-bottom: 24px; font-size: 0.95rem; }
-.tabs { display: flex; gap: 6px; background: #f5f5f5; border-radius: 12px; padding: 5px; margin-bottom: 20px; }
-.tab { 
-  flex: 1; padding: 13px; border-radius: 9px; border: none;
-  font-size: 1rem; font-weight: 800; cursor: pointer;
-  transition: all 0.2s;
-}
-.tab.active { background: #E8631C; color: white; }
-.tab.inactive { background: none; color: #888; }
-input {
-  width: 100%; padding: 14px 16px;
-  border: 2px solid #e0d4c0; border-radius: 12px;
-  font-size: 1rem; margin-bottom: 12px;
-  outline: none; display: block;
-}
-input:focus { border-color: #E8631C; }
-.btn-orange {
-  width: 100%; padding: 16px;
-  background: #E8631C; color: white;
-  border: none; border-radius: 12px;
-  font-size: 1.1rem; font-weight: 800;
-  cursor: pointer; margin-bottom: 10px;
-}
-.btn-green {
-  width: 100%; padding: 16px;
-  background: #1F9D6B; color: white;
-  border: none; border-radius: 12px;
-  font-size: 1.1rem; font-weight: 800;
-  cursor: pointer; margin-bottom: 10px;
-}
-.error {
-  display: none;
-  background: #fdecea; border: 2px solid #f5c6c0;
-  border-radius: 9px; padding: 12px 14px;
-  color: #c0392b; font-weight: 700;
-  margin-bottom: 14px; font-size: 0.92rem;
-}
-#loginForm, #signupForm { display: none; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#E8631C,#D98C12);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.box{background:#fff;border-radius:20px;padding:36px 28px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+h1{font-size:1.9rem;color:#E8631C;text-align:center;margin-bottom:4px;}
+.sub{color:#999;text-align:center;margin-bottom:24px;font-size:0.95rem;}
+.tabs{display:flex;gap:6px;background:#f0f0f0;border-radius:12px;padding:5px;margin-bottom:20px;}
+.tab{flex:1;padding:13px;border-radius:9px;border:none;font-size:1rem;font-weight:800;cursor:pointer;}
+.tab.on{background:#E8631C;color:#fff;}
+.tab.off{background:none;color:#999;}
+.err{display:none;background:#fdecea;border:2px solid #f5b0a0;border-radius:10px;padding:12px;color:#c0392b;font-weight:700;margin-bottom:14px;font-size:0.92rem;}
+input{width:100%;padding:14px 16px;border:2px solid #e0d4c0;border-radius:12px;font-size:1rem;margin-bottom:12px;outline:none;}
+input:focus{border-color:#E8631C;}
+.btn1{width:100%;padding:16px;background:#E8631C;color:#fff;border:none;border-radius:12px;font-size:1.1rem;font-weight:800;cursor:pointer;margin-top:4px;}
+.btn2{width:100%;padding:16px;background:#1F9D6B;color:#fff;border:none;border-radius:12px;font-size:1.1rem;font-weight:800;cursor:pointer;margin-top:4px;}
+#app{display:none;text-align:center;padding:10px;}
+.check{font-size:4rem;margin-bottom:16px;}
+.ok{font-size:1.4rem;font-weight:800;color:#1F9D6B;margin-bottom:8px;}
+.name{color:#666;margin-bottom:24px;}
+.go{display:inline-block;padding:16px 32px;background:#E8631C;color:#fff;border-radius:12px;font-weight:800;font-size:1.1rem;text-decoration:none;}
 </style>
 </head>
 <body>
 <div class="box">
-  <h1>BudgetSmart</h1>
-  <p>L'intelligence financière pour tous</p>
 
-  <div class="tabs">
-    <button class="tab active" id="tabLogin" onclick="showLogin()">Connexion</button>
-    <button class="tab inactive" id="tabSignup" onclick="showSignup()">Créer un compte</button>
+  <!-- AUTH -->
+  <div id="auth">
+    <h1>BudgetSmart</h1>
+    <div class="sub">Gérez vos finances facilement</div>
+
+    <div class="tabs">
+      <button class="tab on" id="t1" onclick="show('login')">Connexion</button>
+      <button class="tab off" id="t2" onclick="show('signup')">Créer un compte</button>
+    </div>
+
+    <div class="err" id="err"></div>
+
+    <!-- LOGIN -->
+    <div id="login">
+      <input type="email" id="lEmail" placeholder="Votre email"/>
+      <input type="password" id="lPwd" placeholder="Mot de passe"/>
+      <button class="btn1" onclick="login()">Se connecter →</button>
+    </div>
+
+    <!-- SIGNUP -->
+    <div id="signup" style="display:none">
+      <input type="text" id="sName" placeholder="Votre prénom"/>
+      <input type="email" id="sEmail" placeholder="Votre email"/>
+      <input type="password" id="sPwd" placeholder="Mot de passe (min. 6 caractères)"/>
+      <button class="btn2" onclick="signup()">Créer mon compte ✓</button>
+    </div>
   </div>
 
-  <div id="errMsg" class="error"></div>
-
-  <!-- CONNEXION -->
-  <div id="loginForm">
-    <input type="email" id="loginEmail" placeholder="Votre email"/>
-    <input type="password" id="loginPwd" placeholder="Mot de passe"/>
-    <button class="btn-orange" onclick="doLogin()">Se connecter →</button>
-  </div>
-
-  <!-- INSCRIPTION -->
-  <div id="signupForm">
-    <input type="text" id="signupName" placeholder="Votre prénom"/>
-    <input type="email" id="signupEmail" placeholder="Votre email"/>
-    <input type="password" id="signupPwd" placeholder="Mot de passe (min. 6 caractères)"/>
-    <button class="btn-green" onclick="doSignup()">Créer mon compte ✓</button>
+  <!-- SUCCESS -->
+  <div id="app">
+    <div class="check">✅</div>
+    <div class="ok">Connecté avec succès !</div>
+    <div class="name" id="welcome"></div>
+    <a class="go" href="https://misswaxbeautycare.github.io/budgetsmart-app-v2/">
+      Ouvrir BudgetSmart →
+    </a>
   </div>
 
 </div>
-
 <script>
-// Show login by default
-showLogin();
-
-function showLogin() {
-  document.getElementById('loginForm').style.display = 'block';
-  document.getElementById('signupForm').style.display = 'none';
-  document.getElementById('tabLogin').className = 'tab active';
-  document.getElementById('tabSignup').className = 'tab inactive';
-  hideErr();
+function show(tab) {
+  document.getElementById('login').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('signup').style.display = tab==='signup' ? 'block' : 'none';
+  document.getElementById('t1').className = tab==='login' ? 'tab on' : 'tab off';
+  document.getElementById('t2').className = tab==='signup' ? 'tab on' : 'tab off';
+  document.getElementById('err').style.display = 'none';
 }
 
-function showSignup() {
-  document.getElementById('signupForm').style.display = 'block';
-  document.getElementById('loginForm').style.display = 'none';
-  document.getElementById('tabSignup').className = 'tab active';
-  document.getElementById('tabLogin').className = 'tab inactive';
-  hideErr();
-}
-
-function showErr(msg) {
-  var e = document.getElementById('errMsg');
+function err(msg) {
+  var e = document.getElementById('err');
   e.textContent = msg;
   e.style.display = 'block';
 }
-function hideErr() {
-  document.getElementById('errMsg').style.display = 'none';
+
+function success(name) {
+  document.getElementById('auth').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('welcome').textContent = 'Bienvenue ' + name + ' !';
 }
 
-function doLogin() {
-  var email = document.getElementById('loginEmail').value.trim();
-  var pwd   = document.getElementById('loginPwd').value;
-  if (!email || !pwd) { showErr('Remplissez votre email et mot de passe.'); return; }
-  
-  // Check saved users
+function login() {
+  var email = document.getElementById('lEmail').value.trim();
+  var pwd = document.getElementById('lPwd').value;
+  if (!email || !pwd) { err('Remplissez votre email et mot de passe.'); return; }
   var users = JSON.parse(localStorage.getItem('bs_users') || '[]');
-  var found = users.find(function(u) { return u.email === email && u.pwd === btoa(pwd); });
-  
-  if (found) {
-    localStorage.setItem('bs_user', JSON.stringify({email: found.email, name: found.name}));
-    localStorage.setItem('bs_logged_in', '1');
-    document.querySelector('.box').innerHTML = '<div style="text-align:center;padding:20px"><div style="font-size:3rem">✅</div><h2 style="color:#1F9D6B;margin:16px 0">Connecté avec succès !</h2><p style="color:#888;margin-bottom:20px">Bienvenue ' + (typeof name !== 'undefined' ? name : email) + '</p><a href="https://misswaxbeautycare.github.io/budgetsmart-app-v2/" style="display:inline-block;padding:14px 28px;background:#E8631C;color:white;border-radius:12px;font-weight:800;font-size:1rem;text-decoration:none">Ouvrir BudgetSmart →</a></div>';
-  } else {
-    showErr('Email ou mot de passe incorrect.');
+  var u = null;
+  for (var i=0; i<users.length; i++) {
+    if (users[i].email === email && users[i].pwd === btoa(unescape(encodeURIComponent(pwd)))) {
+      u = users[i]; break;
+    }
   }
+  if (!u) { err('Email ou mot de passe incorrect.'); return; }
+  localStorage.setItem('bs_user', JSON.stringify({email:u.email, name:u.name}));
+  success(u.name);
 }
 
-function doSignup() {
-  var name  = document.getElementById('signupName').value.trim();
-  var email = document.getElementById('signupEmail').value.trim();
-  var pwd   = document.getElementById('signupPwd').value;
-  
-  if (!name || !email || !pwd) { showErr('Remplissez tous les champs.'); return; }
-  if (pwd.length < 6) { showErr('Mot de passe minimum 6 caractères.'); return; }
-  
+function signup() {
+  var name = document.getElementById('sName').value.trim();
+  var email = document.getElementById('sEmail').value.trim();
+  var pwd = document.getElementById('sPwd').value;
+  if (!name) { err('Entrez votre prénom.'); return; }
+  if (!email) { err('Entrez votre email.'); return; }
+  if (!pwd || pwd.length < 6) { err('Mot de passe minimum 6 caractères.'); return; }
   var users = JSON.parse(localStorage.getItem('bs_users') || '[]');
-  if (users.find(function(u) { return u.email === email; })) {
-    showErr('Cet email est déjà utilisé. Connectez-vous.'); return;
+  for (var i=0; i<users.length; i++) {
+    if (users[i].email === email) { err('Cet email est déjà utilisé. Connectez-vous.'); return; }
   }
-  
-  users.push({email: email, name: name, pwd: btoa(pwd)});
+  var encoded = btoa(unescape(encodeURIComponent(pwd)));
+  users.push({email:email, name:name, pwd:encoded});
   localStorage.setItem('bs_users', JSON.stringify(users));
-  localStorage.setItem('bs_user', JSON.stringify({email: email, name: name}));
-  
-  alert('✅ Compte créé avec succès ! Bienvenue ' + name + ' !');
-  localStorage.setItem('bs_logged_in', '1');
-    document.querySelector('.box').innerHTML = '<div style="text-align:center;padding:20px"><div style="font-size:3rem">✅</div><h2 style="color:#1F9D6B;margin:16px 0">Connecté avec succès !</h2><p style="color:#888;margin-bottom:20px">Bienvenue ' + (typeof name !== 'undefined' ? name : email) + '</p><a href="https://misswaxbeautycare.github.io/budgetsmart-app-v2/" style="display:inline-block;padding:14px 28px;background:#E8631C;color:white;border-radius:12px;font-weight:800;font-size:1rem;text-decoration:none">Ouvrir BudgetSmart →</a></div>';
+  localStorage.setItem('bs_user', JSON.stringify({email:email, name:name}));
+  success(name);
 }
+
+// Check if already logged in
+var u = localStorage.getItem('bs_user');
+if (u) { try { var d=JSON.parse(u); success(d.name||d.email); } catch(e){} }
 </script>
 </body>
 </html>
