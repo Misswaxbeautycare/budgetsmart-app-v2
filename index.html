@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BudgetSmart</title>
-<link rel="stylesheet" href="style.css?v=1790978421"/>
+<link rel="stylesheet" href="style.css?v=1790979166"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#2E7D5E"/>
@@ -1058,7 +1058,7 @@ function authDone(user) {
   var scr = document.getElementById('authScreen');
   if (scr) scr.style.display = 'none';
   document.body.classList.add('authed');
-  // Wait for script.js?v=1790978421 then call initApp
+  // Wait for script.js?v=1790979166 then call initApp
   var tries = 0;
   var check = setInterval(function() {
     if (typeof initApp === 'function') {
@@ -1150,7 +1150,7 @@ window.addEventListener('load', function() {
   }
 });
 </script>
-<script src="script.js?v=1790978421"></script>
+<script src="script.js?v=1790979166"></script>
 
 <script>
 function togglePwd(id, btn) {
@@ -1163,35 +1163,6 @@ function togglePwd(id, btn) {
     btn.textContent = '👁️';
   }
 }
-</script>
-
-<script>
-// Fix: ensure auth works even if script.js is slow to load
-window._authReady = false;
-function _waitAndCall(fn) {
-  if (typeof fn === 'function') { fn(); return; }
-  var t = 0;
-  var i = setInterval(function() {
-    if (typeof fn === 'function') { clearInterval(i); fn(); }
-    if (t++ > 100) clearInterval(i);
-  }, 100);
-}
-// Auto check session on load
-window.addEventListener('DOMContentLoaded', function() {
-  var saved = localStorage.getItem('bs_local_user');
-  if (saved) {
-    try {
-      var u = JSON.parse(saved);
-      if (u && u.email) {
-        currentUser = u;
-        var scr = document.getElementById('authScreen');
-        if (scr) scr.style.display = 'none';
-        document.body.classList.add('authed');
-        _waitAndCall(function() { if(typeof initApp==='function') initApp(); });
-      }
-    } catch(e) { localStorage.removeItem('bs_local_user'); }
-  }
-});
 </script>
 </body>
 </html>
