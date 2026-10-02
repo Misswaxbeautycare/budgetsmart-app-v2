@@ -1360,19 +1360,25 @@ async function handlePDFUpload(e) {
 }
 
 function extractTextFromPDF(uint8) {
-  // Simple PDF text extraction — looks for readable text strings
-  let text = '';
-  const str = new TextDecoder('latin1').decode(uint8);
-  const matches = str.match(/[(]([^)]{2,80})[)]/g)||[];
-  matches.forEach(m => {
-    const t = m.slice(1,-1).replace(/\n/g,'
-').replace(/\/g,'');
-    if(/[a-zA-ZÀ-ÿ0-9€.,\s]{3,}/.test(t)) text += t + '
-';
-  });
-  return text || 'Contenu extrait — vérifiez et complétez manuellement.';
+  try {
+    const str = new TextDecoder('latin1').decode(uint8);
+    const words = [];
+    let i = 0;
+    while (i < str.length - 1) {
+      if (str[i] === String.fromCharCode(40)) {
+        let j = i + 1, word = '';
+        while (j < str.length && str[j] !== String.fromCharCode(41) && j - i < 100) {
+          word += str[j]; j++;
+        }
+        if (word.length > 3 && /[a-zA-ZÀ-ÿ0-9]/.test(word)) words.push(word.trim());
+        i = j + 1;
+      } else { i++; }
+    }
+    return words.join(' ') || 'Vérifiez et complétez manuellement.';
+  } catch(e) {
+    return 'Contenu extrait — vérifiez manuellement.';
+  }
 }
-
 function pdfRecreate() {
   const titre   = document.getElementById('pdfTitre')?.value||'Facture';
   const client  = document.getElementById('pdfClient')?.value||'—';
