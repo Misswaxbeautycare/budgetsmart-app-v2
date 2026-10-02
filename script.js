@@ -148,12 +148,49 @@ async function doLogin() {
   hideAuthError();
   const email = document.getElementById('loginEmail')?.value.trim();
   const pwd   = document.getElementById('loginPwd')?.value;
-  if (!email || !pwd) { showAuthError('Remplissez tous les champs.'); return; }
-  const btn = document.getElementById('btnLogin'); if(btn){btn.disabled=true;btn.textContent='Connexion…';}
-  const { data, error } = await sbClient.auth.signInWithPassword({ email, password: pwd });
-  if (btn){btn.disabled=false;btn.textContent='Se connecter';}
-  if (error) { showAuthError(error.message==='Invalid login credentials'?'Email ou mot de passe incorrect.':error.message); return; }
-  onAuthSuccess(data.user);
+  if (!email || !pwd) { showAuthError('Remplissez votre email et mot de passe.'); return; }
+  const btn = document.getElementById('btnLogin');
+  if(btn){ btn.disabled=true; btn.textContent='Connexion…'; }
+
+  // 1. Essai local d'abord
+  try {
+    const users = JSON.parse(localStorage.getItem('bs_users')||'[]');
+    const found = users.find(u => u.email===email && u.pwd===btoa(unescape(encodeURIComponent(pwd))));
+    if (found) {
+      const user = {id:found.id, email, user_metadata:{name:found.name}};
+      localStorage.setItem('bs_local_user', JSON.stringify(user));
+      if(btn){ btn.disabled=false; btn.textContent='Se connecter →'; }
+      document.getElementById('authScreen').style.display='none';
+      document.body.classList.add('authed');
+      currentUser = user;
+      initApp();
+      return;
+    }
+  } catch(e){}
+
+  // 2. Essai Supabase
+  try {
+    const { data, error } = await Promise.race([
+      sbClient.auth.signInWithPassword({ email, password: pwd }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000))
+    ]);
+    if(btn){ btn.disabled=false; btn.textContent='Se connecter →'; }
+    if (error) {
+      showAuthError('Email ou mot de passe incorrect.');
+      return;
+    }
+    if (data?.user) {
+      localStorage.setItem('bs_local_user', JSON.stringify(data.user));
+      document.getElementById('authScreen').style.display='none';
+      document.body.classList.add('authed');
+      currentUser = data.user;
+      initApp();
+      return;
+    }
+  } catch(e) {
+    if(btn){ btn.disabled=false; btn.textContent='Se connecter →'; }
+    showAuthError('Connexion impossible. Vérifiez votre email et mot de passe.');
+  }
 }
 
 async function doSignup() {
@@ -161,18 +198,36 @@ async function doSignup() {
   const name  = document.getElementById('signupName')?.value.trim();
   const email = document.getElementById('signupEmail')?.value.trim();
   const pwd   = document.getElementById('signupPwd')?.value;
-  if (!name || !email || !pwd) { showAuthError('Remplissez tous les champs.'); return; }
-  if (pwd.length < 6) { showAuthError('Le mot de passe doit contenir au moins 6 caractères.'); return; }
-  const btn = document.getElementById('btnSignup'); if(btn){btn.disabled=true;btn.textContent='Création…';}
-  const { data, error } = await sbClient.auth.signUp({ email, password: pwd, options:{ data:{ name } } });
-  if (btn){btn.disabled=false;btn.textContent='Créer mon compte';}
-  if (error) { showAuthError(error.message.includes('already')?'Cet email a déjà un compte. Connectez-vous.':error.message); return; }
-  if (data.user && !data.session) {
-    showAuthError('');
-    showEmailConfirmScreen(email);
+  if (!name)  { showAuthError('Entrez votre prénom.'); return; }
+  if (!email) { showAuthError('Entrez votre email.'); return; }
+  if (!pwd || pwd.length < 6) { showAuthError('Mot de passe minimum 6 caractères.'); return; }
+  const btn = document.getElementById('btnSignup');
+  if(btn){ btn.disabled=true; btn.textContent='Création…'; }
+
+  // Sauvegarder localement
+  const users = JSON.parse(localStorage.getItem('bs_users')||'[]');
+  if (users.find(u => u.email===email)) {
+    if(btn){ btn.disabled=false; btn.textContent='Créer mon compte ✓'; }
+    showAuthError('Cet email est déjà utilisé. Connectez-vous.');
     return;
   }
-  if (data.session) onAuthSuccess(data.user);
+  const id = 'local_'+Date.now();
+  const encoded = btoa(unescape(encodeURIComponent(pwd)));
+  users.push({id, email, name, pwd:encoded});
+  localStorage.setItem('bs_users', JSON.stringify(users));
+
+  const user = {id, email, user_metadata:{name}};
+  localStorage.setItem('bs_local_user', JSON.stringify(user));
+
+  // Essai Supabase en arrière-plan
+  try { await sbClient.auth.signUp({email, password:pwd, options:{data:{name}}}); } catch(e){}
+
+  if(btn){ btn.disabled=false; btn.textContent='Créer mon compte ✓'; }
+  document.getElementById('authScreen').style.display='none';
+  document.body.classList.add('authed');
+  currentUser = user;
+  initApp();
+  toast('✅ Compte créé ! Bienvenue '+name+' !');
 }
 
 async function doForgotPassword() {
