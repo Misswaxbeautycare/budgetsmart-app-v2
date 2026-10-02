@@ -119,7 +119,11 @@
     <!-- LOGIN -->
     <div id="loginForm">
       <div class="fg"><label>Email</label><input type="email" id="loginEmail" class="inp" placeholder="votre@email.com"/></div>
-      <div class="fg"><label>Mot de passe</label><input type="password" id="loginPwd" class="inp" placeholder="••••••••"/></div>
+      <div class="fg"><label>Mot de passe</label>
+      <div style="position:relative">
+        <input type="password" id="loginPwd" class="inp" placeholder="••••••••" style="padding-right:48px"/>
+        <button type="button" onclick="togglePwd('loginPwd',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.2rem;color:#888;padding:4px;">👁️</button>
+      </div></div>
       <button class="btn-g" id="btnLogin" style="width:100%;margin-top:8px">Se connecter</button>
       <a href="#" class="auth-forgot" id="btnForgot">Mot de passe oublié ?</a>
     </div>
@@ -1024,5 +1028,18 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 
 <div id="toast"></div>
 <script src="script.js"></script>
+
+<script>
+function togglePwd(id, btn) {
+  var inp = document.getElementById(id);
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    inp.type = 'password';
+    btn.textContent = '👁️';
+  }
+}
+</script>
 </body>
 </html>
