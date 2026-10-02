@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BudgetSmart</title>
-<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="style.css?v=1790977362"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#2E7D5E"/>
@@ -1031,7 +1031,126 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js"></script>
+
+<script>
+// AUTH FUNCTIONS - inline in HTML for reliability
+var currentUser = null;
+
+function showAuthError(msg) {
+  var e = document.getElementById('authError');
+  if (e) { e.textContent = msg; e.style.display = msg ? 'block' : 'none'; }
+}
+function hideAuthError() { showAuthError(''); }
+
+function switchAuthTab(tab) {
+  document.getElementById('loginForm').style.display   = tab==='login'  ? 'block' : 'none';
+  document.getElementById('signupForm').style.display  = tab==='signup' ? 'block' : 'none';
+  var tl = document.getElementById('tabLogin');
+  var ts = document.getElementById('tabSignup');
+  if(tl) { tl.className = 'auth-tab' + (tab==='login' ? ' active' : ''); }
+  if(ts) { ts.className = 'auth-tab' + (tab==='signup' ? ' active' : ''); }
+  hideAuthError();
+}
+
+function authDone(user) {
+  currentUser = user;
+  localStorage.setItem('bs_local_user', JSON.stringify(user));
+  var scr = document.getElementById('authScreen');
+  if (scr) scr.style.display = 'none';
+  document.body.classList.add('authed');
+  // Wait for script.js then call initApp
+  var tries = 0;
+  var check = setInterval(function() {
+    if (typeof initApp === 'function') {
+      clearInterval(check);
+      initApp();
+    } else if (tries++ > 50) {
+      clearInterval(check);
+      location.reload();
+    }
+  }, 100);
+}
+
+async function doLogin() {
+  hideAuthError();
+  var email = (document.getElementById('loginEmail').value || '').trim();
+  var pwd   = document.getElementById('loginPwd').value || '';
+  if (!email || !pwd) { showAuthError('Remplissez votre email et mot de passe.'); return; }
+  var btn = document.getElementById('btnLogin');
+  if (btn) { btn.disabled = true; btn.textContent = 'Connexion…'; }
+  
+  // Check local users first
+  try {
+    var users = JSON.parse(localStorage.getItem('bs_users') || '[]');
+    var found = users.find(function(u) { return u.email === email && u.pwd === btoa(unescape(encodeURIComponent(pwd))); });
+    if (found) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Se connecter →'; }
+      authDone({id: found.id, email: email, user_metadata: {name: found.name}});
+      return;
+    }
+  } catch(e) {}
+
+  // Try Supabase with timeout
+  try {
+    var sbLib = window.supabase;
+    if (sbLib) {
+      var client = sbLib.createClient(
+        'https://otpnegpmvsmutyhhmkvp.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90cG5lZ3BtdnNtdXR5aGhta3ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MzkxMzYsImV4cCI6MjA5NzIxNTEzNn0.n0BOebUlmZpMzygGAhNlRSyYnLiPNU0iM0xousqscHo'
+      );
+      var result = await Promise.race([
+        client.auth.signInWithPassword({email: email, password: pwd}),
+        new Promise(function(_, reject) { setTimeout(function() { reject(new Error('timeout')); }, 8000); })
+      ]);
+      if (btn) { btn.disabled = false; btn.textContent = 'Se connecter →'; }
+      if (result.error) { showAuthError('Email ou mot de passe incorrect.'); return; }
+      if (result.data && result.data.user) { authDone(result.data.user); return; }
+    }
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Se connecter →'; }
+    showAuthError('Connexion impossible. Vérifiez vos informations.');
+    return;
+  }
+  if (btn) { btn.disabled = false; btn.textContent = 'Se connecter →'; }
+  showAuthError('Email ou mot de passe incorrect.');
+}
+
+async function doSignup() {
+  hideAuthError();
+  var name  = (document.getElementById('signupName').value || '').trim();
+  var email = (document.getElementById('signupEmail').value || '').trim();
+  var pwd   = document.getElementById('signupPwd').value || '';
+  if (!name)  { showAuthError('Entrez votre prénom.'); return; }
+  if (!email) { showAuthError('Entrez votre email.'); return; }
+  if (!pwd || pwd.length < 6) { showAuthError('Mot de passe minimum 6 caractères.'); return; }
+  var btn = document.getElementById('btnSignup');
+  if (btn) { btn.disabled = true; btn.textContent = 'Création…'; }
+  
+  var users = JSON.parse(localStorage.getItem('bs_users') || '[]');
+  if (users.find(function(u) { return u.email === email; })) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte ✓'; }
+    showAuthError('Cet email est déjà utilisé. Connectez-vous.');
+    return;
+  }
+  var id = 'local_' + Date.now();
+  users.push({id: id, email: email, name: name, pwd: btoa(unescape(encodeURIComponent(pwd)))});
+  localStorage.setItem('bs_users', JSON.stringify(users));
+  if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte ✓'; }
+  authDone({id: id, email: email, user_metadata: {name: name}});
+}
+
+// Auto-login if session exists
+window.addEventListener('load', function() {
+  var saved = localStorage.getItem('bs_local_user');
+  if (saved) {
+    try {
+      var u = JSON.parse(saved);
+      if (u && u.email) { authDone(u); }
+    } catch(e) { localStorage.removeItem('bs_local_user'); }
+  }
+});
+</script>
+<script src="script.js?v=1790977362"></script>
 
 <script>
 function togglePwd(id, btn) {
