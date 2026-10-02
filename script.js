@@ -1363,7 +1363,7 @@ function extractTextFromPDF(uint8) {
   // Simple PDF text extraction — looks for readable text strings
   let text = '';
   const str = new TextDecoder('latin1').decode(uint8);
-  const matches = str.match(/\(([^)]{2,80})\)/g)||[];
+  const matches = str.match(/[(]([^)]{2,80})[)]/g)||[];
   matches.forEach(m => {
     const t = m.slice(1,-1).replace(/\n/g,'
 ').replace(/\/g,'');
