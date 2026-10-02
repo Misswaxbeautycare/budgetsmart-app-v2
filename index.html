@@ -4,14 +4,14 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BudgetSmart</title>
-<link rel="stylesheet" href="style.css?v=1790979166"/>
+<link rel="stylesheet" href="style.css?v=1790979189"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#2E7D5E"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="BudgetSmart"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -110,8 +110,8 @@
     <div class="auth-sub">L'intelligence financière pour tous</div>
 
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Connexion</button>
-      <button class="auth-tab" id="tabSignup" onclick="switchAuthTab('signup')">Créer un compte</button>
+      <button class="auth-tab active" id="tabLogin">Connexion</button>
+      <button class="auth-tab" id="tabSignup">Créer un compte</button>
     </div>
 
     <div id="authError" class="auth-error" style="display:none"></div>
@@ -119,12 +119,8 @@
     <!-- LOGIN -->
     <div id="loginForm">
       <div class="fg"><label>Email</label><input type="email" id="loginEmail" class="inp" placeholder="votre@email.com"/></div>
-      <div class="fg"><label>Mot de passe</label>
-      <div style="position:relative">
-        <input type="password" id="loginPwd" class="inp" placeholder="••••••••" style="padding-right:48px"/>
-        <button type="button" onclick="togglePwd('loginPwd',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.2rem;color:#888;padding:4px;">👁️</button>
-      </div></div>
-      <button class="btn-g" id="btnLogin" onclick="doLogin()" style="width:100%;margin-top:8px">Se connecter →</button>
+      <div class="fg"><label>Mot de passe</label><div style="position:relative"><input type="password" id="loginPwd" class="inp" placeholder="••••••••" style="padding-right:46px"/><button type="button" onclick="togglePwd('loginPwd',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem">👁️</button></div></div>
+      <button class="btn-g" id="btnLogin" style="width:100%;margin-top:8px">Se connecter</button>
       <a href="#" class="auth-forgot" id="btnForgot">Mot de passe oublié ?</a>
     </div>
 
@@ -132,12 +128,8 @@
     <div id="signupForm" style="display:none">
       <div class="fg"><label>Prénom</label><input type="text" id="signupName" class="inp" placeholder="Votre prénom"/></div>
       <div class="fg"><label>Email</label><input type="email" id="signupEmail" class="inp" placeholder="votre@email.com"/></div>
-      <div class="fg"><label>Mot de passe</label>
-      <div style="position:relative">
-        <input type="password" id="signupPwd" class="inp" placeholder="6 caractères minimum" style="padding-right:48px"/>
-        <button type="button" onclick="togglePwd('signupPwd',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.2rem;color:#888;padding:4px;">👁️</button>
-      </div></div>
-      <button class="btn-g" id="btnSignup" onclick="doSignup()" style="width:100%;margin-top:8px">Créer mon compte ✓</button>
+      <div class="fg"><label>Mot de passe</label><div style="position:relative"><input type="password" id="signupPwd" class="inp" placeholder="6 caractères minimum" style="padding-right:46px"/><button type="button" onclick="togglePwd('signupPwd',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem">👁️</button></div></div>
+      <button class="btn-g" id="btnSignup" style="width:100%;margin-top:8px">Créer mon compte</button>
     </div>
 
     <div class="auth-trial">🎁 7 jours d'essai gratuit · Sans engagement</div>
@@ -1031,137 +1023,13 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-
+<script src="script.js?v=1790979189"></script>
 <script>
-// AUTH FUNCTIONS - inline in HTML for reliability
-var currentUser = null;
-
-function showAuthError(msg) {
-  var e = document.getElementById('authError');
-  if (e) { e.textContent = msg; e.style.display = msg ? 'block' : 'none'; }
-}
-function hideAuthError() { showAuthError(''); }
-
-function switchAuthTab(tab) {
-  document.getElementById('loginForm').style.display   = tab==='login'  ? 'block' : 'none';
-  document.getElementById('signupForm').style.display  = tab==='signup' ? 'block' : 'none';
-  var tl = document.getElementById('tabLogin');
-  var ts = document.getElementById('tabSignup');
-  if(tl) { tl.className = 'auth-tab' + (tab==='login' ? ' active' : ''); }
-  if(ts) { ts.className = 'auth-tab' + (tab==='signup' ? ' active' : ''); }
-  hideAuthError();
-}
-
-function authDone(user) {
-  currentUser = user;
-  localStorage.setItem('bs_local_user', JSON.stringify(user));
-  var scr = document.getElementById('authScreen');
-  if (scr) scr.style.display = 'none';
-  document.body.classList.add('authed');
-  // Wait for script.js?v=1790979166 then call initApp
-  var tries = 0;
-  var check = setInterval(function() {
-    if (typeof initApp === 'function') {
-      clearInterval(check);
-      initApp();
-    } else if (tries++ > 50) {
-      clearInterval(check);
-      location.reload();
-    }
-  }, 100);
-}
-
-async function doLogin() {
-  hideAuthError();
-  var email = (document.getElementById('loginEmail').value || '').trim();
-  var pwd   = document.getElementById('loginPwd').value || '';
-  if (!email || !pwd) { showAuthError('Remplissez votre email et mot de passe.'); return; }
-  var btn = document.getElementById('btnLogin');
-  if (btn) { btn.disabled = true; btn.textContent = 'Connexion…'; }
-  
-  // Check local users first
-  try {
-    var users = JSON.parse(localStorage.getItem('bs_users') || '[]');
-    var found = users.find(function(u) { return u.email === email && u.pwd === btoa(unescape(encodeURIComponent(pwd))); });
-    if (found) {
-      if (btn) { btn.disabled = false; btn.textContent = 'Se connecter →'; }
-      authDone({id: found.id, email: email, user_metadata: {name: found.name}});
-      return;
-    }
-  } catch(e) {}
-
-  // Try Supabase with timeout
-  try {
-    var sbLib = window.supabase;
-    if (sbLib) {
-      var client = sbLib.createClient(
-        'https://otpnegpmvsmutyhhmkvp.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90cG5lZ3BtdnNtdXR5aGhta3ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MzkxMzYsImV4cCI6MjA5NzIxNTEzNn0.n0BOebUlmZpMzygGAhNlRSyYnLiPNU0iM0xousqscHo'
-      );
-      var result = await Promise.race([
-        client.auth.signInWithPassword({email: email, password: pwd}),
-        new Promise(function(_, reject) { setTimeout(function() { reject(new Error('timeout')); }, 8000); })
-      ]);
-      if (btn) { btn.disabled = false; btn.textContent = 'Se connecter →'; }
-      if (result.error) { showAuthError('Email ou mot de passe incorrect.'); return; }
-      if (result.data && result.data.user) { authDone(result.data.user); return; }
-    }
-  } catch(e) {
-    if (btn) { btn.disabled = false; btn.textContent = 'Se connecter →'; }
-    showAuthError('Connexion impossible. Vérifiez vos informations.');
-    return;
-  }
-  if (btn) { btn.disabled = false; btn.textContent = 'Se connecter →'; }
-  showAuthError('Email ou mot de passe incorrect.');
-}
-
-async function doSignup() {
-  hideAuthError();
-  var name  = (document.getElementById('signupName').value || '').trim();
-  var email = (document.getElementById('signupEmail').value || '').trim();
-  var pwd   = document.getElementById('signupPwd').value || '';
-  if (!name)  { showAuthError('Entrez votre prénom.'); return; }
-  if (!email) { showAuthError('Entrez votre email.'); return; }
-  if (!pwd || pwd.length < 6) { showAuthError('Mot de passe minimum 6 caractères.'); return; }
-  var btn = document.getElementById('btnSignup');
-  if (btn) { btn.disabled = true; btn.textContent = 'Création…'; }
-  
-  var users = JSON.parse(localStorage.getItem('bs_users') || '[]');
-  if (users.find(function(u) { return u.email === email; })) {
-    if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte ✓'; }
-    showAuthError('Cet email est déjà utilisé. Connectez-vous.');
-    return;
-  }
-  var id = 'local_' + Date.now();
-  users.push({id: id, email: email, name: name, pwd: btoa(unescape(encodeURIComponent(pwd)))});
-  localStorage.setItem('bs_users', JSON.stringify(users));
-  if (btn) { btn.disabled = false; btn.textContent = 'Créer mon compte ✓'; }
-  authDone({id: id, email: email, user_metadata: {name: name}});
-}
-
-// Auto-login if session exists
-window.addEventListener('load', function() {
-  var saved = localStorage.getItem('bs_local_user');
-  if (saved) {
-    try {
-      var u = JSON.parse(saved);
-      if (u && u.email) { authDone(u); }
-    } catch(e) { localStorage.removeItem('bs_local_user'); }
-  }
-});
-</script>
-<script src="script.js?v=1790979166"></script>
-
-<script>
-function togglePwd(id, btn) {
-  var inp = document.getElementById(id);
-  if (inp.type === 'password') {
-    inp.type = 'text';
-    btn.textContent = '🙈';
-  } else {
-    inp.type = 'password';
-    btn.textContent = '👁️';
-  }
+function togglePwd(id,btn){
+  var i=document.getElementById(id);
+  if(!i) return;
+  if(i.type==='password'){i.type='text';btn.textContent='🙈';}
+  else{i.type='password';btn.textContent='👁️';}
 }
 </script>
 </body>
