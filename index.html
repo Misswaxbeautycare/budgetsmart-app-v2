@@ -110,8 +110,8 @@
     <div class="auth-sub">L'intelligence financière pour tous</div>
 
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLogin">Connexion</button>
-      <button class="auth-tab" id="tabSignup">Créer un compte</button>
+      <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Connexion</button>
+      <button class="auth-tab" id="tabSignup" onclick="switchAuthTab('signup')">Créer un compte</button>
     </div>
 
     <div id="authError" class="auth-error" style="display:none"></div>
@@ -124,7 +124,7 @@
         <input type="password" id="loginPwd" class="inp" placeholder="••••••••" style="padding-right:48px"/>
         <button type="button" onclick="togglePwd('loginPwd',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.2rem;color:#888;padding:4px;">👁️</button>
       </div></div>
-      <button class="btn-g" id="btnLogin" style="width:100%;margin-top:8px">Se connecter</button>
+      <button class="btn-g" id="btnLogin" onclick="doLogin()" style="width:100%;margin-top:8px">Se connecter →</button>
       <a href="#" class="auth-forgot" id="btnForgot">Mot de passe oublié ?</a>
     </div>
 
@@ -137,7 +137,7 @@
         <input type="password" id="signupPwd" class="inp" placeholder="6 caractères minimum" style="padding-right:48px"/>
         <button type="button" onclick="togglePwd('signupPwd',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.2rem;color:#888;padding:4px;">👁️</button>
       </div></div>
-      <button class="btn-g" id="btnSignup" style="width:100%;margin-top:8px">Créer mon compte</button>
+      <button class="btn-g" id="btnSignup" onclick="doSignup()" style="width:100%;margin-top:8px">Créer mon compte ✓</button>
     </div>
 
     <div class="auth-trial">🎁 7 jours d'essai gratuit · Sans engagement</div>
