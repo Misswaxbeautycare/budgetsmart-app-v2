@@ -1,7 +1,7 @@
 {
-  "name": "BudgetSmart",
+  "name": "BudgetSmart v3",
   "short_name": "BudgetSmart",
-  "description": "L'intelligence financière pour tous. La sérénité, enfin accessible.",
+  "description": "BudgetSmart v3 — Gérez vos finances, factures et objectifs",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#FFFFFF",
@@ -52,5 +52,6 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "version": "3.0.0"
 }
