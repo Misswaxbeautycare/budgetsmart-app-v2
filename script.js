@@ -390,7 +390,7 @@ function renderDettes() {
         </div>
       </div>
       <div class="sd-actions">
-        <div class="sd-info">${jrs<0?'<span style="color:#E8631C">⚠️ En retard de '+Math.abs(jrs)+' j</span>':jrs===0?'<span style="color:#E8631C">⚠️ Échéance aujourd'hui</span>':jrs<=7?'<span style="color:#D98C12">⏰ Dans '+jrs+' j</span>':'<span style="color:#6B5F52">Dans '+jrs+' j ('+moisRestants+' mois)</span>'}</div>
+        <div class="sd-info">${jrs<0?'<span style="color:#E8631C">⚠️ En retard de '+Math.abs(jrs)+' j</span>':jrs===0?'<span style="color:#E8631C">⚠️ Échéance aujourd\'hui</span>':jrs<=7?'<span style="color:#D98C12">⏰ Dans '+jrs+' j</span>':'<span style="color:#6B5F52">Dans '+jrs+' j ('+moisRestants+' mois)</span>'}</div>
         <div class="sd-btns">
           <button class="sd-paye-btn ${d.paye?'on':''}" onclick="toggleDettePaye(${d.id})">${d.paye?'✓ Payée':'Marquer payée'}</button>
           <button class="tx-del" onclick="removeDette(${d.id})">✕</button>
@@ -416,8 +416,8 @@ function renderRecommandations() {
   if(cher.length) html+=`<div class="sr-carte sr-complexe">💸 ${cher.length} dette(s) à taux ≥15% — priorité absolue (méthode avalanche)</div>`;
   if(revenu>0){
     const ratio=totalMensuel/revenu;
-    if(ratio>0.5) html+=`<div class="sr-carte sr-urgent">📊 Vos dettes représentent ${Math.round(ratio*100)}% de votre trésorerie — c'est critique. Renégociez des délais.</div>`;
-    else if(ratio>0.3) html+=`<div class="sr-carte sr-complexe">📊 Charge de remboursement : ${Math.round(ratio*100)}% de votre trésorerie — c'est serré.</div>`;
+    if(ratio>0.5) html+=`<div class="sr-carte sr-urgent">📊 Vos dettes représentent ${Math.round(ratio*100)}% de votre trésorerie — c\'est critique. Renégociez des délais.</div>`;
+    else if(ratio>0.3) html+=`<div class="sr-carte sr-complexe">📊 Charge de remboursement : ${Math.round(ratio*100)}% de votre trésorerie — c\'est serré.</div>`;
     else html+=`<div class="sr-carte sr-simple">📊 Charge de remboursement raisonnable : ${Math.round(ratio*100)}% de votre trésorerie.</div>`;
   }
   html+=`<div class="sr-carte sr-simple">💰 Mensualités totales conseillées : <strong>${fmt(totalMensuel,cur)}/mois</strong></div>`;
@@ -496,7 +496,7 @@ function calSelectDay(dateStr) {
       </div>
       <button class="tx-del" onclick="removeEvenement(${e.id})">✕</button>
     </div>`),
-    ...dettes.map(d=>`<div class="sa-item sd-retard"><div class="sa-info"><div class="sa-titre">💳 Échéance : ${d.nom}</div><div class="sa-date">${fmt(d.montant)} — ${suiviJoursRestants(d.echeance)<0?'En retard !':'Aujourd'hui !'}</div></div></div>`)
+    ...dettes.map(d=>`<div class="sa-item sd-retard"><div class="sa-info"><div class="sa-titre">💳 Échéance : ${d.nom}</div><div class="sa-date">${fmt(d.montant)} — ${suiviJoursRestants(d.echeance)<0?'En retard !':'Aujourd\'hui !'}</div></div></div>`)
   ].join('');
   panel.style.display='block';
 }
@@ -553,7 +553,7 @@ function renderTaskStats() {
   const todayPct=todayT.length?Math.round(todayT.filter(t=>t.fait).length/todayT.length*100):0;
   const weekPct=weekT.length?Math.round(weekT.filter(t=>t.fait).length/weekT.length*100):0;
   el.innerHTML=`
-    <div class="task-stat"><span>Aujourd'hui</span><strong>${todayT.filter(t=>t.fait).length}/${todayT.length}</strong><div class="ts-bar"><div class="ts-fill" style="width:${todayPct}%"></div></div></div>
+    <div class="task-stat"><span>Aujourd\'hui</span><strong>${todayT.filter(t=>t.fait).length}/${todayT.length}</strong><div class="ts-bar"><div class="ts-fill" style="width:${todayPct}%"></div></div></div>
     <div class="task-stat"><span>Cette semaine</span><strong>${weekT.filter(t=>t.fait).length}/${weekT.length}</strong><div class="ts-bar"><div class="ts-fill" style="width:${weekPct}%"></div></div></div>
     <div class="task-stat"><span>Urgent en attente</span><strong style="color:#E8631C">${taches.filter(t=>!t.fait&&t.prio==='urgent').length}</strong></div>
     <div class="task-stat"><span>Total complétées</span><strong style="color:#1F9D6B">${taches.filter(t=>t.fait).length}</strong></div>
