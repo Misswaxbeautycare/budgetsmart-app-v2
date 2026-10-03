@@ -1796,8 +1796,24 @@ function initMobile() {
   const btn = document.getElementById('menuBtn');
   const sb  = document.getElementById('sidebar');
   const ov  = document.getElementById('ov');
-  if (btn) btn.addEventListener('click', () => { sb.classList.toggle('open'); ov.classList.toggle('show'); });
-  if (ov)  ov.addEventListener('click', closeSidebar);
+
+  if (btn) {
+    btn.addEventListener('click', () => {
+      if (sb) sb.classList.toggle('open');
+      if (ov) ov.classList.toggle('show');
+    });
+  }
+  if (ov) ov.addEventListener('click', closeSidebar);
+
+  // Also make nav items close sidebar on mobile/tablet
+  document.querySelectorAll('.ni').forEach(item => {
+    item.addEventListener('click', () => {
+      if (window.innerWidth <= 900) {
+        if (sb) sb.classList.remove('open');
+        if (ov) ov.classList.remove('show');
+      }
+    });
+  });
 }
 function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
