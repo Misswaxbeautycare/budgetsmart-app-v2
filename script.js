@@ -449,59 +449,159 @@ function removeEvenement(id) {
   sv('evenements',ls('evenements',[]).filter(e=>e.id!==id)); renderCalendar();
 }
 function renderCalendar() {
-  const y=calCurrentDate.getFullYear(), m=calCurrentDate.getMonth();
-  const monthNames=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-  txt('calMonthLabel',monthNames[m]+' '+y);
-  const firstDay=new Date(y,m,1).getDay();
-  const daysInMonth=new Date(y,m+1,0).getDate();
-  const today=new Date(); today.setHours(0,0,0,0);
-  const ev=ls('evenements',[]);
-  const dettes=ls('dettes',[]).filter(d=>!d.paye);
-  const grid=document.getElementById('calGrid'); if(!grid) return;
-  const days=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
-  let html=days.map(d=>`<div class="cal-header-cell">${d}</div>`).join('');
-  const startDay=(firstDay+6)%7;
-  for(let i=0;i<startDay;i++) html+='<div class="cal-cell cal-empty"></div>';
-  for(let day=1;day<=daysInMonth;day++){
-    const dateStr=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    const dayDate=new Date(y,m,day);
-    const isToday=dayDate.getTime()===today.getTime();
-    const dayEv=ev.filter(e=>e.date===dateStr);
-    const dayDettes=dettes.filter(d=>d.echeance===dateStr);
-    const total=dayEv.length+dayDettes.length;
-    html+=`<div class="cal-cell ${isToday?'cal-today':''} ${total?'cal-has-events':''}" onclick="calSelectDay('${dateStr}')">
-      <div class="cal-day-num">${day}</div>
-      ${dayEv.slice(0,2).map(e=>`<div class="cal-ev-dot" style="background:${EV_COLORS[e.type]||'#E8631C'}" title="${e.titre}"></div>`).join('')}
-      ${dayDettes.slice(0,1).map(d=>`<div class="cal-ev-dot" style="background:#E8631C" title="💳 ${d.nom}"></div>`).join('')}
-      ${total>3?`<div class="cal-more">+${total-2}</div>`:''}
+  const y = calCurrentDate.getFullYear();
+  const m = calCurrentDate.getMonth();
+  const monthNames = ['Janvier','Février','Mars','Avril','Mai','Juin',
+    'Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const dayNames = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  
+  txt('calMonthLabel', monthNames[m] + ' ' + y);
+  
+  const firstDay  = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+  
+  const ev     = ls('evenements', []);
+  const dettes = ls('dettes', []).filter(d => !d.paye);
+  
+  const grid = document.getElementById('calGrid');
+  if (!grid) return;
+  
+  // Header days
+  let html = dayNames.map(d => 
+    `<div style="text-align:center;font-size:0.75rem;font-weight:800;color:var(--mu);
+     padding:6px 0;text-transform:uppercase;">${d}</div>`
+  ).join('');
+  
+  // Empty cells before first day
+  const startDay = (firstDay + 6) % 7;
+  for (let i = 0; i < startDay; i++) {
+    html += `<div style="min-height:80px;"></div>`;
+  }
+  
+  // Days
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = y + '-' + String(m+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+    const dayDate = new Date(y, m, day);
+    const isToday = dayDate.getTime() === today.getTime();
+    const isPast  = dayDate < today;
+    
+    // Get events for this day
+    const dayEv = ev.filter(e => e.date === dateStr);
+    const dayDettes = dettes.filter(d => d.echeance === dateStr);
+    
+    // Color for day number
+    const dayNumStyle = isToday
+      ? 'background:#E8631C;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.95rem;'
+      : `color:${isPast ? '#bbb' : 'var(--tx)'};font-weight:700;font-size:0.95rem;`;
+
+    // Build event pills
+    const evColors = {
+      personnel: '#2E7DD6',
+      finance:   '#E8631C', 
+      sante:     '#1F9D6B',
+      travail:   '#D98C12',
+      dette:     '#D6432E'
+    };
+    
+    let evHtml = '';
+    // Show up to 3 events with title
+    const allDayItems = [
+      ...dayDettes.map(d => ({titre: '💳 ' + d.nom, type: 'dette', color: '#D6432E'})),
+      ...dayEv.map(e => ({titre: e.titre, type: e.type||'personnel', color: evColors[e.type]||'#2E7DD6'}))
+    ];
+    
+    allDayItems.slice(0,3).forEach(item => {
+      evHtml += `<div onclick="calSelectDay('${dateStr}')" style="
+        background:${item.color};color:#fff;
+        font-size:0.68rem;font-weight:700;
+        padding:2px 5px;border-radius:4px;
+        margin-top:2px;cursor:pointer;
+        overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+        max-width:100%;line-height:1.3;
+        ">${item.titre}</div>`;
+    });
+    
+    if (allDayItems.length > 3) {
+      evHtml += `<div style="font-size:0.68rem;color:var(--mu);margin-top:2px;font-weight:700;">
+        +${allDayItems.length - 3} autre(s)</div>`;
+    }
+    
+    const hasBorder = allDayItems.length > 0;
+    
+    html += `<div onclick="calSelectDay('${dateStr}')" style="
+      min-height:80px;padding:5px;
+      border-radius:10px;
+      border:${isToday ? '2px solid #E8631C' : hasBorder ? '1.5px solid var(--bo)' : '1px solid var(--bo)'};
+      background:${isToday ? '#FFF7F0' : hasBorder ? '#FDFBF8' : 'var(--card)'};
+      cursor:pointer;transition:all 0.15s;
+      " onmouseover="this.style.borderColor='#E8631C'" 
+        onmouseout="this.style.borderColor='${isToday ? '#E8631C' : hasBorder ? 'var(--bo)' : 'var(--bo)'}'">
+      <div style="${dayNumStyle}">${day}</div>
+      ${evHtml}
     </div>`;
   }
-  grid.innerHTML=html;
-}
-function calSelectDay(dateStr) {
-  const ev=ls('evenements',[]).filter(e=>e.date===dateStr);
-  const dettes=ls('dettes',[]).filter(d=>d.paye===false&&d.echeance===dateStr);
-  const panel=document.getElementById('calDayEvents');
-  const title=document.getElementById('calDayTitle');
-  const list=document.getElementById('calDayList');
-  if(!panel||!title||!list) return;
-  const d=new Date(dateStr);
-  title.textContent=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
-  if(!ev.length&&!dettes.length){list.innerHTML='<div class="empty">Aucun événement ce jour.</div>';panel.style.display='block';return;}
-  list.innerHTML=[
-    ...ev.map(e=>`<div class="sa-item" style="border-color:${EV_COLORS[e.type]||'#E8631C'}">
-      <div class="sa-info">
-        <div class="sa-titre">${e.titre}</div>
-        <div class="sa-date">${e.heure||''} · ${e.type} ${e.rappel?'· Rappel '+e.rappel+'j avant':''}</div>
-      </div>
-      <button class="tx-del" onclick="removeEvenement(${e.id})">✕</button>
-    </div>`),
-    ...dettes.map(d=>`<div class="sa-item sd-retard"><div class="sa-info"><div class="sa-titre">💳 Échéance : ${d.nom}</div><div class="sa-date">${fmt(d.montant)} — ${suiviJoursRestants(d.echeance)<0?'En retard !':'Aujourd\'hui !'}</div></div></div>`)
-  ].join('');
-  panel.style.display='block';
+  
+  grid.innerHTML = html;
 }
 
-/* ══ TÂCHES AMÉLIORÉES ══ */
+
+function calSelectDay(dateStr) {
+  const ev     = ls('evenements', []).filter(e => e.date === dateStr);
+  const dettes = ls('dettes', []).filter(d => !d.paye && d.echeance === dateStr);
+  const panel  = document.getElementById('calDayEvents');
+  const title  = document.getElementById('calDayTitle');
+  const list   = document.getElementById('calDayList');
+  if (!panel || !title || !list) return;
+  
+  const d = new Date(dateStr);
+  title.textContent = d.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  
+  if (!ev.length && !dettes.length) {
+    list.innerHTML = `<div style="text-align:center;padding:20px;color:var(--mu)">
+      <div style="font-size:2rem;margin-bottom:8px">📅</div>
+      <div style="font-weight:700">Aucun événement ce jour</div>
+      <button onclick="document.getElementById('sEvDate').value='${dateStr}';document.getElementById('sEvTitre').focus();"
+        style="margin-top:12px;padding:8px 16px;background:var(--or);color:#fff;border:none;
+        border-radius:8px;cursor:pointer;font-weight:700;">+ Ajouter un rendez-vous</button>
+    </div>`;
+    panel.style.display = 'block';
+    return;
+  }
+  
+  const evColors = {personnel:'#2E7DD6',finance:'#E8631C',sante:'#1F9D6B',travail:'#D98C12'};
+  const evIcons  = {personnel:'👤',finance:'💰',sante:'🏥',travail:'💼'};
+  
+  list.innerHTML = [
+    ...dettes.map(d => `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;
+        background:#FFF1E6;border:2px solid #E8631C;margin-bottom:8px;">
+        <div style="font-size:1.5rem">💳</div>
+        <div style="flex:1">
+          <div style="font-weight:800;color:#E8631C">Échéance : ${d.nom}</div>
+          <div style="font-size:0.88rem;color:var(--mu);margin-top:2px">Montant : ${fmt(d.montant)} — ⚠️ À rembourser</div>
+        </div>
+      </div>`),
+    ...ev.map(e => `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;
+        background:var(--bg);border:2px solid ${evColors[e.type]||'#2E7DD6'};margin-bottom:8px;">
+        <div style="font-size:1.5rem">${evIcons[e.type]||'📅'}</div>
+        <div style="flex:1">
+          <div style="font-weight:800;color:${evColors[e.type]||'#2E7DD6'}">${e.titre}</div>
+          <div style="font-size:0.88rem;color:var(--mu);margin-top:2px">
+            ${e.heure||''} ${e.rappel?'· Rappel '+e.rappel+'j avant':''}
+          </div>
+        </div>
+        <button onclick="removeEvenement(${e.id})" 
+          style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--mu);padding:4px;">✕</button>
+      </div>`)
+  ].join('');
+  
+  panel.style.display = 'block';
+  panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+
 function addTache() {
   const titre=document.getElementById('sTacheTitre')?.value.trim();
   const date=document.getElementById('sTacheDate')?.value||suiviToday();
