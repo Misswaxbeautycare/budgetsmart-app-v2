@@ -1770,6 +1770,24 @@ function buildElegant(data) { return buildModerne({...data,couleur:'#2C1654'}); 
 function buildNature(data)  { return buildModerne({...data,couleur:'#1F9D6B'}); }
 function buildAfrique(data) { return buildModerne({...data,couleur:'#C8390A'}); }
 
+
+function renderShare() {
+  const url = 'https://misswaxbeautycare.github.io/budgetsmart-app-v2';
+  const msg = encodeURIComponent('🎉 Gérez vos finances avec BudgetSmart ! ' + url);
+  const el = document.getElementById('shareUrl');
+  if (el) el.textContent = url;
+  const b = (id, link) => {
+    const btn = document.getElementById(id);
+    if (btn) btn.onclick = () => window.open(link, '_blank');
+  };
+  b('btnShareWA',  'https://wa.me/?text=' + msg);
+  b('btnShareFB',  'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url));
+  b('btnShareTW',  'https://twitter.com/intent/tweet?text=' + msg);
+  b('btnShareEM',  'mailto:?subject=BudgetSmart&body=' + decodeURIComponent(msg));
+  b('btnCopyLink', null);
+  const copy = document.getElementById('btnCopyLink');
+  if (copy) copy.onclick = () => { navigator.clipboard?.writeText(url); toast('Lien copié !'); };
+}
 /* ══ NAVIGATION ══ */
 function initNav() {
   document.querySelectorAll('.ni').forEach(el => {
@@ -1786,10 +1804,20 @@ function go(page) {
   document.querySelectorAll('.ni').forEach(i => i.classList.toggle('active', i.dataset.p === page));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'p-' + page));
   window.scrollTo(0, 0);
-  if (page === 'admin') renderAdmin();
-  if (page === 'dashboard') { renderDash(); initPWABanner(); }
+  if (page === 'dashboard')   { renderDash(); initPWABanner(); }
+  if (page === 'daily')       { renderEntries(); }
+  if (page === 'goals')       { renderGoals(); }
+  if (page === 'pricing')     { renderPricingAll(); }
+  if (page === 'tips')        { renderTips(); }
+  if (page === 'defis')       { renderDefis(); }
+  if (page === 'business')    { renderPricingProject('pgBusiness','pcBusiness'); }
+  if (page === 'couple')      { renderPricingProject('pgCouple','pcCouple'); }
+  if (page === 'family')      { renderPricingProject('pgFamily','pcFamily'); }
   if (page === 'suivi')       { renderSuivi(); suiviInit(); }
   if (page === 'facturation') { renderFacturesList(); factGo('liste'); }
+  if (page === 'admin')       { renderAdmin(); }
+  if (page === 'profile')     { loadProfile(); loadPhoto(); }
+  if (page === 'share')       { renderShare(); }
 }
 
 function initMobile() {
