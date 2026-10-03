@@ -2117,9 +2117,8 @@ function renderEntries() {
         ${e.exp?'<div class="tx-exp">-'+fmt(e.exp,cur)+'</div>':''}
         ${e.sav?'<div class="tx-sav">+'+fmt(e.sav,cur)+'</div>':''}
       </div>
-      <button class="tx-del" data-id="${e.id}">✕</button>
+      <button class="tx-del" onclick="delEntry(${e.id})" style="min-width:44px;min-height:44px;font-size:1.1rem">✕</button>
     </div>`).join('');
-  lst.querySelectorAll('.tx-del').forEach(btn => btn.addEventListener('click', () => delEntry(+btn.dataset.id)));
 }
 function delEntry(id) { if(!confirm('Supprimer ?'))return; sv('entries',ls('entries',[]).filter(e=>e.id!==id)); renderEntries(); renderDash(); }
 
