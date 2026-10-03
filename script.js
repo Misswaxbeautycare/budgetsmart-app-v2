@@ -2145,6 +2145,38 @@ function initAllButtons() {
   b('btnShareWA2',      () => factShare('wa'));
   b('btnSendMessage',   sendMessageToAll);
 
+  /* ── PARAMÈTRES ── */
+  b('setDark',   toggleDark);
+  b('setPDF',    openPDFModal);
+  b('setExport', exportData);
+  b('setClear',  clearData);
+  b('setPWA',    pwaInstall);
+
+  /* ── PARTAGER ── */
+  b('btnShareFB', () => {
+    const url = encodeURIComponent('https://misswaxbeautycare.github.io/budgetsmart-app-v2');
+    window.open('https://www.facebook.com/sharer/sharer.php?u=' + url, '_blank');
+  });
+  b('btnShareTW', () => {
+    const msg = encodeURIComponent('🎉 Gérez vos finances avec BudgetSmart v3 ! https://misswaxbeautycare.github.io/budgetsmart-app-v2');
+    window.open('https://twitter.com/intent/tweet?text=' + msg, '_blank');
+  });
+  b('btnShareEM', () => {
+    const msg = encodeURIComponent('Bonjour,\n\nJe vous recommande BudgetSmart v3 pour gérer vos finances !\nhttps://misswaxbeautycare.github.io/budgetsmart-app-v2');
+    window.open('mailto:?subject=BudgetSmart v3&body=' + msg, '_blank');
+  });
+  b('btnShareIG', () => window.open('https://www.instagram.com/', '_blank'));
+  b('btnShareTK', () => window.open('https://www.tiktok.com/', '_blank'));
+
+  /* ── PLANS ── */
+  b('togEU', () => { pMode='eu'; renderPricingAll(); });
+  b('togAF', () => { pMode='af'; renderPricingAll(); });
+
+  /* ── NAVIGATION ADMIN ── */
+  document.querySelectorAll('.anb[data-p]').forEach(btn => {
+    btn.addEventListener('click', () => go(btn.dataset.p));
+  });
+
   /* PWA Banner */
   b('btnPWA',       pwaInstall);
 
