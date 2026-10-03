@@ -818,3 +818,18 @@ textarea.inp{resize:vertical;min-height:80px;line-height:1.6;}
 
 @media(max-width:900px){.template-grid{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:500px){.template-grid{grid-template-columns:repeat(1,1fr);}}
+
+/* ══ MOBILE TOUCH FIX ══ */
+@media(max-width:900px){
+  button, .ni, .btn-g, .btn-out, .btn-gold, .anb, .tx-del,
+  .suivi-tab, .auth-tab, .defi-btn, .sd-paye-btn {
+    min-height: 44px !important;
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: rgba(232,99,28,0.2) !important;
+    touch-action: manipulation !important;
+  }
+  .ni { padding: 16px !important; font-size: 1.05rem !important; }
+  .tx-del { min-width: 44px !important; min-height: 44px !important; padding: 10px !important; }
+  .sidebar { touch-action: pan-y !important; }
+  input, select, textarea { font-size: 16px !important; }
+}
