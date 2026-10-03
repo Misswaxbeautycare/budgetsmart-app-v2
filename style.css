@@ -47,7 +47,7 @@ input,select{font-family:var(--fb);}
 .sb-up:hover{color:var(--gol);}
 
 /* ── MOBILE ── */
-.mh{display:none;position:fixed;top:0;left:0;right:0;height:54px;background:var(--sid);align-items:center;justify-content:space-between;padding:0 16px;z-index:200;}
+.mh{display:flex;position:fixed;top:0;left:0;right:0;height:54px;background:var(--sid);align-items:center;justify-content:space-between;padding:0 16px;z-index:200;border-bottom:2px solid var(--or);}
 .mh button{background:none;color:#fff;font-size:1.3rem;padding:6px;}
 .mh-logo{font-family:var(--ft);font-size:1.15rem;color:#fff;font-weight:800;}
 .mh-logo em{color:var(--gol);font-style:normal;}
