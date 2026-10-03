@@ -292,6 +292,10 @@ function initApp() {
   initPDF();
   checkAdminMessage();
   initFacturation();
+  initLang();
+  setTimeout(checkDailyReminders, 3000);
+  setTimeout(drawAdvancedCharts, 1500);
+  renderBudgetForecast();
 }
 
 
@@ -2062,6 +2066,264 @@ async function syncAllFromCloud() {
   } catch(e) { console.log('Sync error:', e); }
 }
 
+
+/* ══ MULTI-LANGUES ══ */
+const LANGS = {
+  fr: {
+    dashboard:"Tableau de bord", expenses:"Dépenses", goals:"Objectifs",
+    today:"Aujourd\'hui", thisWeek:"Cette semaine", thisMonth:"Ce mois",
+    welcome:"Bienvenue", logout:"Déconnexion",
+    budget:"Budget", forecast:"Prévision", hello:"Bonjour",
+    income:"Revenus", save:"Économies", noData:"Aucune donnée"
+  },
+  en: {
+    dashboard:"Dashboard", expenses:"Expenses", goals:"Goals",
+    today:"Today", thisWeek:"This week", thisMonth:"This month",
+    welcome:"Welcome", logout:"Logout",
+    budget:"Budget", forecast:"Forecast", hello:"Hello",
+    income:"Income", save:"Savings", noData:"No data"
+  },
+  ln: {
+    dashboard:"Tableau", expenses:"Mabimba", goals:"Biloko",
+    today:"Lelo", thisWeek:"Poso oyo", thisMonth:"Sanza oyo",
+    welcome:"Boyei bolamu", logout:"Bima",
+    budget:"Bütjö", forecast:"Prevision", hello:"Mbote",
+    income:"Mbongo", save:"Kobatela", noData:"Eloko te"
+  }
+};
+let currentLang = localStorage.getItem("bs_lang") || "fr";
+function t(key) { return LANGS[currentLang]?.[key] || LANGS.fr[key] || key; }
+function setLang(lang) {
+  currentLang = lang; localStorage.setItem("bs_lang", lang);
+  const flags = {fr:"🇫🇷 Français", en:"🇬🇧 English", ln:"🇨🇩 Lingála"};
+  toast(flags[lang] || lang);
+  document.querySelectorAll("[data-lang]").forEach(b => 
+    b.classList.toggle("active", b.dataset.lang === lang)
+  );
+}
+function initLang() {
+  document.querySelectorAll("[data-lang]").forEach(btn => {
+    btn.addEventListener("click", () => setLang(btn.dataset.lang));
+    if (btn.dataset.lang === currentLang) btn.classList.add("active");
+  });
+}
+
+/* ══ BUDGET PRÉVISIONNEL ══ */
+function renderBudgetForecast() {
+  const p = ls("profile",{}), cur = p.currency||"€";
+  const budget = ls("monthly_budget",{});
+  const entries = ls("entries",[]);
+  const now = new Date(), m = now.getMonth(), y = now.getFullYear();
+  const actual = {};
+  entries.forEach(e => {
+    const d = new Date(e.date);
+    if (d.getMonth()===m && d.getFullYear()===y && e.exp)
+      actual[e.cat] = (actual[e.cat]||0) + e.exp;
+  });
+  const totalActual = Object.values(actual).reduce((s,v)=>s+v,0);
+  const totalBudget = ls("monthly_budget_total",0);
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const daysElapsed = now.getDate();
+  const dailyRate   = daysElapsed ? totalActual/daysElapsed : 0;
+  const forecast    = dailyRate * daysInMonth;
+  const surplus     = totalBudget - forecast;
+  const el = document.getElementById("budgetForecast");
+  if (!el) return;
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px">
+      <div style="background:var(--bg);border:2px solid var(--bo);border-radius:var(--r);padding:16px;text-align:center">
+        <div style="font-size:0.78rem;font-weight:800;color:var(--mu);text-transform:uppercase;margin-bottom:6px">Dépensé ce mois</div>
+        <div style="font-family:var(--ft);font-size:1.6rem;font-weight:800;color:#E8631C">${fmt(totalActual,cur)}</div>
+        <div style="font-size:0.82rem;color:var(--mu);margin-top:4px">Jour ${daysElapsed}/${daysInMonth}</div>
+      </div>
+      <div style="background:var(--bg);border:2px solid var(--bo);border-radius:var(--r);padding:16px;text-align:center">
+        <div style="font-size:0.78rem;font-weight:800;color:var(--mu);text-transform:uppercase;margin-bottom:6px">Prévision fin de mois</div>
+        <div style="font-family:var(--ft);font-size:1.6rem;font-weight:800;color:${forecast>totalBudget&&totalBudget>0?"#D6432E":"#1F9D6B"}">${fmt(forecast,cur)}</div>
+        <div style="font-size:0.82rem;color:var(--mu);margin-top:4px">${forecast>totalBudget&&totalBudget>0?"⚠️ Dépassement prévu":"✅ Dans le budget"}</div>
+      </div>
+      <div style="background:var(--bg);border:2px solid var(--bo);border-radius:var(--r);padding:16px;text-align:center">
+        <div style="font-size:0.78rem;font-weight:800;color:var(--mu);text-transform:uppercase;margin-bottom:6px">Budget mensuel</div>
+        <div style="font-family:var(--ft);font-size:1.6rem;font-weight:800;color:var(--tx)">${totalBudget?fmt(totalBudget,cur):"Non défini"}</div>
+        <div style="font-size:0.82rem;color:var(--mu);margin-top:4px">Restant : ${fmt(Math.max(0,totalBudget-totalActual),cur)}</div>
+      </div>
+      <div style="background:${surplus>=0?"var(--gp)":"var(--rep)"};border:2px solid ${surplus>=0?"var(--g)":"var(--re)"};border-radius:var(--r);padding:16px;text-align:center">
+        <div style="font-size:0.78rem;font-weight:800;color:${surplus>=0?"var(--g)":"var(--re)"};text-transform:uppercase;margin-bottom:6px">${surplus>=0?"Excédent prévu":"Déficit prévu"}</div>
+        <div style="font-family:var(--ft);font-size:1.6rem;font-weight:800;color:${surplus>=0?"var(--g)":"var(--re)"}">${fmt(Math.abs(surplus),cur)}</div>
+        <div style="font-size:0.82rem;color:var(--mu);margin-top:4px">${fmt(dailyRate,cur)}/jour</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <label style="font-size:0.88rem;font-weight:800;color:var(--mu)">Budget total mensuel (${cur})</label>
+      <input type="number" class="inp" placeholder="Ex: 1500" value="${totalBudget||""}"
+        onchange="sv('monthly_budget_total',parseFloat(this.value)||0);renderBudgetForecast();toast('Budget mis à jour !');"
+        style="width:140px;padding:8px 12px;font-size:0.95rem"/>
+    </div>`;
+}
+function updateCatBudget(cat,val) {
+  const b=ls("monthly_budget",{}); b[cat]=parseFloat(val)||0;
+  sv("monthly_budget",b); renderBudgetForecast();
+}
+
+/* ══ GRAPHIQUES AVANCÉS ══ */
+function drawAdvancedCharts() {
+  drawTrendChart();
+  drawCategoryPie();
+}
+function drawTrendChart() {
+  const canvas = document.getElementById("trendChart");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const entries = ls("entries",[]);
+  const p = ls("profile",{}), cur = p.currency||"€";
+  const now = new Date();
+  const months=[], incData=[], expData=[], savData=[];
+  const mn=["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
+  for (let i=5;i>=0;i--) {
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    months.push(mn[d.getMonth()]);
+    let inc=0,exp=0,sav=0;
+    entries.forEach(e=>{
+      const ed=new Date(e.date);
+      if(ed.getMonth()===d.getMonth()&&ed.getFullYear()===d.getFullYear()){
+        inc+=e.inc||0;exp+=e.exp||0;sav+=e.sav||0;
+      }
+    });
+    incData.push(inc);expData.push(exp);savData.push(sav);
+  }
+  const W=canvas.width=canvas.offsetWidth||500;
+  const H=canvas.height=200;
+  const pl=55,pr=15,pt=15,pb=35;
+  const w=W-pl-pr,h=H-pt-pb;
+  const max=Math.max(...incData,...expData,...savData,1);
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle="#F0DFC4";ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pt+h-(i/4)*h;
+    ctx.beginPath();ctx.moveTo(pl,y);ctx.lineTo(pl+w,y);ctx.stroke();
+    ctx.fillStyle="#6B5F52";ctx.font="10px Arial";ctx.textAlign="right";
+    ctx.fillText(Math.round(max*i/4),pl-4,y+4);
+  }
+  [[incData,"#1F9D6B"],[expData,"#E8631C"],[savData,"#D98C12"]].forEach(([data,col])=>{
+    ctx.beginPath();ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.lineJoin="round";
+    data.forEach((v,i)=>{
+      const x=pl+(i/(months.length-1))*w,y=pt+h-(v/max)*h;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    data.forEach((v,i)=>{
+      const x=pl+(i/(months.length-1))*w,y=pt+h-(v/max)*h;
+      ctx.beginPath();ctx.arc(x,y,3.5,0,Math.PI*2);
+      ctx.fillStyle=col;ctx.fill();
+      ctx.strokeStyle="#fff";ctx.lineWidth=1.5;ctx.stroke();
+    });
+  });
+  ctx.fillStyle="#6B5F52";ctx.font="10px Arial";ctx.textAlign="center";
+  months.forEach((m,i)=>{
+    ctx.fillText(m,pl+(i/(months.length-1))*w,H-8);
+  });
+  const leg=document.getElementById("trendLegend");
+  if(leg) leg.innerHTML=[["Revenus","#1F9D6B"],["Dépenses","#E8631C"],["Économies","#D98C12"]]
+    .map(([l,c])=>`<span style="display:inline-flex;align-items:center;gap:5px;margin-right:12px;font-size:0.82rem;font-weight:700;color:${c}"><span style="width:14px;height:3px;background:${c};display:inline-block;border-radius:2px"></span>${l}</span>`).join("");
+}
+function drawCategoryPie() {
+  const canvas=document.getElementById("catPieChart");
+  if(!canvas) return;
+  const ctx=canvas.getContext("2d");
+  const entries=ls("entries",[]);
+  const now=new Date(),m=now.getMonth(),y=now.getFullYear();
+  const cats={};
+  entries.forEach(e=>{
+    const d=new Date(e.date);
+    if(d.getMonth()===m&&d.getFullYear()===y&&e.exp)
+      cats[e.cat]=(cats[e.cat]||0)+e.exp;
+  });
+  const arr=Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+  const total=arr.reduce((s,[,v])=>s+v,0);
+  if(!total){ctx.clearRect(0,0,canvas.width,canvas.height);return;}
+  const cols=["#E8631C","#2E7DD6","#1F9D6B","#D98C12","#2C1654","#D6432E","#F0AB35"];
+  const W=canvas.width=canvas.offsetWidth||180,H=canvas.height=180;
+  const cx=W/2,cy=H/2,r=Math.min(W,H)/2-8;
+  ctx.clearRect(0,0,W,H);
+  let angle=-Math.PI/2;
+  arr.forEach(([,val],i)=>{
+    const sl=(val/total)*Math.PI*2;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,angle,angle+sl);ctx.closePath();
+    ctx.fillStyle=cols[i%cols.length];ctx.fill();
+    ctx.strokeStyle="#fff";ctx.lineWidth=2;ctx.stroke();
+    angle+=sl;
+  });
+  const leg=document.getElementById("catPieLegend");
+  if(leg) leg.innerHTML=arr.slice(0,6).map(([cat,val],i)=>
+    `<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;font-size:0.8rem">
+      <div style="width:9px;height:9px;border-radius:50%;background:${cols[i%cols.length]};flex-shrink:0"></div>
+      <span style="font-weight:700">${cat}</span>
+      <span style="color:var(--mu);margin-left:auto">${Math.round(val/total*100)}%</span>
+    </div>`).join("");
+}
+
+/* ══ NOTIFICATIONS PUSH ══ */
+async function requestNotifPermission() {
+  if (!("Notification" in window)) { toast("Notifications non supportées."); return; }
+  const perm = await Notification.requestPermission();
+  if (perm==="granted") { toast("✅ Notifications activées !"); checkDailyReminders(); }
+  else toast("❌ Notifications refusées.");
+}
+function sendNotif(title,body) {
+  if (Notification.permission!=="granted") return;
+  try { new Notification(title,{body,icon:"/icons/icon-192.png"}); } catch(e){}
+}
+function checkDailyReminders() {
+  const today=new Date().toISOString().slice(0,10);
+  if (localStorage.getItem("bs_notif_"+today)) return;
+  localStorage.setItem("bs_notif_"+today,"1");
+  const events=ls("evenements",[]);
+  const dettes=ls("dettes",[]).filter(d=>!d.paye);
+  const now=new Date();
+  events.forEach(ev=>{
+    const d=new Date(ev.date),diff=Math.ceil((d-now)/86400000);
+    if(diff>=0&&diff<=(ev.rappel||1))
+      setTimeout(()=>sendNotif("BudgetSmart — Rappel","📅 "+(diff===0?"Aujourd\'hui":"Dans "+diff+"j")+" : "+ev.titre),3000);
+  });
+  dettes.forEach(d=>{
+    const dd=new Date(d.echeance),diff=Math.ceil((dd-now)/86400000);
+    if(diff>=0&&diff<=7)
+      setTimeout(()=>sendNotif("BudgetSmart — Échéance","💳 "+d.nom+" : "+fmt(d.montant)+" dans "+diff+"j"),5000);
+  });
+}
+
+/* ══ RAPPORT EMAIL ══ */
+function generateEmailReport() {
+  const p=ls("profile",{}),cur=p.currency||"€";
+  const entries=ls("entries",[]),goals=ls("goals",[]);
+  const now=new Date(),m=now.getMonth(),y=now.getFullYear();
+  const mn=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+  const me=entries.filter(e=>{const d=new Date(e.date);return d.getMonth()===m&&d.getFullYear()===y;});
+  const inc=me.reduce((s,e)=>s+(e.inc||0),0);
+  const exp=me.reduce((s,e)=>s+(e.exp||0),0);
+  const sav=me.reduce((s,e)=>s+(e.sav||0),0);
+  const subj=encodeURIComponent("BudgetSmart — Rapport "+mn[m]+" "+y);
+  const body=encodeURIComponent(
+    "RAPPORT BUDGETSMART — "+mn[m].toUpperCase()+" "+y+"\n"
+    +"=".repeat(40)+"\n\n"
+    +"Revenus : "+fmt(inc,cur)+"\n"
+    +"Dépenses : "+fmt(exp,cur)+"\n"
+    +"Economies : "+fmt(sav,cur)+"\n"
+    +"Solde : "+fmt(inc-exp,cur)+"\n\n"
+    +"OBJECTIFS :\n"
+    +goals.map(g=>g.name+" : "+Math.round(((g.sav||0)/g.target)*100)+"%").join("\n")+"\n\n"
+    +"Généré par BudgetSmart v3.0.0"
+  );
+  window.open("mailto:"+(p.email||"")+"?subject="+subj+"&body="+body,"_blank");
+  toast("📧 Rapport prêt à envoyer !");
+}
+
+/* ══ SYNC TEMPS RÉEL ══ */
+function initRealtimeSync() {
+  if (!currentUser?.id) return;
+  console.log("Sync temps réel initialisée pour", currentUser.id);
+}
+function stopRealtimeSync() {}
+
 /* ══ NAVIGATION ══ */
 function initNav() {
   document.querySelectorAll('.ni').forEach(el => {
@@ -2143,7 +2405,13 @@ function initAllButtons() {
   b('btnPreviewFacture',factPreview);
   b('btnDownloadFacture',factDownload);
   b('btnShareWA2',      () => factShare('wa'));
-  b('btnSendMessage',   sendMessageToAll);
+  b('btnSendMessage',     sendMessageToAll);
+  b('btnEmailReport',     generateEmailReport);
+  b('btnRequestNotif',    requestNotifPermission);
+  b('btnSyncCloud',       syncAllFromCloud);
+  document.querySelectorAll('[data-lang]').forEach(btn => {
+    btn.addEventListener('click', () => setLang(btn.dataset.lang));
+  });
 
   /* ── PARAMÈTRES ── */
   b('setDark',   toggleDark);
