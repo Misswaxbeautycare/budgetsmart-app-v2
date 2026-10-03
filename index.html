@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BudgetSmart v3</title>
-<link rel="stylesheet" href="style.css?v=1791061195"/>
+<link rel="stylesheet" href="style.css?v=1791062231"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#2E7D5E"/>
@@ -253,11 +253,21 @@
   </div>
 
   <!-- GRAPHIQUES -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="ct">📈 Évolution sur 6 mois</div>
+    <canvas id="trendChart" style="width:100%;max-height:200px"></canvas>
+    <div id="trendLegend" style="display:flex;margin-top:10px;flex-wrap:wrap"></div>
+  </div>
   <div class="charts-row">
     <div class="chart-card">
       <div class="chart-title">Répartition des dépenses</div>
       <canvas id="donut" width="180" height="180"></canvas>
       <div id="donutLeg"></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">Dépenses par catégorie</div>
+    <canvas id="catPieChart" style="width:100%;max-height:180px"></canvas>
+    <div id="catPieLegend" style="margin-top:10px"></div>
     </div>
     <div class="chart-card chart-wide">
       <div class="chart-title">Évolution 6 mois</div>
@@ -919,6 +929,20 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 <section class="page" id="p-settings">
   <div class="ph"><div><h1 class="pt">Paramètres</h1><p class="ps">Configurez votre expérience</p></div></div>
   <div class="card">
+    <div class="ct">🌍 Langue / Language / Lokóta</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+      <button data-lang="fr" class="btn-out" style="flex:1;min-width:100px">🇫🇷 Français</button>
+      <button data-lang="en" class="btn-out" style="flex:1;min-width:100px">🇬🇧 English</button>
+      <button data-lang="ln" class="btn-out" style="flex:1;min-width:100px">🇨🇩 Lingála</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">📊 Budget prévisionnel mensuel</div>
+    <div id="budgetForecast"><div class="empty">Chargement...</div></div>
+  </div>
+
+  <div class="card">
     <div class="ct">Mon compte</div>
     <div class="set-item" id="setProfile"><div class="si-ico">👤</div><div class="si-inf"><div class="si-n">Mon Profil</div><div class="si-d">Nom, email, devise, photo</div></div><div class="si-a">→</div></div>
     <div class="set-item" id="setNotif">
@@ -937,6 +961,9 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
     <div class="ct">Application</div>
     <div class="set-item" id="setShare"><div class="si-ico">📤</div><div class="si-inf"><div class="si-n">Partager l'application</div><div class="si-d">Inviter vos proches</div></div><div class="si-a">→</div></div>
     <div class="set-item" id="setExport"><div class="si-ico">📊</div><div class="si-inf"><div class="si-n">Exporter mes données (JSON)</div><div class="si-d">Télécharger toutes vos données</div></div><div class="si-a">→</div></div>
+    <div class="set-item" id="btnEmailReport"><div class="si-ico">📧</div><div class="si-inf"><div class="si-n">Rapport mensuel par email</div><div class="si-d">Envoyer un résumé mensuel</div></div><div class="si-a">→</div></div>
+    <div class="set-item" id="btnRequestNotif"><div class="si-ico">🔔</div><div class="si-inf"><div class="si-n">Activer les notifications push</div><div class="si-d">Rappels rendez-vous et échéances</div></div><div class="si-a">→</div></div>
+    <div class="set-item" id="btnSyncCloud"><div class="si-ico">☁️</div><div class="si-inf"><div class="si-n">Synchroniser avec le cloud</div><div class="si-d">Charger vos données depuis Supabase</div></div><div class="si-a">→</div></div>
     <div class="set-item" id="setPDF"><div class="si-ico">📄</div><div class="si-inf"><div class="si-n">Rapport mensuel PDF</div><div class="si-d">Générer un rapport imprimable</div></div><div class="si-a">→</div></div>
     <div class="set-item" id="setDark"><div class="si-ico">🌙</div><div class="si-inf"><div class="si-n">Mode sombre</div><div class="si-d">Changer l'apparence de l'app</div></div><div class="si-tog" id="darkToggle"><div class="tog-ball"></div></div></div>
     <div class="set-item danger" id="setClear"><div class="si-ico">🗑</div><div class="si-inf"><div class="si-n">Effacer toutes les données</div><div class="si-d">Action irréversible</div></div><div class="si-a">→</div></div>
@@ -1023,7 +1050,7 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791061195"></script>
+<script src="script.js?v=1791062231"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
