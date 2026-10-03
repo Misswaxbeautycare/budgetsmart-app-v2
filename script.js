@@ -1888,6 +1888,180 @@ function renderShare() {
   const copy = document.getElementById('btnCopyLink');
   if (copy) copy.onclick = () => { navigator.clipboard?.writeText(url); toast('Lien copié !'); };
 }
+
+/* ══════════════════════════════════════
+   SUPABASE SYNC — Synchronisation cloud
+══════════════════════════════════════ */
+
+async function sbFetch(method, table, body=null, params='') {
+  try {
+    const token = currentUser?.access_token || SUPABASE_KEY;
+    const opts = {
+      method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+        'Prefer': method==='POST' ? 'return=representation' : ''
+      }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(SUPABASE_URL + '/rest/v1/' + table + params, opts);
+    if (!res.ok) return null;
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  } catch(e) { return null; }
+}
+
+async function syncExpenseToCloud(entry) {
+  if (!currentUser?.id) return;
+  await sbFetch('POST', 'expenses', {
+    user_id: currentUser.id, amount: entry.exp||0,
+    category: entry.cat||'autre', description: entry.note||'',
+    date: entry.date, created_at: new Date().toISOString()
+  });
+}
+
+async function syncIncomeToCloud(entry) {
+  if (!currentUser?.id || !entry.inc) return;
+  await sbFetch('POST', 'incomes', {
+    user_id: currentUser.id, amount: entry.inc,
+    source: entry.note||'Revenu', date: entry.date,
+    created_at: new Date().toISOString()
+  });
+}
+
+async function loadExpensesFromCloud() {
+  if (!currentUser?.id) return;
+  const data = await sbFetch('GET', 'expenses', null,
+    '?user_id=eq.' + currentUser.id + '&order=date.desc&limit=200');
+  if (!data?.length) return;
+  const local = ls('entries', []);
+  const cloudIds = new Set(data.map(e => 'c'+e.id));
+  const merged = [
+    ...local.filter(e => !e.cloud_id),
+    ...data.map(e => ({
+      id: e.id, cloud_id: 'c'+e.id, date: e.date,
+      exp: e.amount||0, inc: 0, cat: e.category||'autre',
+      note: e.description||'', sav: 0
+    }))
+  ];
+  sv('entries', merged);
+}
+
+async function loadGoalsFromCloud() {
+  if (!currentUser?.id) return;
+  const data = await sbFetch('GET', 'annual_goals', null,
+    '?user_id=eq.' + currentUser.id);
+  if (!data?.length) return;
+  sv('goals', data.map(g => ({
+    id: g.id, name: g.title,
+    target: g.target_amount, sav: g.current_amount||0,
+    date: g.deadline||''
+  })));
+}
+
+async function loadDettesFromCloud() {
+  if (!currentUser?.id) return;
+  const data = await sbFetch('GET', 'debts', null,
+    '?user_id=eq.' + currentUser.id);
+  if (!data?.length) return;
+  sv('dettes', data.map(d => ({
+    id: d.id, nom: d.name, montant: d.amount,
+    taux: d.interest_rate||0, echeance: d.due_date||'',
+    paye: d.is_paid||false
+  })));
+}
+
+async function loadEventsFromCloud() {
+  if (!currentUser?.id) return;
+  const data = await sbFetch('GET', 'events', null,
+    '?user_id=eq.' + currentUser.id + '&order=event_date.asc');
+  if (!data?.length) return;
+  sv('evenements', data.map(e => ({
+    id: e.id, titre: e.title, date: e.event_date,
+    heure: e.event_time||'', type: e.event_type||'personnel',
+    rappel: e.reminder_days||0
+  })));
+}
+
+async function loadTasksFromCloud() {
+  if (!currentUser?.id) return;
+  const data = await sbFetch('GET', 'daily_tasks', null,
+    '?user_id=eq.' + currentUser.id + '&order=task_date.desc&limit=100');
+  if (!data?.length) return;
+  sv('taches', data.map(t => ({
+    id: t.id, titre: t.title, date: t.task_date,
+    prio: t.priority||'normal', cat: t.category||'perso',
+    fait: t.is_done||false
+  })));
+}
+
+async function syncGoalToCloud(goal) {
+  if (!currentUser?.id) return;
+  await sbFetch('POST', 'annual_goals', {
+    user_id: currentUser.id, title: goal.name,
+    target_amount: goal.target, current_amount: goal.sav||0,
+    deadline: goal.date||null, created_at: new Date().toISOString()
+  });
+}
+
+async function syncDetteToCloud(dette) {
+  if (!currentUser?.id) return;
+  await sbFetch('POST', 'debts', {
+    user_id: currentUser.id, name: dette.nom,
+    amount: dette.montant, interest_rate: dette.taux||0,
+    due_date: dette.echeance||null, is_paid: dette.paye||false,
+    created_at: new Date().toISOString()
+  });
+}
+
+async function syncEventToCloud(ev) {
+  if (!currentUser?.id) return;
+  await sbFetch('POST', 'events', {
+    user_id: currentUser.id, title: ev.titre,
+    event_date: ev.date, event_time: ev.heure||null,
+    event_type: ev.type||'personnel', reminder_days: ev.rappel||0,
+    created_at: new Date().toISOString()
+  });
+}
+
+async function syncTaskToCloud(task) {
+  if (!currentUser?.id) return;
+  await sbFetch('POST', 'daily_tasks', {
+    user_id: currentUser.id, title: task.titre,
+    task_date: task.date, priority: task.prio||'normal',
+    category: task.cat||'perso', is_done: task.fait||false,
+    created_at: new Date().toISOString()
+  });
+}
+
+async function syncFactureToCloud(facture) {
+  if (!currentUser?.id) return;
+  await sbFetch('POST', 'pdf_documents', {
+    user_id: currentUser.id,
+    title: (facture.numero||'') + ' - ' + (facture.clientNom||''),
+    client_name: facture.clientNom||'', total_amount: facture.total||0,
+    status: facture.statut||'brouillon', doc_date: facture.date||null,
+    due_date: facture.echeance||null, created_at: new Date().toISOString()
+  });
+}
+
+async function syncAllFromCloud() {
+  if (!currentUser?.id) return;
+  try {
+    await Promise.all([
+      loadExpensesFromCloud(),
+      loadGoalsFromCloud(),
+      loadDettesFromCloud(),
+      loadEventsFromCloud(),
+      loadTasksFromCloud()
+    ]);
+    renderDash();
+    toast('✅ Données synchronisées avec le cloud !');
+  } catch(e) { console.log('Sync error:', e); }
+}
+
 /* ══ NAVIGATION ══ */
 function initNav() {
   document.querySelectorAll('.ni').forEach(el => {
