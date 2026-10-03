@@ -1863,6 +1863,12 @@ function initAllButtons() {
   b('btnSeeAllGoals',   () => go('goals'));
   b('btnSuiviAddGoal',  () => go('goals'));
   b('btnSuiviAddDefi',  () => go('defis'));
+  b('btnScanReceipt',   openScanner);
+  b('btnNewFacture',    () => { factNew(); factGo('creer'); });
+  b('btnSaveFacture',   factSave);
+  b('btnPreviewFacture',factPreview);
+  b('btnDownloadFacture',factDownload);
+  b('btnShareWA2',      () => factShare('wa'));
   b('btnSendMessage',   sendMessageToAll);
 
   /* PWA Banner */
