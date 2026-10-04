@@ -2739,6 +2739,160 @@ function renderProchainRDV(){
   }).join('');
 }
 
+
+/* ══ IMPORT PDF AMÉLIORÉ ══ */
+function handleDropPDF(e) {
+  const file = e.dataTransfer?.files?.[0];
+  if (file?.type === 'application/pdf') handleImportPDF(file);
+  else toast('⚠️ Veuillez choisir un fichier PDF.');
+}
+
+function handleImportPDF(file) {
+  const status = document.getElementById('importStatus');
+  if (status) {
+    status.style.display = 'block';
+    status.innerHTML = '<div style="text-align:center;padding:16px"><div style="font-size:1.5rem;margin-bottom:8px">⏳</div><div style="font-weight:700">Traitement en cours...</div></div>';
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const base64 = e.target.result;
+    const facture = {
+      id:          Date.now(),
+      numero:      'IMP-' + Date.now(),
+      clientNom:   '',
+      clientEmail: '',
+      clientTel:   '',
+      clientAdresse:'',
+      date:        new Date().toISOString().slice(0,10),
+      echeance:    '',
+      lignes:      [{desc:'(Contenu importé)',qte:1,prix:0,tva:0}],
+      notes:       '',
+      statut:      'importe',
+      modele:      'moderne',
+      pdfBase64:   base64,
+      fileName:    file.name,
+      importDate:  new Date().toISOString(),
+      total:0, sousTotal:0, totalTVA:0
+    };
+    const factures = ls('factures',[]);
+    factures.unshift(facture);
+    sv('factures', factures);
+    if (status) {
+      status.innerHTML = '<div style="background:#EAFAF1;border:2px solid #1F9D6B;border-radius:10px;padding:14px;text-align:center"><div style="font-size:1.5rem;margin-bottom:6px">✅</div><div style="font-weight:800;color:#1F9D6B">PDF importé avec succès !</div><div style="color:var(--mu);font-size:0.88rem;margin-top:4px">Cliquez Aperçu pour le voir</div></div>';
+    }
+    afficherPreviewFacture(facture);
+    renderImportedFactures();
+    renderFacturesList();
+    toast('✅ Facture importée et sauvegardée !');
+    setTimeout(() => factGo('apercu'), 800);
+  };
+  reader.readAsDataURL(file);
+}
+
+function afficherPreviewFacture(facture) {
+  const zone = document.getElementById('factPreviewZone');
+  if (!zone) return;
+  if (facture.pdfBase64) {
+    zone.innerHTML = `
+      <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.12);max-width:860px;margin:0 auto">
+        <div style="background:linear-gradient(135deg,#E8631C,#D98C12);color:#fff;padding:16px 20px">
+          <div style="font-size:1rem;font-weight:800;margin-bottom:4px">📄 ${facture.fileName||facture.numero}</div>
+          <div style="font-size:0.83rem;opacity:0.85">Importée le ${new Date(facture.importDate||facture.date).toLocaleDateString('fr-FR')}</div>
+        </div>
+        <div style="display:flex;gap:8px;padding:12px 16px;flex-wrap:wrap;background:var(--bg);border-bottom:2px solid var(--bo)">
+          <button onclick="factEditImported(${facture.id})" class="btn-g" style="font-size:0.88rem;padding:8px 14px">✏️ Modifier avec un modèle</button>
+          <button onclick="downloadImportedPDF(${facture.id})" class="btn-out" style="font-size:0.88rem;padding:8px 14px;background:#1F9D6B;color:#fff;border:none">⬇️ Télécharger</button>
+          <button onclick="shareImportedPDF(${facture.id},'wa')" style="padding:8px 14px;background:#25D366;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.88rem;font-weight:700">📱 WhatsApp</button>
+          <button onclick="shareImportedPDF(${facture.id},'email')" style="padding:8px 14px;background:#2E7DD6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.88rem;font-weight:700">📧 Email</button>
+        </div>
+        <iframe src="${facture.pdfBase64}" style="width:100%;height:680px;border:none" title="Aperçu PDF"></iframe>
+      </div>`;
+  } else {
+    // Generated invoice preview
+    zone.innerHTML = '<div style="max-width:860px;margin:0 auto">' + buildFactureHTML(facture) + `
+      <div style="display:flex;gap:8px;padding:14px;flex-wrap:wrap;margin-top:12px">
+        <button onclick="factEdit(ls('factures',[]).find(f=>f.id===${facture.id}))" class="btn-g" style="flex:1">✏️ Modifier</button>
+        <button onclick="factDownload()" class="btn-out" style="flex:1;background:#1F9D6B;color:#fff;border:none">⬇️ PDF</button>
+        <button onclick="factShare('wa')" style="flex:1;padding:12px;background:#25D366;color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:800">📱 WA</button>
+        <button onclick="factShare('email')" style="flex:1;padding:12px;background:#2E7DD6;color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:800">📧 Email</button>
+      </div>
+    </div>`;
+  }
+}
+
+function factEditImported(id) {
+  const factures = ls('factures',[]);
+  const f = factures.find(x=>x.id===id);
+  if (!f) return;
+  // Keep original PDF reference but load into editor
+  factEdit(f);
+  // Store original PDF reference
+  const origInput = document.getElementById('factOriginalPDF');
+  if (origInput && f.pdfBase64) origInput.value = f.pdfBase64;
+  factGo('creer');
+  toast('Facture chargée — choisissez un modèle et sauvegardez.');
+}
+
+function downloadImportedPDF(id) {
+  const f = ls('factures',[]).find(x=>x.id===id);
+  if (!f?.pdfBase64) { toast('PDF non disponible.'); return; }
+  const a = document.createElement('a');
+  a.href = f.pdfBase64;
+  a.download = f.fileName || f.numero + '.pdf';
+  a.click();
+  toast('⬇️ Téléchargement démarré !');
+}
+
+function shareImportedPDF(id, method) {
+  const f = ls('factures',[]).find(x=>x.id===id);
+  if (!f) return;
+  const msg = encodeURIComponent('Bonjour,\n\nVeuillez trouver notre facture '+( f.numero||f.fileName||'')+'.\n\nCordialement');
+  if (method==='wa') {
+    const phone = prompt('Numéro WhatsApp du client (ex: 32495639902) :','');
+    if (phone) window.open('https://wa.me/'+phone.replace(/\D/g,'')+'?text='+msg,'_blank');
+  } else {
+    const email = f.clientEmail || prompt('Email du client :','');
+    if (email) window.open('mailto:'+email+'?subject=Facture '+encodeURIComponent(f.numero||'')+'&body='+msg,'_blank');
+  }
+}
+
+function renderImportedFactures() {
+  const el = document.getElementById('importedFacturesList');
+  if (!el) return;
+  const factures = ls('factures',[]).filter(f=>f.pdfBase64||f.statut==='importe');
+  if (!factures.length) { el.innerHTML='<div class="empty">Aucune facture importée.</div>'; return; }
+  el.innerHTML = factures.map(f=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:12px;
+      background:var(--bg);border:2px solid var(--bo);margin-bottom:10px;flex-wrap:wrap">
+      <div style="font-size:2rem;flex-shrink:0">📄</div>
+      <div style="flex:1;min-width:140px">
+        <div style="font-weight:800;color:var(--tx)">${f.fileName||f.numero}</div>
+        <div style="font-size:0.82rem;color:var(--mu);margin-top:2px">
+          ${new Date(f.importDate||f.date).toLocaleDateString('fr-FR')}
+          ${f.clientNom?' · '+f.clientNom:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button onclick="afficherPreviewFacture(ls('factures',[]).find(x=>x.id===${f.id}));factGo('apercu')"
+          class="btn-out" style="padding:7px 12px;font-size:0.82rem">👁️</button>
+        <button onclick="factEditImported(${f.id})"
+          class="btn-g" style="padding:7px 12px;font-size:0.82rem">✏️</button>
+        <button onclick="downloadImportedPDF(${f.id})"
+          style="padding:7px 12px;font-size:0.82rem;background:#1F9D6B;color:#fff;border:none;border-radius:8px;cursor:pointer">⬇️</button>
+        <button onclick="shareImportedPDF(${f.id},'wa')"
+          style="padding:7px 12px;font-size:0.82rem;background:#25D366;color:#fff;border:none;border-radius:8px;cursor:pointer">📱</button>
+        <button onclick="if(confirm('Supprimer cette facture importée ?')){sv('factures',ls('factures',[]).filter(x=>x.id!==${f.id}));renderImportedFactures();renderFacturesList();toast('Supprimée.');}"
+          style="padding:7px 10px;font-size:0.82rem;background:none;border:2px solid #D6432E;color:#D6432E;border-radius:8px;cursor:pointer">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function selectTemplate(tpl, el) {
+  currentTemplate = tpl;
+  document.querySelectorAll('.tpl-card').forEach(c=>c.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+
 /* ══ NAVIGATION ══ */
 function initNav() {
   document.querySelectorAll('.ni').forEach(el => {
@@ -2816,11 +2970,35 @@ function initAllButtons() {
   b('btnSuiviAddGoal',  () => go('goals'));
   b('btnSuiviAddDefi',  () => go('defis'));
   b('btnScanReceipt',   openScanner);
-  b('btnNewFacture',    () => { factNew(); factGo('creer'); });
-  b('btnSaveFacture',   factSave);
-  b('btnPreviewFacture',factPreview);
-  b('btnDownloadFacture',factDownload);
-  b('btnShareWA2',      () => factShare('wa'));
+  b('btnNewFacture',      () => { factNew(); factGo('creer'); });
+  b('btnSaveFacture',     factSave);
+  b('btnPreviewFacture',  factPreview);
+  b('btnDownloadFacture', factDownload);
+  b('btnShareFactWA',     () => factShare('wa'));
+  b('btnShareFactEmail',  () => factShare('email'));
+  b('btnAddLigne',        factAddLigne);
+  b('pdfUploadFile',      null); // handled by onchange in HTML
+
+  // Template selection
+  document.querySelectorAll('.tpl-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.tpl-card').forEach(c=>c.classList.remove('active'));
+      card.classList.add('active');
+      currentTemplate = card.dataset.tpl || 'moderne';
+    });
+  });
+
+  // Import PDF
+  const pdfInput = document.getElementById('pdfUploadFile');
+  if (pdfInput) pdfInput.addEventListener('change', (e) => {
+    if (e.target.files[0]) handleImportPDF(e.target.files[0]);
+  });
+
+  // Auto-calc totaux on input change
+  ['factTVA','factRemise'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', factCalcTotaux);
+  });
   b('btnSendMessage',     sendMessageToAll);
   b('btnEmailReport',     generateEmailReport);
   b('btnRequestNotif',    requestNotifPermission);
