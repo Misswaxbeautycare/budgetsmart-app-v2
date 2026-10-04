@@ -891,3 +891,37 @@ textarea.inp{resize:vertical;min-height:80px;line-height:1.6;}
 #calGrid2 > div { transition: all 0.15s; }
 #calDayDetails { display: none; margin-top: 14px; padding: 16px; background: var(--bg); border-radius: var(--r); border: 2px solid var(--or); }
 #upcomingEvents .empty { padding: 20px; text-align: center; color: var(--mu); }
+
+/* ══ FACTURATION PRO ══ */
+.tpl-card {
+  border: 2px solid var(--bo);
+  border-radius: 12px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--card);
+}
+.tpl-card:hover { border-color: var(--or); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(232,99,28,0.15); }
+.tpl-card.active { border-color: var(--or) !important; background: var(--orp) !important; box-shadow: 0 4px 16px rgba(232,99,28,0.25) !important; }
+#factLignes .fact-ligne {
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr 1fr 40px;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+#factTotaux .tot-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  font-size: 0.9rem;
+}
+#factTotaux .tot-row.total {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--or);
+  border-top: 2px solid var(--bo);
+  padding-top: 10px;
+  margin-top: 6px;
+}
+#pdfUploadZone:hover { background: var(--orp) !important; }
