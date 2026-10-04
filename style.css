@@ -21,10 +21,10 @@ button{cursor:pointer;border:none;font-family:var(--fb);font-weight:700;}
 input,select{font-family:var(--fb);}
 
 /* ── SIDEBAR ── */
-.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sw);background:var(--sid);display:flex;flex-direction:column;z-index:100;overflow-y:auto;transition:transform var(--tr);}
-.sidebar-logo{display:flex;align-items:center;gap:11px;padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,0.08);}
-.logo-img{width:42px;height:42px;border-radius:10px;object-fit:cover;flex-shrink:0;}
-.logo-text{font-family:var(--ft);font-size:1.35rem;font-weight:800;color:#fff;display:block;line-height:1.1;}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sw);background:var(--sid);border-right:3px solid var(--or);display:flex;flex-direction:column;z-index:100;overflow-y:auto;transition:transform var(--tr);box-shadow:4px 0 20px rgba(232,99,28,0.08);}
+.sidebar-logo{display:flex;align-items:center;gap:11px;padding:20px 16px 16px;border-bottom:2px solid var(--orp);cursor:pointer;}
+.logo-img{width:44px;height:44px;border-radius:12px;object-fit:cover;flex-shrink:0;border:2px solid var(--orp);box-shadow:0 2px 8px rgba(232,99,28,0.15);}
+.logo-text{font-family:var(--ft);font-size:1.4rem;font-weight:800;color:#fff;display:block;line-height:1.1;}
 .logo-text em{color:var(--gol);font-style:normal;}
 .logo-sub{font-size:0.6rem;color:rgba(255,255,255,0.32);margin-top:2px;}
 .sp{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.06);margin:8px 10px;border-radius:10px;cursor:pointer;transition:all var(--tr);}
@@ -47,7 +47,7 @@ input,select{font-family:var(--fb);}
 .sb-up:hover{color:var(--gol);}
 
 /* ── MOBILE ── */
-.mh{display:flex;position:fixed;top:0;left:0;right:0;height:54px;background:var(--sid);align-items:center;justify-content:space-between;padding:0 16px;z-index:200;border-bottom:2px solid var(--or);}
+.mh{display:flex;position:fixed;top:0;left:0;right:0;height:60px;background:var(--sid);align-items:center;justify-content:space-between;padding:0 18px;z-index:200;border-bottom:3px solid var(--or);box-shadow:0 2px 12px rgba(232,99,28,0.1);}
 .mh button{background:none;color:#fff;font-size:1.3rem;padding:6px;}
 .mh-logo{font-family:var(--ft);font-size:1.15rem;color:#fff;font-weight:800;}
 .mh-logo em{color:var(--gol);font-style:normal;}
@@ -57,7 +57,7 @@ input,select{font-family:var(--fb);}
 .ov.show{display:block;}
 
 /* ── MAIN ── */
-.main{margin-left:var(--sw);flex:1;min-height:100vh;padding:28px 32px;}
+.main{margin-left:var(--sw);flex:1;min-height:100vh;padding:72px 32px 32px;}
 .page{display:none;animation:fi 0.22s ease;}
 .page.active{display:block;}
 @keyframes fi{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
@@ -832,4 +832,47 @@ textarea.inp{resize:vertical;min-height:80px;line-height:1.6;}
   .tx-del { min-width: 44px !important; min-height: 44px !important; padding: 10px !important; }
   .sidebar { touch-action: pan-y !important; }
   input, select, textarea { font-size: 16px !important; }
+}
+
+
+/* ══ DESKTOP LAYOUT FIX ══ */
+@media(min-width:901px) {
+  .main { padding-top: 72px !important; }
+  .mh { display: flex !important; left: var(--sw) !important; }
+}
+@media(max-width:900px) {
+  .main { margin-left: 0 !important; padding: 72px 16px 32px !important; }
+  .mh { left: 0 !important; }
+}
+
+/* ══ LOGO FIX ══ */
+.logo-text em { color: var(--or) !important; font-style: normal; }
+.logo-sub { font-size: 0.72rem; color: var(--mu); margin-top: 2px; }
+
+/* ══ GRAPHIQUES ══ */
+.chart-card { background: var(--card); border-radius: var(--r); padding: 20px; border: 2px solid var(--bo); box-shadow: var(--s1); }
+.chart-title { font-family: var(--ft); font-size: 1.1rem; font-weight: 800; color: var(--tx); margin-bottom: 12px; }
+#trendChart { display: block; width: 100% !important; }
+
+/* ══ CALENDRIER AMÉLIORÉ ══ */
+#calGrid2 .cal-day {
+  min-height: 80px;
+  padding: 5px;
+  border-radius: 8px;
+  border: 1px solid var(--bo);
+  background: var(--card);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 0.88rem;
+}
+#calGrid2 .cal-day:hover { border-color: var(--or); background: var(--orp); }
+#calGrid2 .cal-day.today { border: 2.5px solid var(--or) !important; background: #FFF7F0 !important; }
+#calGrid2 .cal-day-num { font-weight: 700; margin-bottom: 3px; }
+#calGrid2 .cal-pill {
+  font-size: 0.65rem; font-weight: 700;
+  padding: 2px 5px; border-radius: 3px;
+  color: #fff; margin-top: 2px;
+  overflow: hidden; white-space: nowrap;
+  text-overflow: ellipsis; max-width: 100%;
+  display: block; cursor: pointer;
 }
