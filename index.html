@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BudgetSmart v3</title>
-<link rel="stylesheet" href="style.css?v=1791094790"/>
+<link rel="stylesheet" href="style.css?v=1791099712"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#2E7D5E"/>
@@ -707,266 +707,257 @@
 <!-- FACTURATION -->
 <section class="page" id="p-facturation">
   <div class="ph">
-    <div><h1 class="pt">Facturation</h1><p class="ps">Créez, modifiez et partagez vos factures</p></div>
-    <button class="btn-g" id="btnNewFacture">+ Nouvelle facture</button>
+    <div><h1 class="pt">📄 Facturation Pro</h1>
+    <p class="ps">Créez, importez et gérez vos factures professionnelles</p></div>
+    <button class="btn-g" id="btnNewFacture" style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:1.1rem">+</span> Nouvelle facture
+    </button>
   </div>
 
   <!-- ONGLETS -->
-  <div class="suivi-tabs">
+  <div class="suivi-tabs" style="flex-wrap:wrap;gap:6px">
     <button class="suivi-tab active" data-tab="liste">📋 Mes factures</button>
-    <button class="suivi-tab" data-tab="creer">✏️ Créer/Modifier</button>
+    <button class="suivi-tab" data-tab="creer">✏️ Créer</button>
     <button class="suivi-tab" data-tab="upload">📤 Importer PDF</button>
     <button class="suivi-tab" data-tab="apercu">👁️ Aperçu</button>
     <button class="suivi-tab" data-tab="importees">🗂️ Importées</button>
   </div>
 
-  <!-- APERÇU FACTURE IMPORTÉE -->
-  <div class="suivi-panel" data-panel="apercu" style="display:none">
-    <div id="factPreviewZone">
-      <div class="empty" style="padding:40px;text-align:center">
-        <div style="font-size:3rem;margin-bottom:12px">📄</div>
-        <div style="font-weight:700">Importez une facture pour la voir ici</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- FACTURES IMPORTÉES -->
-  <div class="suivi-panel" data-panel="importees" style="display:none">
-    <div class="card">
-      <div class="ct">🗂️ Toutes vos factures importées</div>
-      <div id="importedFacturesList"><div class="empty">Aucune facture importée.</div></div>
-    </div>
-  </div>
-
-  <!-- LISTE DES FACTURES -->
+  <!-- ── LISTE ── -->
   <div class="suivi-panel" data-panel="liste">
     <div class="card">
-      <div class="fact-search-row">
-        <input type="text" class="inp" id="factSearch" placeholder="Rechercher une facture…" style="flex:1"/>
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <input type="text" class="inp" id="factSearch" placeholder="🔍 Rechercher..." style="flex:1;min-width:180px"/>
         <select class="inp" id="factFilter" style="width:160px">
           <option value="all">Toutes</option>
           <option value="brouillon">Brouillons</option>
           <option value="envoyee">Envoyées</option>
           <option value="payee">Payées</option>
+          <option value="importe">Importées</option>
         </select>
       </div>
-      <div id="facturesList"><div class="empty">Aucune facture. Cliquez sur "+ Nouvelle facture" pour commencer.</div></div>
+      <div id="facturesList"><div class="empty">Aucune facture. Cliquez sur "+ Nouvelle facture".</div></div>
     </div>
   </div>
 
-  <!-- CRÉER / MODIFIER -->
+  <!-- ── CRÉER ── -->
   <div class="suivi-panel" data-panel="creer" style="display:none">
 
-    <!-- CHOIX DU MODÈLE -->
+    <!-- MODÈLES -->
     <div class="card" id="templateSelector">
-      <div class="ct">Choisissez un modèle</div>
-      <div class="template-grid">
+      <div class="ct">🎨 Choisissez votre modèle</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-top:4px">
 
-        <div class="tpl-card active" data-tpl="moderne">
-          <div class="tpl-preview" style="background:linear-gradient(135deg,#E8631C,#FF8C42)">
-            <div class="tpl-lines"><div></div><div style="width:60%"></div><div style="width:80%"></div></div>
+        <div class="tpl-card active" data-tpl="moderne" onclick="selectTemplate('moderne',this)">
+          <div style="height:80px;background:linear-gradient(135deg,#E8631C,#FF8C42);border-radius:8px;display:flex;flex-direction:column;justify-content:flex-end;padding:8px">
+            <div style="width:70%;height:4px;background:rgba(255,255,255,0.9);border-radius:2px;margin-bottom:4px"></div>
+            <div style="width:50%;height:3px;background:rgba(255,255,255,0.6);border-radius:2px;margin-bottom:4px"></div>
+            <div style="width:90%;height:2px;background:rgba(255,255,255,0.4);border-radius:2px"></div>
           </div>
-          <div class="tpl-name">Moderne Orange</div>
-          <div class="tpl-desc">Coloré · Dynamique · Startup</div>
+          <div style="text-align:center;font-size:0.82rem;font-weight:800;margin-top:6px;color:var(--tx)">🔥 Moderne</div>
+          <div style="text-align:center;font-size:0.72rem;color:var(--mu)">Orange vif</div>
         </div>
 
-        <div class="tpl-card" data-tpl="corporate">
-          <div class="tpl-preview" style="background:linear-gradient(135deg,#1E3A5F,#2E5A8E)">
-            <div class="tpl-lines"><div></div><div style="width:60%"></div><div style="width:80%"></div></div>
+        <div class="tpl-card" data-tpl="corporate" onclick="selectTemplate('corporate',this)">
+          <div style="height:80px;background:linear-gradient(135deg,#1A2332,#2E4A7A);border-radius:8px;display:flex;flex-direction:column;justify-content:flex-end;padding:8px">
+            <div style="width:70%;height:4px;background:rgba(255,255,255,0.9);border-radius:2px;margin-bottom:4px"></div>
+            <div style="width:50%;height:3px;background:rgba(100,150,255,0.8);border-radius:2px;margin-bottom:4px"></div>
+            <div style="width:90%;height:2px;background:rgba(255,255,255,0.3);border-radius:2px"></div>
           </div>
-          <div class="tpl-name">Corporate Bleu</div>
-          <div class="tpl-desc">Sérieux · Professionnel · Entreprise</div>
+          <div style="text-align:center;font-size:0.82rem;font-weight:800;margin-top:6px;color:var(--tx)">💼 Corporate</div>
+          <div style="text-align:center;font-size:0.72rem;color:var(--mu)">Bleu marine</div>
         </div>
 
-        <div class="tpl-card" data-tpl="elegant">
-          <div class="tpl-preview" style="background:linear-gradient(135deg,#2C1654,#4A2480)">
-            <div class="tpl-lines"><div></div><div style="width:60%"></div><div style="width:80%"></div></div>
+        <div class="tpl-card" data-tpl="elegant" onclick="selectTemplate('elegant',this)">
+          <div style="height:80px;background:linear-gradient(135deg,#2C1654,#6B3FA0);border-radius:8px;display:flex;flex-direction:column;justify-content:flex-end;padding:8px">
+            <div style="width:70%;height:4px;background:rgba(255,255,255,0.9);border-radius:2px;margin-bottom:4px"></div>
+            <div style="width:50%;height:3px;background:rgba(200,150,255,0.8);border-radius:2px;margin-bottom:4px"></div>
+            <div style="width:90%;height:2px;background:rgba(255,255,255,0.3);border-radius:2px"></div>
           </div>
-          <div class="tpl-name">Élégant Violet</div>
-          <div class="tpl-desc">Luxe · Créatif · Agence</div>
+          <div style="text-align:center;font-size:0.82rem;font-weight:800;margin-top:6px;color:var(--tx)">✨ Élégant</div>
+          <div style="text-align:center;font-size:0.72rem;color:var(--mu)">Violet luxe</div>
         </div>
 
-        <div class="tpl-card" data-tpl="nature">
-          <div class="tpl-preview" style="background:linear-gradient(135deg,#1F9D6B,#2ECC8E)">
-            <div class="tpl-lines"><div></div><div style="width:60%"></div><div style="width:80%"></div></div>
+        <div class="tpl-card" data-tpl="nature" onclick="selectTemplate('nature',this)">
+          <div style="height:80px;background:linear-gradient(135deg,#1F9D6B,#2ECC71);border-radius:8px;display:flex;flex-direction:column;justify-content:flex-end;padding:8px">
+            <div style="width:70%;height:4px;background:rgba(255,255,255,0.9);border-radius:2px;margin-bottom:4px"></div>
+            <div style="width:50%;height:3px;background:rgba(200,255,200,0.8);border-radius:2px;margin-bottom:4px"></div>
+            <div style="width:90%;height:2px;background:rgba(255,255,255,0.3);border-radius:2px"></div>
           </div>
-          <div class="tpl-name">Nature Vert</div>
-          <div class="tpl-desc">Frais · Écologique · Santé</div>
+          <div style="text-align:center;font-size:0.82rem;font-weight:800;margin-top:6px;color:var(--tx)">🌿 Nature</div>
+          <div style="text-align:center;font-size:0.72rem;color:var(--mu)">Vert éco</div>
         </div>
 
-        <div class="tpl-card" data-tpl="gold">
-          <div class="tpl-preview" style="background:linear-gradient(135deg,#1A1410,#2E2620)">
-            <div class="tpl-lines" style="border-color:#D98C12"><div style="background:#D98C12"></div><div style="width:60%;background:#D98C12"></div><div style="width:80%;background:#D98C12"></div></div>
+        <div class="tpl-card" data-tpl="gold" onclick="selectTemplate('gold',this)">
+          <div style="height:80px;background:linear-gradient(135deg,#8B6914,#D4AF37);border-radius:8px;display:flex;flex-direction:column;justify-content:flex-end;padding:8px">
+            <div style="width:70%;height:4px;background:rgba(255,255,255,0.9);border-radius:2px;margin-bottom:4px"></div>
+            <div style="width:50%;height:3px;background:rgba(255,230,100,0.8);border-radius:2px;margin-bottom:4px"></div>
+            <div style="width:90%;height:2px;background:rgba(255,255,255,0.3);border-radius:2px"></div>
           </div>
-          <div class="tpl-name">Premium Or</div>
-          <div class="tpl-desc">Prestige · Haut de gamme · VIP</div>
+          <div style="text-align:center;font-size:0.82rem;font-weight:800;margin-top:6px;color:var(--tx)">👑 Premium</div>
+          <div style="text-align:center;font-size:0.72rem;color:var(--mu)">Or prestige</div>
         </div>
 
-        <div class="tpl-card" data-tpl="minimal">
-          <div class="tpl-preview" style="background:#fff;border:2px solid #E0D4C0">
-            <div class="tpl-lines" style="border-color:#1A1410"><div style="background:#1A1410"></div><div style="width:60%;background:#E0D4C0"></div><div style="width:80%;background:#E0D4C0"></div></div>
+        <div class="tpl-card" data-tpl="minimal" onclick="selectTemplate('minimal',this)">
+          <div style="height:80px;background:#F8F5F0;border-radius:8px;border:2px solid #E0D4C0;display:flex;flex-direction:column;justify-content:flex-end;padding:8px">
+            <div style="width:70%;height:4px;background:#1A1410;border-radius:2px;margin-bottom:4px"></div>
+            <div style="width:50%;height:3px;background:#888;border-radius:2px;margin-bottom:4px"></div>
+            <div style="width:90%;height:2px;background:#ccc;border-radius:2px"></div>
           </div>
-          <div class="tpl-name">Minimaliste</div>
-          <div class="tpl-desc">Simple · Épuré · Sans design</div>
+          <div style="text-align:center;font-size:0.82rem;font-weight:800;margin-top:6px;color:var(--tx)">⬜ Minimal</div>
+          <div style="text-align:center;font-size:0.72rem;color:var(--mu)">Épuré noir</div>
         </div>
 
-        <div class="tpl-card" data-tpl="simple">
-          <div class="tpl-preview" style="background:#F8F8F8;border:2px solid #E0D4C0">
-            <div class="tpl-lines" style="border-color:#333"><div style="background:#333;height:2px"></div><div style="width:70%;background:#999;height:1px"></div><div style="width:90%;background:#999;height:1px"></div></div>
+        <div class="tpl-card" data-tpl="rouge" onclick="selectTemplate('rouge',this)">
+          <div style="height:80px;background:linear-gradient(135deg,#C0392B,#E74C3C);border-radius:8px;display:flex;flex-direction:column;justify-content:flex-end;padding:8px">
+            <div style="width:70%;height:4px;background:rgba(255,255,255,0.9);border-radius:2px;margin-bottom:4px"></div>
+            <div style="width:50%;height:3px;background:rgba(255,200,200,0.8);border-radius:2px;margin-bottom:4px"></div>
+            <div style="width:90%;height:2px;background:rgba(255,255,255,0.3);border-radius:2px"></div>
           </div>
-          <div class="tpl-name">Simple sans design</div>
-          <div class="tpl-desc">Texte seul · Noir & blanc · Rapide</div>
+          <div style="text-align:center;font-size:0.82rem;font-weight:800;margin-top:6px;color:var(--tx)">❤️ Bold Red</div>
+          <div style="text-align:center;font-size:0.72rem;color:var(--mu)">Rouge vif</div>
         </div>
 
-        <div class="tpl-card" data-tpl="afrique">
-          <div class="tpl-preview" style="background:linear-gradient(135deg,#C8390A,#E8631C)">
-            <div class="tpl-lines" style="border-color:#F0AB35"><div style="background:#F0AB35"></div><div style="width:60%;background:#F0AB35"></div><div style="width:80%;background:rgba(255,255,255,0.5)"></div></div>
+        <div class="tpl-card" data-tpl="afrique" onclick="selectTemplate('afrique',this)">
+          <div style="height:80px;background:linear-gradient(135deg,#D4AF37,#C0392B);border-radius:8px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:8px">
+            <div style="position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,#009000,#FFD700,#C0392B)"></div>
+            <div style="width:70%;height:4px;background:rgba(255,255,255,0.9);border-radius:2px;margin-bottom:4px"></div>
+            <div style="width:50%;height:3px;background:rgba(255,220,100,0.8);border-radius:2px;margin-bottom:4px"></div>
+            <div style="width:90%;height:2px;background:rgba(255,255,255,0.3);border-radius:2px"></div>
           </div>
-          <div class="tpl-name">Afrique Business</div>
-          <div class="tpl-desc">Chaleureux · Africain · Dynamique</div>
+          <div style="text-align:center;font-size:0.82rem;font-weight:800;margin-top:6px;color:var(--tx)">🌍 Afrique</div>
+          <div style="text-align:center;font-size:0.72rem;color:var(--mu)">Pan-Africain</div>
         </div>
 
-      </div>
-      <div style="text-align:center;margin-top:16px">
-        <button class="btn-g" id="btnSelectTemplate">Utiliser ce modèle →</button>
-        <button class="btn-out" id="btnSkipTemplate" style="margin-left:10px">Partir de zéro</button>
-      </div>
-    </div>
-
-    <div class="card" id="factFormCard" style="display:none">
-      <div class="fact-header-form">
-        <!-- Entreprise émettrice -->
-        <div class="fact-col">
-          <div class="ct">Votre entreprise</div>
-          <div class="fg"><label>Nom de l'entreprise</label><input type="text" class="inp" id="fEntreprise" placeholder="Votre entreprise…"/></div>
-          <div class="fg"><label>Adresse</label><input type="text" class="inp" id="fAdresse" placeholder="Rue, ville, pays…"/></div>
-          <div class="fg"><label>Email</label><input type="email" class="inp" id="fEmail" placeholder="votre@email.com"/></div>
-          <div class="fg"><label>Téléphone</label><input type="tel" class="inp" id="fTel" placeholder="+32 …"/></div>
-          <div class="fg"><label>Logo</label>
-            <label for="fLogo" class="btn-out" style="cursor:pointer;display:block;text-align:center">📷 Uploader votre logo</label>
-            <input type="file" id="fLogo" accept="image/*" style="display:none"/>
-            <img id="fLogoPreview" src="" style="display:none;max-height:60px;margin-top:8px;border-radius:8px"/>
-          </div>
-        </div>
-        <!-- Info facture -->
-        <div class="fact-col">
-          <div class="ct">Détails facture</div>
-          <div class="fg"><label>N° Facture</label><input type="text" class="inp" id="fNumero" placeholder="FAC-001"/></div>
-          <div class="fg"><label>Date</label><input type="date" class="inp" id="fDate"/></div>
-          <div class="fg"><label>Date d'échéance</label><input type="date" class="inp" id="fEcheance"/></div>
-          <div class="fg"><label>Devise</label>
-            <select class="inp" id="fDevise">
-              <option value="€">Euro (€)</option>
-              <option value="$">Dollar ($)</option>
-              <option value="FCFA">FCFA</option>
-              <option value="MAD">Dirham (MAD)</option>
-            </select>
-          </div>
-          <div class="fg"><label>Couleur principale</label>
-            <div class="fact-colors">
-              <div class="fc-swatch active" data-color="#E8631C" style="background:#E8631C" title="Orange"></div>
-              <div class="fc-swatch" data-color="#1E5A9C" style="background:#1E5A9C" title="Bleu marine"></div>
-              <div class="fc-swatch" data-color="#1F9D6B" style="background:#1F9D6B" title="Vert"></div>
-              <div class="fc-swatch" data-color="#2C1654" style="background:#2C1654" title="Violet"></div>
-              <div class="fc-swatch" data-color="#D98C12" style="background:#D98C12" title="Or"></div>
-              <div class="fc-swatch" data-color="#1A1410" style="background:#1A1410" title="Noir"></div>
-            </div>
-            <input type="hidden" id="fCouleur" value="#E8631C"/>
-          </div>
-        </div>
-        <!-- Client -->
-        <div class="fact-col">
-          <div class="ct">Client</div>
-          <div class="fg"><label>Nom du client</label><input type="text" class="inp" id="fClientNom" placeholder="Nom ou entreprise…"/></div>
-          <div class="fg"><label>Adresse client</label><input type="text" class="inp" id="fClientAdresse" placeholder="Adresse…"/></div>
-          <div class="fg"><label>Email client</label><input type="email" class="inp" id="fClientEmail" placeholder="client@email.com"/></div>
-          <div class="fg"><label>Téléphone client</label><input type="tel" class="inp" id="fClientTel" placeholder="+32 …"/></div>
-        </div>
-      </div>
-
-      <!-- LIGNES DE FACTURE -->
-      <div class="ct" style="margin-top:20px">Articles / Services</div>
-      <div id="factLignes"></div>
-      <button class="btn-out" id="btnAddLigne" style="margin-top:10px">+ Ajouter une ligne</button>
-
-      <!-- TOTAUX -->
-      <div class="fact-totaux">
-        <div class="fg"><label>Remise (%)</label><input type="number" class="inp" id="fRemise" value="0" min="0" max="100" style="width:100px"/></div>
-        <div class="fg"><label>TVA (%)</label><input type="number" class="inp" id="fTVA" value="0" min="0" style="width:100px"/></div>
-        <div class="fact-total-box" id="factTotalBox">
-          <div class="ft-row"><span>Sous-total</span><span id="ftSousTotal">0,00 €</span></div>
-          <div class="ft-row"><span>Remise</span><span id="ftRemise">0,00 €</span></div>
-          <div class="ft-row"><span>TVA</span><span id="ftTVA">0,00 €</span></div>
-          <div class="ft-row ft-total"><span>TOTAL</span><span id="ftTotal">0,00 €</span></div>
-        </div>
-      </div>
-
-      <!-- NOTE -->
-      <div class="fg" style="margin-top:14px"><label>Note / Conditions de paiement</label>
-        <textarea class="inp" id="fNote" rows="2" placeholder="Ex: Paiement à 30 jours. Merci pour votre confiance !"></textarea>
-      </div>
-      <div class="fg"><label>Statut</label>
-        <select class="inp" id="fStatut" style="width:180px">
-          <option value="brouillon">Brouillon</option>
-          <option value="envoyee">Envoyée</option>
-          <option value="payee">Payée</option>
-        </select>
-      </div>
-
-      <!-- ACTIONS -->
-      <div class="pc-btns" style="margin-top:18px;flex-wrap:wrap">
-        <button class="btn-g" id="btnSaveFacture">💾 Sauvegarder</button>
-        <button class="btn-card" id="btnPreviewFacture">👁️ Prévisualiser</button>
-        <button class="btn-out" id="btnDownloadFacture">📥 Télécharger PDF</button>
-        <button class="btn-pp" id="btnShareWA">💬 WhatsApp</button>
-        <button class="btn-out" id="btnShareEmail">✉️ Email</button>
-        <button class="btn-out" id="btnChangeTemplate">🎨 Changer modèle</button>
       </div>
     </div>
-    </div>
 
-    <!-- PRÉVISUALISATION -->
-    <div id="factPreviewContainer" style="display:none">
-      <div class="card">
-        <div class="ct">Prévisualisation</div>
-        <div id="factPreview" class="fact-preview"></div>
+    <!-- FORMULAIRE -->
+    <div class="card">
+      <div class="ct">📝 Informations de la facture</div>
+      <input type="hidden" id="factId"/>
+      <input type="hidden" id="factOriginalPDF"/>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div class="fg"><label>Numéro de facture</label>
+          <input type="text" class="inp" id="factNumero" placeholder="FAC-2024-001"/></div>
+        <div class="fg"><label>Date</label>
+          <input type="date" class="inp" id="factDate"/></div>
+        <div class="fg"><label>Échéance</label>
+          <input type="date" class="inp" id="factEcheance"/></div>
+        <div class="fg"><label>Statut</label>
+          <select class="inp" id="factStatut">
+            <option value="brouillon">Brouillon</option>
+            <option value="envoyee">Envoyée</option>
+            <option value="payee">Payée ✅</option>
+            <option value="en_attente">En attente</option>
+          </select></div>
+      </div>
+
+      <div class="ct" style="margin-top:8px">👤 Client</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div class="fg"><label>Nom / Entreprise</label>
+          <input type="text" class="inp" id="factClientNom" placeholder="Nom du client"/></div>
+        <div class="fg"><label>Email</label>
+          <input type="email" class="inp" id="factClientEmail" placeholder="client@email.com"/></div>
+        <div class="fg"><label>Téléphone</label>
+          <input type="tel" class="inp" id="factClientTel" placeholder="+32 ..."/></div>
+        <div class="fg"><label>Adresse</label>
+          <input type="text" class="inp" id="factClientAdresse" placeholder="Rue, Ville, Pays"/></div>
+      </div>
+
+      <div class="ct" style="margin-top:8px">📋 Prestations</div>
+      <div id="factLignes" style="margin-bottom:12px">
+        <div style="display:grid;grid-template-columns:3fr 1fr 1fr 1fr 40px;gap:8px;margin-bottom:6px;font-size:0.78rem;font-weight:800;color:var(--mu);text-transform:uppercase;padding:0 4px">
+          <div>Description</div><div>Qté</div><div>Prix unit.</div><div>TVA %</div><div></div>
+        </div>
+        <!-- Lines added by JS -->
+      </div>
+      <button class="btn-out" id="btnAddLigne" style="width:100%;margin-bottom:16px">+ Ajouter une ligne</button>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="fg"><label>TVA globale (%)</label>
+          <input type="number" class="inp" id="factTVA" value="0" min="0" max="100"/></div>
+        <div class="fg"><label>Remise (%)</label>
+          <input type="number" class="inp" id="factRemise" value="0" min="0" max="100"/></div>
+      </div>
+
+      <div id="factTotaux" style="background:var(--bg);border-radius:var(--rs);padding:14px;margin-bottom:14px;border:2px solid var(--bo)"></div>
+
+      <div class="fg" style="margin-bottom:16px"><label>Notes / Conditions</label>
+        <textarea class="inp" id="factNotes" rows="3" placeholder="Merci pour votre confiance..."></textarea>
+      </div>
+
+      <!-- BOUTONS ACTIONS -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-g" id="btnSaveFacture" style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:6px">
+          💾 Sauvegarder
+        </button>
+        <button class="btn-out" id="btnPreviewFacture" style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:6px">
+          👁️ Aperçu
+        </button>
+        <button class="btn-out" id="btnDownloadFacture" style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:6px;background:#1F9D6B;color:#fff;border:none">
+          ⬇️ Télécharger PDF
+        </button>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+        <button class="btn-out" id="btnShareFactWA" style="flex:1;min-width:130px;background:#25D366;color:#fff;border:none;display:flex;align-items:center;justify-content:center;gap:6px">
+          📱 WhatsApp
+        </button>
+        <button class="btn-out" id="btnShareFactEmail" style="flex:1;min-width:130px;background:#2E7DD6;color:#fff;border:none;display:flex;align-items:center;justify-content:center;gap:6px">
+          📧 Email
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- IMPORTER PDF -->
+  <!-- ── IMPORTER PDF ── -->
   <div class="suivi-panel" data-panel="upload" style="display:none">
     <div class="card">
-      <div class="ct">📤 Importer une facture PDF existante</div>
-      <div class="pdf-upload-zone" id="pdfUploadZone">
-        <div class="puz-ico">📄</div>
-        <div class="puz-title">Glissez votre PDF ici</div>
-        <div class="puz-sub">ou cliquez pour choisir un fichier</div>
-        <label for="pdfUploadFile" class="btn-g" style="margin-top:14px;cursor:pointer;display:inline-block">Choisir un PDF</label>
+      <div class="ct">📤 Importer une facture PDF</div>
+      <div id="pdfUploadZone" style="border:3px dashed var(--or);border-radius:16px;padding:40px 20px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:16px"
+        onclick="document.getElementById('pdfUploadFile').click()"
+        ondragover="event.preventDefault();this.style.background='var(--orp)'"
+        ondragleave="this.style.background=''"
+        ondrop="event.preventDefault();this.style.background='';handleDropPDF(event)">
+        <div style="font-size:3rem;margin-bottom:12px">📄</div>
+        <div style="font-size:1.1rem;font-weight:800;color:var(--tx);margin-bottom:6px">Glissez votre PDF ici</div>
+        <div style="color:var(--mu);font-size:0.9rem;margin-bottom:16px">ou cliquez pour choisir un fichier</div>
+        <button class="btn-g" style="pointer-events:none">Choisir un PDF</button>
         <input type="file" id="pdfUploadFile" accept="application/pdf" style="display:none"/>
       </div>
-      <div id="pdfExtracted" style="display:none">
-        <div class="ct" style="margin-top:18px">Contenu extrait — modifiez les champs</div>
-        <div class="fg"><label>Titre / Objet</label><input type="text" class="inp" id="pdfTitre" placeholder="Ex: Facture de services…"/></div>
-        <div class="fg"><label>Nom du client</label><input type="text" class="inp" id="pdfClient" placeholder="Nom du client…"/></div>
-        <div class="fg"><label>Montant total (€)</label><input type="number" class="inp" id="pdfMontant" placeholder="0.00" step="0.01"/></div>
-        <div class="fg"><label>Date</label><input type="date" class="inp" id="pdfDate"/></div>
-        <div class="fg"><label>Notes / Détails extraits</label>
-          <textarea class="inp" id="pdfNotes" rows="5" placeholder="Le texte extrait du PDF apparaîtra ici…"></textarea>
-        </div>
-        <div class="fg"><label>Votre logo</label>
-          <label for="pdfLogo" class="btn-out" style="cursor:pointer;display:inline-block">📷 Ajouter votre logo</label>
-          <input type="file" id="pdfLogo" accept="image/*" style="display:none"/>
-          <img id="pdfLogoPreview" src="" style="display:none;max-height:50px;margin-left:10px;border-radius:6px"/>
-        </div>
-        <div class="pc-btns" style="margin-top:18px">
-          <button class="btn-g" id="btnPdfRecreate">📥 Générer PDF modifié</button>
-          <button class="btn-pp" id="btnPdfShareWA">💬 WhatsApp</button>
-          <button class="btn-out" id="btnPdfShareEmail">✉️ Email</button>
+      <div id="importStatus" style="display:none"></div>
+      <div style="background:var(--bg);border-radius:var(--rs);padding:14px;border:2px solid var(--bo)">
+        <div style="font-size:0.88rem;font-weight:800;color:var(--tx);margin-bottom:8px">ℹ️ Comment ça marche :</div>
+        <div style="font-size:0.85rem;color:var(--mu);line-height:1.6">
+          1. Choisissez votre PDF → il s'affiche dans <strong>Aperçu</strong><br/>
+          2. Cliquez <strong>Modifier</strong> pour l'éditer avec un nouveau modèle<br/>
+          3. Votre PDF original est <strong>conservé intact</strong> dans <strong>Importées</strong><br/>
+          4. Envoyez par WhatsApp, Email ou téléchargez
         </div>
       </div>
     </div>
   </div>
+
+  <!-- ── APERÇU ── -->
+  <div class="suivi-panel" data-panel="apercu" style="display:none">
+    <div id="factPreviewZone">
+      <div style="text-align:center;padding:60px 20px;color:var(--mu)">
+        <div style="font-size:4rem;margin-bottom:16px">📄</div>
+        <div style="font-size:1.1rem;font-weight:800;margin-bottom:8px">Aucun aperçu disponible</div>
+        <div style="font-size:0.9rem">Créez ou importez une facture pour la voir ici</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── IMPORTÉES ── -->
+  <div class="suivi-panel" data-panel="importees" style="display:none">
+    <div class="card">
+      <div class="ct">🗂️ Factures importées sauvegardées</div>
+      <div id="importedFacturesList"><div class="empty">Aucune facture importée.</div></div>
+    </div>
+  </div>
+
 </section>
 
 <!-- PARTAGER -->
@@ -1133,7 +1124,7 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791094790"></script>
+<script src="script.js?v=1791099712"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
