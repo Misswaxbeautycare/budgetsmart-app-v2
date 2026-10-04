@@ -49,7 +49,7 @@ input,select{font-family:var(--fb);}
 /* ── MOBILE ── */
 .mh{display:flex;position:fixed;top:0;left:0;right:0;height:60px;background:var(--sid);align-items:center;justify-content:space-between;padding:0 18px;z-index:200;border-bottom:3px solid var(--or);box-shadow:0 2px 12px rgba(232,99,28,0.1);}
 .mh button{background:none;color:#fff;font-size:1.3rem;padding:6px;}
-.mh-logo{font-family:var(--ft);font-size:1.15rem;color:#fff;font-weight:800;}
+.mh-logo{font-family:var(--ft);font-size:1.2rem;color:#fff;font-weight:800;display:flex;align-items:center;gap:8px;}
 .mh-logo em{color:var(--gol);font-style:normal;}
 .mh-av{width:30px;height:30px;background:var(--g);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.82rem;font-weight:800;overflow:hidden;}
 .mh-av img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
@@ -876,3 +876,18 @@ textarea.inp{resize:vertical;min-height:80px;line-height:1.6;}
   text-overflow: ellipsis; max-width: 100%;
   display: block; cursor: pointer;
 }
+
+/* ══ FIX LOGO + SIDEBAR ══ */
+.sidebar { z-index: 300 !important; }
+.sidebar.open { transform: translateX(0) !important; box-shadow: 4px 0 30px rgba(0,0,0,0.3) !important; }
+.ov.show { display: block !important; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 299; }
+.mh { z-index: 200 !important; }
+.mh-logo { font-size: 1.1rem !important; font-weight: 800 !important; color: #fff !important; }
+.mh-logo em { color: var(--or) !important; font-style: normal !important; }
+#menuBtn { font-size: 1.4rem !important; color: #fff !important; background: none !important; border: none !important; cursor: pointer !important; padding: 8px !important; min-width: 44px !important; min-height: 44px !important; }
+
+/* ══ CALENDRIER ══ */
+#calGrid2 { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+#calGrid2 > div { transition: all 0.15s; }
+#calDayDetails { display: none; margin-top: 14px; padding: 16px; background: var(--bg); border-radius: var(--r); border: 2px solid var(--or); }
+#upcomingEvents .empty { padding: 20px; text-align: center; color: var(--mu); }
