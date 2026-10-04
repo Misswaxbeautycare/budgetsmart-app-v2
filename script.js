@@ -2340,7 +2340,7 @@ function go(page) {
   document.querySelectorAll('.ni').forEach(i => i.classList.toggle('active', i.dataset.p === page));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'p-' + page));
   window.scrollTo(0, 0);
-  if (page === 'dashboard')   { renderDash(); initPWABanner(); }
+  if (page === 'dashboard')   { renderDash(); initPWABanner(); setTimeout(drawAdvancedCharts,500); }
   if (page === 'daily')       { renderEntries(); }
   if (page === 'goals')       { renderGoals(); }
   if (page === 'pricing')     { renderPricingAll(); }
