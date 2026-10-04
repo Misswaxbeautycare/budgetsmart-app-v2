@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BudgetSmart v3</title>
-<link rel="stylesheet" href="style.css?v=1791062231"/>
+<link rel="stylesheet" href="style.css?v=1791094150"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#2E7D5E"/>
@@ -161,6 +161,7 @@
     <li><a class="ni" data-p="couple">Projet Couple <span class="nb">Premium</span></a></li>
     <li class="ns">ÉPARGNE</li>
     <li><a class="ni" data-p="suivi">Suivi</a></li>
+    <li><a class="ni" data-p="calendrier">📅 Calendrier</a></li>
     <li><a class="ni" data-p="tips">Conseils financiers</a></li>
     <li><a class="ni" data-p="defis">Défis d'épargne</a></li>
     <li><a class="ni" data-p="family">Mode Famille</a></li>
@@ -400,6 +401,68 @@
   <div class="pay-choice" id="pcCouple" style="display:none">
     <div class="pc-t">Mode de paiement</div>
     <div class="pc-btns"><button class="btn-card" id="pcCCard">Payer par carte bancaire</button><button class="btn-pp" id="pcCPP">Payer avec PayPal</button></div>
+  </div>
+</section>
+
+<!-- CALENDRIER -->
+<section class="page" id="p-calendrier">
+  <div class="ph">
+    <div><h1 class="pt">📅 Mon Calendrier</h1>
+    <p class="ps">Rendez-vous, échéances et tâches</p></div>
+    <div class="ph-date" id="calDateToday"></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <button class="btn-out" id="calPrev2" style="padding:10px 20px;font-size:1.1rem">←</button>
+      <div id="calMonthLabel2" style="font-family:var(--ft);font-size:1.4rem;font-weight:800"></div>
+      <button class="btn-out" id="calNext2" style="padding:10px 20px;font-size:1.1rem">→</button>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;font-size:0.82rem;font-weight:700">
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#E8631C;border-radius:2px;display:inline-block"></span>RDV</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#D6432E;border-radius:2px;display:inline-block"></span>Dette</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#2E7DD6;border-radius:2px;display:inline-block"></span>Tâche</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#1F9D6B;border-radius:2px;display:inline-block"></span>Objectif</span>
+    </div>
+    <div id="calGrid2" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px"></div>
+    <div id="calDayDetails" style="display:none;margin-top:14px;padding:14px;background:var(--bg);border-radius:var(--r);border:2px solid var(--or)">
+      <div id="calDayTitle2" style="font-family:var(--ft);font-size:1.15rem;font-weight:800;margin-bottom:10px"></div>
+      <div id="calDayList2"></div>
+      <button class="btn-g" id="btnAddEventCalendar" style="margin-top:10px;width:100%">+ Ajouter un RDV ce jour</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">➕ Nouveau rendez-vous</div>
+    <div class="fg2">
+      <div class="fg"><label>Titre</label><input type="text" class="inp" id="calEvTitre" placeholder="Ex: Médecin, Réunion..."/></div>
+      <div class="fg"><label>Type</label>
+        <select class="inp" id="calEvType">
+          <option value="personnel">👤 Personnel</option>
+          <option value="finance">💰 Finance</option>
+          <option value="sante">🏥 Santé</option>
+          <option value="travail">💼 Travail</option>
+          <option value="famille">👨‍👩‍👧 Famille</option>
+        </select>
+      </div>
+      <div class="fg"><label>Date</label><input type="date" class="inp" id="calEvDate"/></div>
+      <div class="fg"><label>Heure</label><input type="time" class="inp" id="calEvHeure" value="09:00"/></div>
+      <div class="fg"><label>Rappel</label>
+        <select class="inp" id="calEvRappel">
+          <option value="0">Pas de rappel</option>
+          <option value="1">1 jour avant</option>
+          <option value="3">3 jours avant</option>
+          <option value="7">1 semaine avant</option>
+        </select>
+      </div>
+      <div class="fg"><label>Note</label><input type="text" class="inp" id="calEvNote" placeholder="Détails..."/></div>
+    </div>
+    <button class="btn-g" id="btnAddCalEvent" style="width:100%;margin-top:8px">✅ Enregistrer</button>
+  </div>
+
+  <div class="card">
+    <div class="ct">📋 Prochains rendez-vous</div>
+    <div id="upcomingEvents"><div class="empty">Aucun rendez-vous à venir.</div></div>
   </div>
 </section>
 
@@ -1050,7 +1113,7 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791062231"></script>
+<script src="script.js?v=1791094150"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
