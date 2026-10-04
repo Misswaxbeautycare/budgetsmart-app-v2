@@ -2525,6 +2525,220 @@ function renderImportedFactures() {
     </div>`).join('');
 }
 
+
+/* ══════════════════════════════════════
+   CALENDRIER COMPLET — Page dédiée
+══════════════════════════════════════ */
+let calDate2 = new Date();
+const CAL_COLORS = {
+  personnel:'#E8631C', finance:'#D98C12',
+  sante:'#1F9D6B',    travail:'#2E7DD6',
+  famille:'#2C1654',  dette:'#D6432E',
+  tache:'#2E7DD6'
+};
+const CAL_ICONS = {
+  personnel:'👤', finance:'💰', sante:'🏥',
+  travail:'💼', famille:'👨', dette:'💳', tache:'✅'
+};
+
+function initCalendrier() {
+  const b = (id,fn) => { const el=document.getElementById(id); if(el){ el.onclick=fn; } };
+  b('calPrev2', () => { calDate2.setMonth(calDate2.getMonth()-1); renderCalendrier(); });
+  b('calNext2', () => { calDate2.setMonth(calDate2.getMonth()+1); renderCalendrier(); });
+  b('btnAddCalEvent', addCalEvent);
+  b('btnAddEventCalendar', () => {
+    const ds = document.getElementById('calDayTitle2')?.dataset?.date;
+    if (ds) document.getElementById('calEvDate').value = ds;
+    document.getElementById('calEvTitre')?.focus();
+    document.getElementById('calEvTitre')?.scrollIntoView({behavior:'smooth'});
+  });
+  const dateInput = document.getElementById('calEvDate');
+  if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0,10);
+  const todayEl = document.getElementById('calDateToday');
+  if (todayEl) todayEl.textContent = new Date().toLocaleDateString('fr-FR',
+    {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  renderCalendrier();
+}
+
+function addCalEvent() {
+  const titre  = (document.getElementById('calEvTitre')?.value||'').trim();
+  const date   = document.getElementById('calEvDate')?.value||'';
+  const heure  = document.getElementById('calEvHeure')?.value||'09:00';
+  const type   = document.getElementById('calEvType')?.value||'personnel';
+  const rappel = parseInt(document.getElementById('calEvRappel')?.value||'0');
+  const note   = (document.getElementById('calEvNote')?.value||'').trim();
+  if (!titre) { toast('⚠️ Saisissez un titre pour le rendez-vous.'); return; }
+  if (!date)  { toast('⚠️ Choisissez une date.'); return; }
+  const ev = ls('evenements',[]);
+  const newEv = {id:Date.now(), titre, date, heure, type, rappel, note};
+  ev.push(newEv);
+  sv('evenements', ev);
+  if(document.getElementById('calEvTitre')) document.getElementById('calEvTitre').value='';
+  if(document.getElementById('calEvNote'))  document.getElementById('calEvNote').value='';
+  renderCalendrier();
+  toast('✅ Rendez-vous "'+titre+'" ajouté !');
+  // Sync cloud
+  if(typeof syncEventToCloud==='function') syncEventToCloud(newEv);
+  // Show the day
+  calSelectDay2(date);
+}
+
+function renderCalendrier() {
+  const y  = calDate2.getFullYear();
+  const m  = calDate2.getMonth();
+  const MN = ['Janvier','Février','Mars','Avril','Mai','Juin',
+    'Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const JN = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  const lbl = document.getElementById('calMonthLabel2');
+  if (lbl) lbl.textContent = MN[m]+' '+y;
+  const grid = document.getElementById('calGrid2');
+  if (!grid) return;
+  const firstDay    = (new Date(y,m,1).getDay()+6)%7;
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const today       = new Date(); today.setHours(0,0,0,0);
+  const events = ls('evenements',[]);
+  const dettes = ls('dettes',[]).filter(d=>!d.paye);
+  const taches = ls('taches',[]);
+  let html = JN.map(j=>`<div style="text-align:center;font-size:0.73rem;font-weight:800;
+    color:var(--mu);padding:8px 2px;text-transform:uppercase;
+    border-bottom:2px solid var(--bo)">${j}</div>`).join('');
+  for(let i=0;i<firstDay;i++) html+='<div></div>';
+  for(let day=1;day<=daysInMonth;day++){
+    const ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+    const dd=new Date(y,m,day);
+    const isToday=dd.getTime()===today.getTime();
+    const isPast=dd<today;
+    const dayEv=events.filter(e=>e.date===ds);
+    const dayDt=dettes.filter(d=>d.echeance===ds);
+    const dayTk=taches.filter(t=>t.date===ds&&!t.fait);
+    const all=[
+      ...dayDt.map(d=>({l:'💳 '+d.nom.slice(0,10),c:'#D6432E'})),
+      ...dayEv.map(e=>({l:(CAL_ICONS[e.type]||'📅')+' '+e.titre.slice(0,11),c:CAL_COLORS[e.type]||'#E8631C'})),
+      ...dayTk.map(t=>({l:'✅ '+t.titre.slice(0,10),c:'#2E7DD6'})),
+    ];
+    const pills=all.slice(0,2).map(i=>`<div style="background:${i.c};color:#fff;
+      font-size:0.62rem;font-weight:700;padding:2px 4px;border-radius:3px;
+      margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+      max-width:100%">${i.l}</div>`).join('');
+    const more=all.length>2?`<div style="font-size:0.62rem;color:var(--mu);font-weight:700;margin-top:1px">+${all.length-2} autre(s)</div>`:'';
+    const border=isToday?'2.5px solid #E8631C':all.length?'1.5px solid var(--or)':'1px solid var(--bo)';
+    const bg=isToday?'#FFF1E6':all.length?'#FFFAF6':'var(--card)';
+    html+=`<div onclick="calSelectDay2('${ds}')" style="min-height:72px;padding:5px 4px;
+      border-radius:8px;cursor:pointer;border:${border};background:${bg};
+      transition:all 0.15s;position:relative"
+      onmouseover="this.style.background='#FFF7F0';this.style.borderColor='#E8631C'"
+      onmouseout="this.style.background='${bg}';this.style.borderColor='${border.split(' ').pop()}'">
+      <div style="${isToday?'background:#E8631C;color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;':'color:'+(isPast?'#bbb':'var(--tx)')+';"'} font-size:0.85rem;font-weight:${isToday?'900':'700'};margin-bottom:2px">${day}</div>
+      ${pills}${more}
+    </div>`;
+  }
+  grid.innerHTML=html;
+  renderProchainRDV();
+}
+
+function calSelectDay2(ds) {
+  const events=ls('evenements',[]).filter(e=>e.date===ds);
+  const dettes=ls('dettes',[]).filter(d=>!d.paye&&d.echeance===ds);
+  const taches=ls('taches',[]).filter(t=>t.date===ds);
+  const panel=document.getElementById('calDayDetails');
+  const title=document.getElementById('calDayTitle2');
+  const list =document.getElementById('calDayList2');
+  if(!panel||!title||!list) return;
+  const d=new Date(ds);
+  title.textContent=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  title.dataset.date=ds;
+  const dateInput=document.getElementById('calEvDate');
+  if(dateInput) dateInput.value=ds;
+  if(!events.length&&!dettes.length&&!taches.length){
+    list.innerHTML=`<div style="text-align:center;padding:16px;color:var(--mu)">
+      <div style="font-size:1.5rem;margin-bottom:6px">📅</div>
+      <div style="font-weight:700">Aucun événement ce jour</div>
+      <div style="font-size:0.85rem;margin-top:4px">Utilisez le formulaire ci-dessous pour ajouter un rendez-vous</div>
+    </div>`;
+  } else {
+    list.innerHTML=[
+      ...dayDtHTML(dettes),
+      ...dayEvHTML(events),
+      ...dayTkHTML(taches)
+    ].join('');
+  }
+  panel.style.display='block';
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function dayDtHTML(dettes){
+  return dettes.map(d=>`<div style="display:flex;align-items:center;gap:10px;
+    padding:10px 12px;border-radius:10px;background:#FFF1E6;
+    border:2px solid #D6432E;margin-bottom:8px">
+    <span style="font-size:1.3rem">💳</span>
+    <div><div style="font-weight:800;color:#D6432E">${d.nom}</div>
+    <div style="font-size:0.85rem;color:var(--mu)">Montant : ${fmt(d.montant)}</div></div>
+  </div>`);
+}
+function dayEvHTML(events){
+  return events.map(e=>`<div style="display:flex;align-items:center;gap:10px;
+    padding:10px 12px;border-radius:10px;background:var(--bg);
+    border:2px solid ${CAL_COLORS[e.type]||'#E8631C'};margin-bottom:8px">
+    <span style="font-size:1.3rem">${CAL_ICONS[e.type]||'📅'}</span>
+    <div style="flex:1">
+      <div style="font-weight:800;color:${CAL_COLORS[e.type]||'#E8631C'}">${e.titre}</div>
+      <div style="font-size:0.85rem;color:var(--mu)">${e.heure||''} ${e.note?'· '+e.note:''}</div>
+    </div>
+    <button onclick="removeCalEvent2(${e.id})"
+      style="background:none;border:none;cursor:pointer;color:var(--mu);font-size:1rem;padding:4px">✕</button>
+  </div>`);
+}
+function dayTkHTML(taches){
+  return taches.map(t=>`<div style="display:flex;align-items:center;gap:10px;
+    padding:10px 12px;border-radius:10px;background:var(--blp);
+    border:2px solid #2E7DD6;margin-bottom:8px">
+    <span style="font-size:1.3rem">${t.fait?'✅':'☐'}</span>
+    <div style="font-weight:800;color:#2E7DD6">${t.titre}</div>
+  </div>`);
+}
+function removeCalEvent2(id){
+  sv('evenements',ls('evenements',[]).filter(e=>e.id!==id));
+  renderCalendrier();
+  toast('Rendez-vous supprimé.');
+}
+
+function renderProchainRDV(){
+  const el=document.getElementById('upcomingEvents');
+  if(!el) return;
+  const now=new Date(); now.setHours(0,0,0,0);
+  const events=ls('evenements',[])
+    .filter(e=>new Date(e.date)>=now)
+    .sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const dettes=ls('dettes',[])
+    .filter(d=>!d.paye&&d.echeance&&new Date(d.echeance)>=now)
+    .sort((a,b)=>new Date(a.echeance)-new Date(b.echeance));
+  const all=[
+    ...events.map(e=>({date:e.date,label:e.titre,color:CAL_COLORS[e.type]||'#E8631C',icon:CAL_ICONS[e.type]||'📅',type:'rdv'})),
+    ...dettes.map(d=>({date:d.echeance,label:'💳 '+d.nom+' — '+fmt(d.montant),color:'#D6432E',icon:'💳',type:'dette'}))
+  ].sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,15);
+  if(!all.length){el.innerHTML='<div class="empty">Aucun rendez-vous à venir.</div>';return;}
+  el.innerHTML=all.map(item=>{
+    const d=new Date(item.date);
+    const diff=Math.ceil((d-now)/86400000);
+    const tag=diff===0?'<span style="background:#E8631C;color:#fff;padding:2px 8px;border-radius:20px;font-size:0.78rem;font-weight:800">Aujourd\'hui</span>':
+               diff===1?'<span style="background:#D98C12;color:#fff;padding:2px 8px;border-radius:20px;font-size:0.78rem;font-weight:800">Demain</span>':
+               `<span style="background:var(--bg);color:var(--mu);padding:2px 8px;border-radius:20px;font-size:0.78rem;font-weight:700;border:1px solid var(--bo)">Dans ${diff}j</span>`;
+    return `<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;
+      border-radius:10px;background:var(--bg);border-left:4px solid ${item.color};
+      border-top:1px solid var(--bo);border-right:1px solid var(--bo);border-bottom:1px solid var(--bo);
+      margin-bottom:8px">
+      <span style="font-size:1.4rem">${item.icon}</span>
+      <div style="flex:1">
+        <div style="font-weight:800;color:var(--tx)">${item.label}</div>
+        <div style="font-size:0.83rem;color:var(--mu);margin-top:3px">
+          ${d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}
+        </div>
+      </div>
+      ${tag}
+    </div>`;
+  }).join('');
+}
+
 /* ══ NAVIGATION ══ */
 function initNav() {
   document.querySelectorAll('.ni').forEach(el => {
@@ -2542,6 +2756,7 @@ function go(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'p-' + page));
   window.scrollTo(0, 0);
   if (page === 'dashboard')   { renderDash(); initPWABanner(); setTimeout(drawAdvancedCharts,500); }
+  if (page === 'calendrier')  { initCalendrier(); }
   if (page === 'daily')       { renderEntries(); }
   if (page === 'goals')       { renderGoals(); }
   if (page === 'pricing')     { renderPricingAll(); }
