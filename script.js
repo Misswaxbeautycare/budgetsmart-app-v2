@@ -1076,6 +1076,8 @@ function initFacturation() {
   if (saved.logo)       { factLogoData=saved.logo; const img=document.getElementById('fLogoPreview'); if(img){img.src=saved.logo;img.style.display='block';} }
 
   initTemplateSelector();
+  initImportPDF();
+  renderImportedFactures();
   factAddLigne(); // Start with one empty line
   renderFacturesList();
 }
@@ -2323,6 +2325,205 @@ function initRealtimeSync() {
   console.log("Sync temps réel initialisée pour", currentUser.id);
 }
 function stopRealtimeSync() {}
+
+
+/* ══ FACTURATION — IMPORT PDF & GESTION COMPLÈTE ══ */
+
+// Initialiser l'import PDF
+function initImportPDF() {
+  const zone  = document.getElementById('pdfUploadZone');
+  const input = document.getElementById('pdfUploadFile');
+  if (!zone || !input) return;
+
+  // Drag & drop
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor='#E8631C'; });
+  zone.addEventListener('dragleave', () => { zone.style.borderColor=''; });
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.style.borderColor='';
+    const file = e.dataTransfer.files[0];
+    if (file?.type === 'application/pdf') processImportedPDF(file);
+    else toast('Veuillez choisir un fichier PDF.');
+  });
+
+  input.addEventListener('change', () => {
+    const file = input.files[0];
+    if (file) processImportedPDF(file);
+  });
+}
+
+async function processImportedPDF(file) {
+  const zone = document.getElementById('pdfUploadZone');
+  if (zone) zone.innerHTML = '<div style="padding:20px;text-align:center"><div style="font-size:2rem">⏳</div><div style="font-weight:700;margin-top:8px">Traitement en cours...</div></div>';
+
+  // Read file as base64
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const base64 = e.target.result; // data:application/pdf;base64,...
+    const fileName = file.name.replace('.pdf','');
+
+    // Create facture entry from imported PDF
+    const facture = {
+      id:          Date.now(),
+      numero:      fileName || 'IMP-' + Date.now(),
+      clientNom:   '',
+      clientEmail: '',
+      clientAdresse:'',
+      date:        new Date().toISOString().slice(0,10),
+      echeance:    '',
+      lignes:      [{desc:'(Article importé)', qte:1, prix:0, tva:0}],
+      notes:       '',
+      statut:      'importe',
+      modele:      'moderne',
+      pdfBase64:   base64,          // Garder le PDF original
+      fileName:    file.name,
+      importDate:  new Date().toISOString(),
+      total:       0,
+      sousTotal:   0,
+      totalTVA:    0
+    };
+
+    // Save to storage
+    const factures = ls('factures', []);
+    factures.unshift(facture);
+    sv('factures', factures);
+
+    // Show preview immediately
+    afficherFactureImportee(facture);
+    toast('✅ Facture importée ! Vous pouvez la modifier et l\'envoyer.');
+
+    // Reset zone
+    const z = document.getElementById('pdfUploadZone');
+    if (z) z.innerHTML = `
+      <div class="puz-ico">📄</div>
+      <div class="puz-title">Glissez votre PDF ici</div>
+      <div class="puz-sub">ou cliquez pour choisir un fichier</div>
+      <label for="pdfUploadFile" class="btn-g" style="margin-top:14px;cursor:pointer;display:inline-block">Choisir un PDF</label>
+      <input type="file" id="pdfUploadFile" accept="application/pdf" style="display:none" onchange="document.querySelector('#pdfUploadZone input').dispatchEvent(new Event('change'))"/>`;
+    initImportPDF();
+  };
+  reader.readAsDataURL(file);
+}
+
+function afficherFactureImportee(facture) {
+  // Switch to preview tab
+  factGo('apercu');
+
+  const preview = document.getElementById('factPreviewZone');
+  if (!preview) return;
+
+  preview.innerHTML = `
+    <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.12);max-width:800px;margin:0 auto">
+
+      <!-- Bandeau info -->
+      <div style="background:linear-gradient(135deg,#E8631C,#D98C12);color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:1rem;font-weight:800">📄 ${facture.fileName || facture.numero}</div>
+          <div style="font-size:0.85rem;opacity:0.9">Importée le ${new Date(facture.importDate).toLocaleDateString('fr-FR')}</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onclick="factEditImported(${facture.id})" 
+            style="padding:8px 16px;background:#fff;color:#E8631C;border:none;border-radius:8px;font-weight:800;cursor:pointer">
+            ✏️ Modifier
+          </button>
+          <button onclick="factShareImported(${facture.id},'wa')"
+            style="padding:8px 16px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer">
+            📱 WhatsApp
+          </button>
+          <button onclick="factShareImported(${facture.id},'email')"
+            style="padding:8px 16px;background:#2E7DD6;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer">
+            📧 Email
+          </button>
+          <button onclick="downloadImportedPDF(${facture.id})"
+            style="padding:8px 16px;background:#1F9D6B;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer">
+            ⬇️ Télécharger
+          </button>
+        </div>
+      </div>
+
+      <!-- PDF embed -->
+      <div style="padding:4px">
+        <iframe src="${facture.pdfBase64}" 
+          style="width:100%;height:700px;border:none;border-radius:0 0 12px 12px"
+          title="Aperçu facture">
+        </iframe>
+      </div>
+    </div>`;
+}
+
+function factEditImported(id) {
+  const factures = ls('factures',[]);
+  const f = factures.find(x=>x.id===id);
+  if (!f) return;
+  // Load into editor
+  factEdit(f);
+  factGo('creer');
+  toast('Facture chargée — modifiez et sauvegardez.');
+}
+
+function factShareImported(id, method) {
+  const factures = ls('factures',[]);
+  const f = factures.find(x=>x.id===id);
+  if (!f) return;
+
+  const msg = encodeURIComponent(
+    'Bonjour,\n\nVeuillez trouver ci-joint notre facture ' + (f.numero||'') +
+    '\n\nCordialement,\nBudgetSmart'
+  );
+
+  if (method==='wa') {
+    const phone = prompt('Numéro WhatsApp du client (ex: 32495639902) :','');
+    if (phone) window.open('https://wa.me/'+phone.replace(/\D/g,'')+'?text='+msg,'_blank');
+  } else if (method==='email') {
+    const email = f.clientEmail || prompt('Email du client :','');
+    if (email) {
+      window.open('mailto:'+email+'?subject=Facture '+encodeURIComponent(f.numero||'')+'&body='+msg,'_blank');
+    }
+  }
+}
+
+function downloadImportedPDF(id) {
+  const factures = ls('factures',[]);
+  const f = factures.find(x=>x.id===id);
+  if (!f?.pdfBase64) { toast('PDF non disponible.'); return; }
+  const a = document.createElement('a');
+  a.href = f.pdfBase64;
+  a.download = f.fileName || f.numero + '.pdf';
+  a.click();
+  toast('⬇️ Téléchargement démarré !');
+}
+
+// Améliorer renderFacturesList pour montrer les importées
+function renderImportedFactures() {
+  const factures = ls('factures',[]).filter(f=>f.statut==='importe'||f.pdfBase64);
+  const el = document.getElementById('importedFacturesList');
+  if (!el) return;
+  if (!factures.length) {
+    el.innerHTML = '<div class="empty">Aucune facture importée.</div>';
+    return;
+  }
+  el.innerHTML = factures.map(f=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:12px;
+      background:var(--bg);border:2px solid var(--bo);margin-bottom:10px;flex-wrap:wrap">
+      <div style="font-size:2rem">📄</div>
+      <div style="flex:1;min-width:150px">
+        <div style="font-weight:800;color:var(--tx)">${f.fileName||f.numero}</div>
+        <div style="font-size:0.85rem;color:var(--mu);margin-top:2px">
+          Importée le ${new Date(f.importDate||f.date).toLocaleDateString('fr-FR')}
+          ${f.clientNom?' · '+f.clientNom:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button onclick="afficherFactureImportee(ls('factures',[]).find(x=>x.id===${f.id}))"
+          class="btn-out" style="padding:7px 12px;font-size:0.85rem">👁️ Voir</button>
+        <button onclick="factEditImported(${f.id})"
+          class="btn-g" style="padding:7px 12px;font-size:0.85rem">✏️ Modifier</button>
+        <button onclick="downloadImportedPDF(${f.id})"
+          class="btn-out" style="padding:7px 12px;font-size:0.85rem;background:#1F9D6B;color:#fff;border:none">⬇️</button>
+        <button onclick="if(confirm('Supprimer ?')){const f=ls('factures',[]).filter(x=>x.id!==${f.id});sv('factures',f);renderImportedFactures();renderFacturesList();}"
+          style="padding:7px 10px;background:none;border:2px solid #D6432E;color:#D6432E;border-radius:8px;cursor:pointer;font-size:0.85rem">✕</button>
+      </div>
+    </div>`).join('');
+}
 
 /* ══ NAVIGATION ══ */
 function initNav() {
