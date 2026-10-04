@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BudgetSmart v3</title>
-<link rel="stylesheet" href="style.css?v=1791094150"/>
+<link rel="stylesheet" href="style.css?v=1791094790"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#2E7D5E"/>
@@ -716,6 +716,26 @@
     <button class="suivi-tab active" data-tab="liste">📋 Mes factures</button>
     <button class="suivi-tab" data-tab="creer">✏️ Créer/Modifier</button>
     <button class="suivi-tab" data-tab="upload">📤 Importer PDF</button>
+    <button class="suivi-tab" data-tab="apercu">👁️ Aperçu</button>
+    <button class="suivi-tab" data-tab="importees">🗂️ Importées</button>
+  </div>
+
+  <!-- APERÇU FACTURE IMPORTÉE -->
+  <div class="suivi-panel" data-panel="apercu" style="display:none">
+    <div id="factPreviewZone">
+      <div class="empty" style="padding:40px;text-align:center">
+        <div style="font-size:3rem;margin-bottom:12px">📄</div>
+        <div style="font-weight:700">Importez une facture pour la voir ici</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FACTURES IMPORTÉES -->
+  <div class="suivi-panel" data-panel="importees" style="display:none">
+    <div class="card">
+      <div class="ct">🗂️ Toutes vos factures importées</div>
+      <div id="importedFacturesList"><div class="empty">Aucune facture importée.</div></div>
+    </div>
   </div>
 
   <!-- LISTE DES FACTURES -->
@@ -1113,7 +1133,7 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791094150"></script>
+<script src="script.js?v=1791094790"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
