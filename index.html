@@ -1471,7 +1471,7 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791413909"></script>
+<script src="script.js?v=1791414084"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
@@ -1486,26 +1486,45 @@ function togglePwd(id,btn){
 <!-- BOUTON AFFILIATION FLOTTANT -->
 <div id="affilFloat" style="position:fixed;bottom:16px;left:16px;z-index:8000;">
 
-  <a href="landing.html#affiliation" target="_blank" style="
-    display:flex;align-items:center;gap:10px;
-    background:linear-gradient(135deg,#1F9D6B,#2ECC71);
-    color:#fff;padding:14px 20px;border-radius:14px;
-    font-size:1rem;font-weight:800;text-decoration:none;
-    box-shadow:0 4px 20px rgba(31,157,107,0.5);
-    position:relative;
-    animation:affilPulse 1.8s ease-in-out infinite;
-    white-space:nowrap;
-  ">
-    <span style="font-size:1.3rem">💰</span>
-    Gagner de l'argent — Affiliation
-    <span style="
-      position:absolute;top:-8px;right:-8px;
-      background:#E8631C;color:#fff;
-      font-size:0.65rem;font-weight:900;
-      padding:3px 8px;border-radius:10px;
-      animation:badgePulse 1s ease-in-out infinite alternate;
-    ">NOUVEAU</span>
-  </a>
+  <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
+
+    <!-- Bouton principal clignotant -->
+    <a href="landing.html#affiliation" target="_blank" style="
+      display:flex;align-items:center;gap:10px;
+      background:linear-gradient(135deg,#1F9D6B,#2ECC71);
+      color:#fff;padding:14px 20px;border-radius:14px;
+      font-size:1rem;font-weight:800;text-decoration:none;
+      box-shadow:0 4px 20px rgba(31,157,107,0.5);
+      position:relative;
+      animation:affilPulse 1.8s ease-in-out infinite;
+      white-space:nowrap;
+    ">
+      <span style="font-size:1.3rem">💰</span>
+      Gagner de l'argent — Affiliation
+      <span style="
+        position:absolute;top:-8px;right:-8px;
+        background:#E8631C;color:#fff;
+        font-size:0.65rem;font-weight:900;
+        padding:3px 8px;border-radius:10px;
+        animation:badgePulse 1s ease-in-out infinite alternate;
+      ">NOUVEAU</span>
+    </a>
+
+    <!-- Bouton demander lien -->
+    <button onclick="demanderLienAffilie()" style="
+      display:flex;align-items:center;gap:8px;
+      background:#fff;color:#1F9D6B;
+      padding:10px 18px;border-radius:12px;
+      font-size:0.88rem;font-weight:800;
+      border:2px solid #1F9D6B;cursor:pointer;
+      box-shadow:0 2px 8px rgba(0,0,0,0.12);
+      white-space:nowrap;width:100%;
+    ">
+      <span>🔗</span>
+      Demander votre lien affilié
+    </button>
+
+  </div>
 
 </div>
 
