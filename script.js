@@ -2884,7 +2884,7 @@ function afficherPreviewFacture(facture) {
           <div style="font-size:0.83rem;opacity:0.85">Importée le ${new Date(facture.importDate||facture.date).toLocaleDateString('fr-FR')}</div>
         </div>
         <div style="display:flex;gap:8px;padding:12px 16px;flex-wrap:wrap;background:var(--bg);border-bottom:2px solid var(--bo)">
-          <button onclick="factEditImported(${facture.id})" class="btn-g" style="font-size:0.88rem;padding:8px 14px">✏️ Modifier avec un modèle</button>
+          <button onclick="openPDFEditor(${facture.id})" class="btn-g" style="font-size:0.88rem;padding:8px 14px">✏️ Modifier le document</button>
           <button onclick="downloadImportedPDF(${facture.id})" class="btn-out" style="font-size:0.88rem;padding:8px 14px;background:#1F9D6B;color:#fff;border:none">⬇️ Télécharger</button>
           <button onclick="shareImportedPDF(${facture.id},'wa')" style="padding:8px 14px;background:#25D366;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.88rem;font-weight:700">📱 WhatsApp</button>
           <button onclick="shareImportedPDF(${facture.id},'email')" style="padding:8px 14px;background:#2E7DD6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.88rem;font-weight:700">📧 Email</button>
@@ -2905,16 +2905,7 @@ function afficherPreviewFacture(facture) {
 }
 
 function factEditImported(id) {
-  const factures = ls('factures',[]);
-  const f = factures.find(x=>x.id===id);
-  if (!f) return;
-  // Keep original PDF reference but load into editor
-  factEdit(f);
-  // Store original PDF reference
-  const origInput = document.getElementById('factOriginalPDF');
-  if (origInput && f.pdfBase64) origInput.value = f.pdfBase64;
-  factGo('creer');
-  toast('Facture chargée — choisissez un modèle et sauvegardez.');
+  openPDFEditor(id);
 }
 
 function downloadImportedPDF(id) {
@@ -2959,7 +2950,7 @@ function renderImportedFactures() {
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         <button onclick="afficherPreviewFacture(ls('factures',[]).find(x=>x.id===${f.id}));factGo('apercu')"
           class="btn-out" style="padding:7px 12px;font-size:0.82rem">👁️</button>
-        <button onclick="factEditImported(${f.id})"
+        <button onclick="openPDFEditor(${f.id})"
           class="btn-g" style="padding:7px 12px;font-size:0.82rem">✏️</button>
         <button onclick="downloadImportedPDF(${f.id})"
           style="padding:7px 12px;font-size:0.82rem;background:#1F9D6B;color:#fff;border:none;border-radius:8px;cursor:pointer">⬇️</button>
@@ -3870,6 +3861,291 @@ function migrateDataToPlan(plan) {
   // Toutes les données existantes sont conservées
   // Le nouveau plan donne juste accès à plus de fonctionnalités
   toast('✅ ' + total + ' enregistrements conservés avec votre plan ' + plan + ' !');
+}
+
+
+/* ══════════════════════════════════════════════
+   ÉDITEUR PDF VISUEL — Voir + Modifier + Envoyer
+══════════════════════════════════════════════ */
+
+let pdfEditorData = null;   // Facture en cours d'édition
+let pdfCanvas     = null;   // Canvas pour l'aperçu
+
+// ── Ouvrir l'éditeur avec un PDF importé ──
+function openPDFEditor(factureId) {
+  const factures = ls('factures', []);
+  const f = factures.find(x => x.id === factureId);
+  if (!f) { toast('Facture introuvable.'); return; }
+  pdfEditorData = JSON.parse(JSON.stringify(f)); // deep copy
+  renderPDFEditor();
+  factGo('editeur');
+}
+
+// ── Rendre l'éditeur visuel ──
+function renderPDFEditor() {
+  const f   = pdfEditorData;
+  const el  = document.getElementById('pdfEditorZone');
+  if (!el || !f) return;
+
+  el.innerHTML = `
+    <div style="max-width:860px;margin:0 auto">
+
+      <!-- BARRE D'OUTILS -->
+      <div style="background:var(--card);border:2px solid var(--bo);border-radius:14px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div style="font-weight:800;font-size:0.95rem;color:var(--tx);flex:1">
+          ✏️ ${f.fileName || f.numero || 'Document'}
+        </div>
+        <button onclick="savePDFEdits()" class="btn-g" style="padding:9px 16px;font-size:0.85rem">💾 Sauvegarder</button>
+        <button onclick="downloadEditedPDF()" style="padding:9px 16px;background:#1F9D6B;color:#fff;border:none;border-radius:9px;cursor:pointer;font-weight:700;font-size:0.85rem">⬇️ Télécharger PDF</button>
+        <button onclick="sendEditedDoc('wa')" style="padding:9px 16px;background:#25D366;color:#fff;border:none;border-radius:9px;cursor:pointer;font-weight:700;font-size:0.85rem">📱 WhatsApp</button>
+        <button onclick="sendEditedDoc('email')" style="padding:9px 16px;background:#2E7DD6;color:#fff;border:none;border-radius:9px;cursor:pointer;font-weight:700;font-size:0.85rem">📧 Email</button>
+        <button onclick="factGo('importees')" style="padding:9px 14px;background:none;border:2px solid var(--bo);border-radius:9px;cursor:pointer;font-size:0.85rem;color:var(--mu)">✕ Fermer</button>
+      </div>
+
+      <!-- DEUX COLONNES : Aperçu | Formulaire édition -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+        <!-- APERÇU VISUEL -->
+        <div style="background:var(--card);border:2px solid var(--bo);border-radius:14px;overflow:hidden">
+          <div style="padding:12px 16px;border-bottom:2px solid var(--bo);font-weight:800;font-size:0.85rem;color:var(--mu)">👁️ APERÇU EN TEMPS RÉEL</div>
+          <div id="pdfPreviewLive" style="padding:16px;background:#f8f5f0;min-height:400px">
+            ${buildFactureHTML(f)}
+          </div>
+        </div>
+
+        <!-- FORMULAIRE ÉDITION -->
+        <div style="background:var(--card);border:2px solid var(--bo);border-radius:14px;overflow:hidden;overflow-y:auto;max-height:600px">
+          <div style="padding:12px 16px;border-bottom:2px solid var(--bo);font-weight:800;font-size:0.85rem;color:var(--mu)">✏️ MODIFIER LES INFORMATIONS</div>
+          <div style="padding:16px">
+
+            <!-- Modèle -->
+            <div class="fg" style="margin-bottom:12px">
+              <label>Modèle visuel</label>
+              <select class="inp" id="editModele" onchange="updatePreview()" style="font-size:0.9rem">
+                <option value="moderne" ${f.modele==='moderne'?'selected':''}>🔥 Moderne Orange</option>
+                <option value="corporate" ${f.modele==='corporate'?'selected':''}>💼 Corporate Bleu</option>
+                <option value="elegant" ${f.modele==='elegant'?'selected':''}>✨ Élégant Violet</option>
+                <option value="nature" ${f.modele==='nature'?'selected':''}>🌿 Nature Vert</option>
+                <option value="gold" ${f.modele==='gold'?'selected':''}>👑 Premium Or</option>
+                <option value="minimal" ${f.modele==='minimal'?'selected':''}>⬜ Minimal</option>
+                <option value="rouge" ${f.modele==='rouge'?'selected':''}>❤️ Bold Red</option>
+                <option value="afrique" ${f.modele==='afrique'?'selected':''}>🌍 Afrique Business</option>
+              </select>
+            </div>
+
+            <!-- Numéro et dates -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+              <div class="fg">
+                <label>Numéro</label>
+                <input type="text" class="inp" id="editNumero" value="${f.numero||''}" oninput="updatePreview()" style="font-size:0.85rem"/>
+              </div>
+              <div class="fg">
+                <label>Statut</label>
+                <select class="inp" id="editStatut" onchange="updatePreview()" style="font-size:0.85rem">
+                  <option value="brouillon" ${f.statut==='brouillon'?'selected':''}>Brouillon</option>
+                  <option value="envoyee" ${f.statut==='envoyee'?'selected':''}>Envoyée</option>
+                  <option value="payee" ${f.statut==='payee'?'selected':''}>Payée ✅</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label>Date</label>
+                <input type="date" class="inp" id="editDate" value="${f.date||''}" oninput="updatePreview()" style="font-size:0.85rem"/>
+              </div>
+              <div class="fg">
+                <label>Échéance</label>
+                <input type="date" class="inp" id="editEcheance" value="${f.echeance||''}" oninput="updatePreview()" style="font-size:0.85rem"/>
+              </div>
+            </div>
+
+            <!-- Client -->
+            <div style="font-size:0.75rem;font-weight:800;color:var(--mu);text-transform:uppercase;margin-bottom:8px">👤 Client</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+              <div class="fg">
+                <label>Nom / Entreprise</label>
+                <input type="text" class="inp" id="editClientNom" value="${f.clientNom||''}" oninput="updatePreview()" style="font-size:0.85rem"/>
+              </div>
+              <div class="fg">
+                <label>Email</label>
+                <input type="email" class="inp" id="editClientEmail" value="${f.clientEmail||''}" oninput="updatePreview()" style="font-size:0.85rem"/>
+              </div>
+              <div class="fg">
+                <label>Téléphone</label>
+                <input type="tel" class="inp" id="editClientTel" value="${f.clientTel||''}" oninput="updatePreview()" style="font-size:0.85rem"/>
+              </div>
+              <div class="fg">
+                <label>Adresse</label>
+                <input type="text" class="inp" id="editClientAdresse" value="${f.clientAdresse||''}" oninput="updatePreview()" style="font-size:0.85rem"/>
+              </div>
+            </div>
+
+            <!-- Lignes -->
+            <div style="font-size:0.75rem;font-weight:800;color:var(--mu);text-transform:uppercase;margin-bottom:8px">📋 Lignes / Prestations</div>
+            <div id="editLignes" style="margin-bottom:8px">
+              ${(f.lignes||[]).map((l,i) => `
+                <div style="display:grid;grid-template-columns:3fr 1fr 1fr 32px;gap:6px;margin-bottom:6px;align-items:center">
+                  <input type="text" class="inp" placeholder="Description" value="${l.desc||''}"
+                    oninput="updateLigne(${i},'desc',this.value);updatePreview()"
+                    style="font-size:0.82rem;padding:8px"/>
+                  <input type="number" class="inp" placeholder="Qté" value="${l.qte||1}"
+                    oninput="updateLigne(${i},'qte',+this.value);updatePreview()"
+                    style="font-size:0.82rem;padding:8px"/>
+                  <input type="number" class="inp" placeholder="Prix" value="${l.prix||0}"
+                    oninput="updateLigne(${i},'prix',+this.value);updatePreview()"
+                    style="font-size:0.82rem;padding:8px"/>
+                  <button onclick="removeLigneEdit(${i})" style="background:#D6432E;color:#fff;border:none;border-radius:7px;cursor:pointer;height:36px;width:32px;font-size:0.9rem">✕</button>
+                </div>`).join('')}
+            </div>
+            <button onclick="addLigneEdit()" style="width:100%;padding:9px;background:none;border:2px dashed var(--bo);border-radius:9px;cursor:pointer;color:var(--mu);font-weight:700;font-size:0.85rem;margin-bottom:12px">+ Ajouter une ligne</button>
+
+            <!-- TVA et remise -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+              <div class="fg">
+                <label>TVA (%)</label>
+                <input type="number" class="inp" id="editTVA" value="${f.tva||0}" min="0" max="100" oninput="updatePreview()" style="font-size:0.85rem"/>
+              </div>
+              <div class="fg">
+                <label>Remise (%)</label>
+                <input type="number" class="inp" id="editRemise" value="${f.remise||0}" min="0" max="100" oninput="updatePreview()" style="font-size:0.85rem"/>
+              </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="fg">
+              <label>Notes / Conditions de paiement</label>
+              <textarea class="inp" id="editNotes" rows="3" oninput="updatePreview()" style="font-size:0.85rem">${f.notes||''}</textarea>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- SI PDF ORIGINAL IMPORTÉ : afficher en dessous -->
+      ${f.pdfBase64 ? `
+      <div style="background:var(--card);border:2px solid var(--bo);border-radius:14px;margin-top:16px;overflow:hidden">
+        <div style="padding:12px 16px;border-bottom:2px solid var(--bo);font-weight:800;font-size:0.85rem;color:var(--mu)">📄 DOCUMENT ORIGINAL IMPORTÉ (conservé intact)</div>
+        <iframe src="${f.pdfBase64}" style="width:100%;height:500px;border:none"></iframe>
+      </div>` : ''}
+
+    </div>`;
+}
+
+// ── Mise à jour temps réel de l'aperçu ──
+function updatePreview() {
+  if (!pdfEditorData) return;
+  // Sync form → data
+  const fields = {
+    numero:         'editNumero',
+    date:           'editDate',
+    echeance:       'editEcheance',
+    statut:         'editStatut',
+    modele:         'editModele',
+    clientNom:      'editClientNom',
+    clientEmail:    'editClientEmail',
+    clientTel:      'editClientTel',
+    clientAdresse:  'editClientAdresse',
+    tva:            'editTVA',
+    remise:         'editRemise',
+    notes:          'editNotes',
+  };
+  Object.entries(fields).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if (el) pdfEditorData[key] = el.value;
+  });
+  // Calc totals
+  const lignes    = pdfEditorData.lignes || [];
+  const sousTotal = lignes.reduce((s,l) => s + (l.qte||1)*(l.prix||0), 0);
+  const remise    = sousTotal * (parseFloat(pdfEditorData.remise)||0) / 100;
+  const tva       = (sousTotal - remise) * (parseFloat(pdfEditorData.tva)||0) / 100;
+  pdfEditorData.sousTotal = sousTotal;
+  pdfEditorData.totalTVA  = tva;
+  pdfEditorData.total     = sousTotal - remise + tva;
+  // Update preview
+  const preview = document.getElementById('pdfPreviewLive');
+  if (preview) preview.innerHTML = buildFactureHTML(pdfEditorData);
+}
+
+function updateLigne(idx, field, val) {
+  if (!pdfEditorData?.lignes) return;
+  if (!pdfEditorData.lignes[idx]) return;
+  pdfEditorData.lignes[idx][field] = val;
+}
+function addLigneEdit() {
+  if (!pdfEditorData) return;
+  if (!pdfEditorData.lignes) pdfEditorData.lignes = [];
+  pdfEditorData.lignes.push({desc:'', qte:1, prix:0, tva:0});
+  renderPDFEditor();
+}
+function removeLigneEdit(idx) {
+  if (!pdfEditorData?.lignes) return;
+  pdfEditorData.lignes.splice(idx, 1);
+  renderPDFEditor();
+}
+
+function savePDFEdits() {
+  if (!pdfEditorData) return;
+  updatePreview();
+  const factures = ls('factures', []);
+  const idx = factures.findIndex(f => f.id === pdfEditorData.id);
+  if (idx >= 0) {
+    // Garder le PDF original intact
+    const originalPDF = factures[idx].pdfBase64;
+    factures[idx] = Object.assign({}, pdfEditorData);
+    if (originalPDF && !pdfEditorData.pdfBase64) {
+      factures[idx].pdfBase64Original = originalPDF;
+    }
+  } else {
+    factures.unshift(pdfEditorData);
+  }
+  sv('factures', factures);
+  renderFacturesList();
+  renderImportedFactures();
+  toast('✅ Document sauvegardé !');
+}
+
+function downloadEditedPDF() {
+  updatePreview();
+  const content = buildFactureHTML(pdfEditorData);
+  const win = window.open('', '_blank');
+  if (!win) { toast('Autorisez les popups pour télécharger.'); return; }
+  win.document.write(`<!DOCTYPE html><html><head>
+    <meta charset="UTF-8"/>
+    <title>${pdfEditorData.numero || 'Facture'}</title>
+    <style>
+      body{margin:0;font-family:Arial,sans-serif;}
+      @media print{@page{margin:0;size:A4;}}
+    </style>
+  </head><body>
+    ${content}
+    <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`);
+  win.document.close();
+  toast('📄 Impression/PDF ouvert — utilisez Ctrl+P pour sauvegarder en PDF');
+}
+
+function sendEditedDoc(method) {
+  if (!pdfEditorData) return;
+  const nom     = pdfEditorData.clientNom || 'Client';
+  const numero  = pdfEditorData.numero || '';
+  const total   = (pdfEditorData.total || 0).toFixed(2);
+  const msg     = encodeURIComponent(
+    'Bonjour ' + nom + ',\n\n' +
+    'Veuillez trouver ci-joint votre facture ' + numero + ' d\'un montant de ' + total + '€.\n\n' +
+    'Pour toute question, n\'hésitez pas à nous contacter.\n\n' +
+    'Cordialement,\nBudgetSmart'
+  );
+  if (method === 'wa') {
+    const phone = pdfEditorData.clientTel
+      ? pdfEditorData.clientTel.replace(/\D/g,'')
+      : prompt('Numéro WhatsApp du client (ex: 32495639902) :','');
+    if (phone) window.open('https://wa.me/' + phone + '?text=' + msg, '_blank');
+  } else {
+    const email = pdfEditorData.clientEmail || prompt('Email du client :','');
+    if (email) window.open('mailto:' + email + '?subject=Facture ' + encodeURIComponent(numero) + '&body=' + msg, '_blank');
+  }
+  // Mark as sent
+  pdfEditorData.statut = 'envoyee';
+  savePDFEdits();
+  toast('✅ Document envoyé !');
 }
 
 /* ══ NAVIGATION ══ */
