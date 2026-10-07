@@ -3111,6 +3111,92 @@ document.addEventListener('click', (e) => {
   }
 });
 
+
+/* ══ ADMIN FUNCTIONS AMÉLIORÉES ══ */
+function setMyPlan(plan) {
+  sv('userPlan', plan);
+  const planNames = {gratuit:'Gratuit',basic:'Basic',premium:'Premium ⭐',business:'Business 👑'};
+  const el = document.getElementById('myCurrentPlan');
+  if (el) {
+    el.textContent = planNames[plan] || plan;
+    const colors = {gratuit:'var(--mu)',basic:'#2E7DD6',premium:'var(--or)',business:'var(--go)'};
+    el.style.background = colors[plan] || 'var(--or)';
+    el.style.color = plan==='business' ? '#1A1007' : '#fff';
+  }
+  // Update sidebar plan badge
+  const sb = document.getElementById('sbPlan');
+  if (sb) sb.textContent = 'Plan ' + (planNames[plan]||plan);
+  toast('✅ Votre plan a été changé : ' + (planNames[plan]||plan));
+  // Apply plan features
+  if (typeof applyUserPlan === 'function') applyUserPlan(plan);
+}
+
+function renderAdminUsers() {
+  const users  = JSON.parse(localStorage.getItem('bs_users') || '[]');
+  const search = (document.getElementById('admin-search')?.value || '').toLowerCase();
+  const filter = document.getElementById('admin-filter')?.value || 'all';
+  const el     = document.getElementById('adminUsersList');
+  if (!el) return;
+
+  // Update stats
+  const planPrices = {basic:2.99, premium:5.99, business:9.99};
+  const paid   = users.filter(u => u.plan && u.plan !== 'gratuit');
+  const revenue = paid.reduce((s,u) => s + (planPrices[u.plan] || 0), 0);
+  const txt = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  txt('adTotalUsers', users.length);
+  txt('adPaidUsers',  paid.length);
+  txt('adRevenue',    revenue.toFixed(2) + '€');
+  txt('adAffiliates', '0');
+
+  // Filter users
+  let filtered = users.filter(u => {
+    const matchSearch = !search || (u.email||'').toLowerCase().includes(search) || (u.name||'').toLowerCase().includes(search);
+    const matchFilter = filter === 'all' || (u.plan || 'gratuit') === filter;
+    return matchSearch && matchFilter;
+  });
+
+  if (!filtered.length) {
+    el.innerHTML = '<div class="empty">Aucun utilisateur trouvé.</div>';
+    return;
+  }
+
+  const planColors  = {gratuit:'var(--mu)',basic:'#2E7DD6',premium:'var(--or)',business:'var(--go)'};
+  const planNames   = {gratuit:'Gratuit',basic:'Basic',premium:'Premium',business:'Business'};
+
+  el.innerHTML = filtered.map(u => {
+    const plan = u.plan || 'gratuit';
+    const initials = (u.name || u.email || '?').charAt(0).toUpperCase();
+    return `<div style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--bo);flex-wrap:wrap">
+      <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--go));display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;flex-shrink:0">${initials}</div>
+      <div style="flex:1;min-width:120px">
+        <div style="font-weight:700;font-size:0.9rem">${u.name || 'Utilisateur'}</div>
+        <div style="font-size:0.78rem;color:var(--mu)">${u.email || ''}</div>
+      </div>
+      <div style="background:${planColors[plan]};color:${plan==='business'?'#1A1007':'#fff'};padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:800;flex-shrink:0">${planNames[plan]}</div>
+      <select onchange="assignPlan('${u.email}',this.value)" style="padding:7px 10px;border-radius:8px;border:2px solid var(--bo);background:var(--bg);color:var(--tx);font-size:0.82rem;font-weight:700;cursor:pointer">
+        <option value="">Changer le plan</option>
+        <option value="gratuit">→ Gratuit</option>
+        <option value="basic">→ Basic (2,99€)</option>
+        <option value="premium">→ Premium (5,99€)</option>
+        <option value="business">→ Business (9,99€)</option>
+      </select>
+    </div>`;
+  }).join('');
+}
+
+function assignPlan(email, plan) {
+  if (!plan || !email) return;
+  const users = JSON.parse(localStorage.getItem('bs_users') || '[]');
+  const idx = users.findIndex(u => u.email === email);
+  if (idx >= 0) {
+    users[idx].plan = plan;
+    localStorage.setItem('bs_users', JSON.stringify(users));
+    const planNames = {gratuit:'Gratuit',basic:'Basic',premium:'Premium',business:'Business'};
+    toast('✅ Plan ' + planNames[plan] + ' attribué à ' + email);
+    renderAdminUsers();
+  }
+}
+
 /* ══ NAVIGATION ══ */
 function initNav() {
   document.querySelectorAll('.ni').forEach(el => {
@@ -3139,7 +3225,7 @@ function go(page) {
   if (page === 'family')      { renderPricingProject('pgFamily','pcFamily'); }
   if (page === 'suivi')       { renderSuivi(); suiviInit(); }
   if (page === 'facturation') { renderFacturesList(); factGo('liste'); }
-  if (page === 'admin')       { renderAdmin(); }
+  if (page === 'admin')       { renderAdmin(); renderAdminUsers(); }
   if (page === 'settings')    { initSettingsPage(); }
   if (page === 'profile')     { loadProfile(); loadPhoto(); }
   if (page === 'share')       { renderShare(); }
