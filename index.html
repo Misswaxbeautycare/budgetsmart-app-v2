@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BudgetSmart v3</title>
-<link rel="stylesheet" href="style.css?v=1791414486"/>
+<link rel="stylesheet" href="style.css?v=1791415426"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
@@ -267,7 +267,7 @@
     <li><a class="ni" data-p="pricing"><i class="fa-solid fa-tag"></i> Plans & Abonnements</a></li>
     <li><a class="ni" data-p="avis"><i class="fa-solid fa-star"></i> Avis clients</a></li>
     <li><a class="ni" data-p="share"><i class="fa-solid fa-share-nodes"></i> Partager l'app</a></li>
-    <li><a class="ni" data-p="legal"><i class="fa-solid fa-scale-balanced"></i> Mentions légales</a></li>
+    <li><a class="ni" data-p="legal"><i class="fa-solid fa-file-contract"></i> Mentions légales</a></li>
     <li><a class="ni" data-p="settings"><i class="fa-solid fa-gear"></i> Paramètres</a></li>
     <li id="adminLi" style="display:none"><a class="ni" data-p="admin"><i class="fa-solid fa-shield-halved"></i> Administration</a></li>
 
@@ -1253,9 +1253,21 @@ Essayez gratuitement : https://misswaxbeautycare.github.io/budgetsmart-app-v2/</
       <div class="sett-left"><div class="sett-icon" style="background:#FFF1E6">🌐</div><div><div class="sett-title">Page de présentation</div><div class="sett-desc">Voir la landing page</div></div></div>
       <div class="sett-arrow">›</div>
     </div>
-    <div class="sett-item sett-divider" onclick="window.open('landing.html#affiliation','_blank')">
-      <div class="sett-left"><div class="sett-icon" style="background:#F0FFF8">💰</div><div><div class="sett-title">Programme d'affiliation</div><div class="sett-desc">Gagner 20-30% de commission</div></div></div>
-      <div style="background:#E8631C;color:#fff;font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:10px;margin-right:8px">NOUVEAU</div>
+    <div class="sett-item sett-divider" onclick="window.open('landing.html#affiliation','_blank')" style="cursor:pointer">
+      <div class="sett-left"><div class="sett-icon" style="background:#F0FFF8"><i class="fa-solid fa-handshake" style="color:#1F9D6B"></i></div>
+        <div>
+          <div class="sett-title">Programme d'affiliation</div>
+          <div class="sett-desc">Gagner 20-30% de commission</div>
+          <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
+            <span onclick="event.stopPropagation();demanderLienAffilie()" style="display:inline-flex;align-items:center;gap:5px;background:#1F9D6B;color:#fff;font-size:0.72rem;font-weight:800;padding:5px 10px;border-radius:8px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='#177A53'" onmouseout="this.style.background='#1F9D6B'">
+              <i class="fa-solid fa-link"></i> Demander mon lien
+            </span>
+            <span onclick="event.stopPropagation();window.open('landing.html#affiliation','_blank')" style="display:inline-flex;align-items:center;gap:5px;background:var(--or);color:#fff;font-size:0.72rem;font-weight:800;padding:5px 10px;border-radius:8px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='var(--or2)'" onmouseout="this.style.background='var(--or)'">
+              <i class="fa-solid fa-info-circle"></i> En savoir plus
+            </span>
+          </div>
+        </div>
+      </div>
       <div class="sett-arrow">›</div>
     </div>
     <div class="sett-item sett-divider" onclick="go('share')">
@@ -1518,7 +1530,7 @@ Essayez gratuitement : https://misswaxbeautycare.github.io/budgetsmart-app-v2/</
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791414746"></script>
+<script src="script.js?v=1791415426"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
@@ -1596,110 +1608,100 @@ function togglePwd(id,btn){
 <!-- PAGE MENTIONS LÉGALES -->
 <section class="page" id="p-legal">
   <div class="ph">
-    <div><h1 class="pt">📜 Mentions légales</h1>
-    <p class="ps">Informations légales et conditions d'utilisation</p></div>
+    <div><h1 class="pt">Informations légales</h1>
+    <p class="ps">Mentions légales · Confidentialité · CGU</p></div>
   </div>
 
-  <div class="card" style="margin-bottom:16px">
-    <div class="ct">🏢 Éditeur de l'application</div>
-    <div style="font-size:0.9rem;line-height:1.8;color:var(--tx)">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div><strong>Raison sociale</strong><br/><span style="color:var(--mu)">Miss Nyunge Digital Services</span></div>
-        <div><strong>Forme juridique</strong><br/><span style="color:var(--mu)">Entreprise individuelle</span></div>
-        <div><strong>Adresse</strong><br/><span style="color:var(--mu)">Bruxelles, Belgique</span></div>
-        <div><strong>Téléphone</strong><br/><span style="color:var(--mu)">+32 495 63 99 02</span></div>
-        <div><strong>Email</strong><br/><span style="color:var(--mu)">missnyunge@gmail.com</span></div>
-        <div><strong>Site web</strong><br/><span style="color:var(--mu)">missnyungedigitalservices.com</span></div>
+  <!-- 3 BOUTONS NAVIGATION -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
+    <button onclick="document.getElementById('secMentions').scrollIntoView({behavior:'smooth'})" style="padding:14px 8px;background:var(--card);border:2px solid var(--bo);border-radius:12px;cursor:pointer;font-weight:700;font-size:0.78rem;color:var(--tx);transition:all 0.2s" onmouseover="this.style.borderColor='var(--or)';this.style.color='var(--or)'" onmouseout="this.style.borderColor='var(--bo)';this.style.color='var(--tx)'">
+      <i class="fa-solid fa-file-contract" style="font-size:1.3rem;display:block;margin-bottom:6px;color:var(--or)"></i>
+      Mentions légales
+    </button>
+    <button onclick="document.getElementById('secConfi').scrollIntoView({behavior:'smooth'})" style="padding:14px 8px;background:var(--card);border:2px solid var(--bo);border-radius:12px;cursor:pointer;font-weight:700;font-size:0.78rem;color:var(--tx);transition:all 0.2s" onmouseover="this.style.borderColor='var(--bl)';this.style.color='var(--bl)'" onmouseout="this.style.borderColor='var(--bo)';this.style.color='var(--tx)'">
+      <i class="fa-solid fa-shield-halved" style="font-size:1.3rem;display:block;margin-bottom:6px;color:var(--bl)"></i>
+      Confidentialité
+    </button>
+    <button onclick="document.getElementById('secCGU').scrollIntoView({behavior:'smooth'})" style="padding:14px 8px;background:var(--card);border:2px solid var(--bo);border-radius:12px;cursor:pointer;font-weight:700;font-size:0.78rem;color:var(--tx);transition:all 0.2s" onmouseover="this.style.borderColor='#1F9D6B';this.style.color='#1F9D6B'" onmouseout="this.style.borderColor='var(--bo)';this.style.color='var(--tx)'">
+      <i class="fa-solid fa-handshake" style="font-size:1.3rem;display:block;margin-bottom:6px;color:#1F9D6B"></i>
+      CGU
+    </button>
+  </div>
+
+  <!-- MENTIONS LÉGALES -->
+  <div id="secMentions" class="card" style="margin-bottom:16px;border-left:4px solid var(--or)">
+    <div class="ct"><i class="fa-solid fa-file-contract" style="color:var(--or)"></i> Mentions légales</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div style="background:var(--bg);border-radius:10px;padding:12px"><div style="font-size:0.72rem;font-weight:800;color:var(--mu);margin-bottom:3px">ÉDITEUR</div><div style="font-weight:700;font-size:0.88rem">Miss Nyunge Digital Services</div></div>
+      <div style="background:var(--bg);border-radius:10px;padding:12px"><div style="font-size:0.72rem;font-weight:800;color:var(--mu);margin-bottom:3px">SIÈGE</div><div style="font-weight:700;font-size:0.88rem">Bruxelles, Belgique</div></div>
+      <div style="background:var(--bg);border-radius:10px;padding:12px"><div style="font-size:0.72rem;font-weight:800;color:var(--mu);margin-bottom:3px">EMAIL</div><a href="mailto:missnyunge@gmail.com" style="font-weight:700;font-size:0.88rem;color:var(--or);text-decoration:none">missnyunge@gmail.com</a></div>
+      <div style="background:var(--bg);border-radius:10px;padding:12px"><div style="font-size:0.72rem;font-weight:800;color:var(--mu);margin-bottom:3px">TÉLÉPHONE</div><a href="tel:+32495639902" style="font-weight:700;font-size:0.88rem;color:var(--or);text-decoration:none">+32 495 63 99 02</a></div>
+    </div>
+    <p style="font-size:0.82rem;color:var(--mu);line-height:1.7">BudgetSmart v3.0.0 est une application de gestion financière éditée par Miss Nyunge Digital Services. Toute reproduction partielle ou totale est interdite sans autorisation.</p>
+  </div>
+
+  <!-- CONFIDENTIALITÉ -->
+  <div id="secConfi" class="card" style="margin-bottom:16px;border-left:4px solid var(--bl)">
+    <div class="ct"><i class="fa-solid fa-shield-halved" style="color:var(--bl)"></i> Politique de confidentialité (RGPD)</div>
+    <p style="font-size:0.85rem;margin-bottom:12px;color:var(--mu)">Conformément au RGPD et à la loi belge du 30 juillet 2018, vous disposez des droits suivants :</p>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:9px;padding:10px 14px;font-size:0.85rem"><i class="fa-solid fa-eye" style="color:var(--bl);width:18px;text-align:center;flex-shrink:0"></i><span><strong>Droit d'accès</strong> à vos données personnelles</span></div>
+      <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:9px;padding:10px 14px;font-size:0.85rem"><i class="fa-solid fa-pen" style="color:var(--bl);width:18px;text-align:center;flex-shrink:0"></i><span><strong>Droit de rectification</strong> de vos informations</span></div>
+      <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:9px;padding:10px 14px;font-size:0.85rem"><i class="fa-solid fa-trash" style="color:var(--bl);width:18px;text-align:center;flex-shrink:0"></i><span><strong>Droit à l'oubli</strong> — suppression complète</span></div>
+      <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:9px;padding:10px 14px;font-size:0.85rem"><i class="fa-solid fa-file-export" style="color:var(--bl);width:18px;text-align:center;flex-shrink:0"></i><span><strong>Droit à la portabilité</strong> de vos données</span></div>
+      <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:9px;padding:10px 14px;font-size:0.85rem"><i class="fa-solid fa-ban" style="color:var(--bl);width:18px;text-align:center;flex-shrink:0"></i><span><strong>Droit d'opposition</strong> au traitement</span></div>
+    </div>
+    <div style="background:rgba(46,125,214,0.07);border:1px solid rgba(46,125,214,0.18);border-radius:10px;padding:13px;font-size:0.82rem;line-height:1.7;color:var(--mu)">
+      <strong style="color:var(--tx)">Données collectées :</strong> email, données financières, facturation.<br/>
+      <strong style="color:var(--tx)">Conservation :</strong> Durée de l'abonnement + 3 ans.<br/>
+      <strong style="color:var(--tx)">Contact :</strong> <a href="mailto:missnyunge@gmail.com" style="color:var(--bl)">missnyunge@gmail.com</a>
+    </div>
+  </div>
+
+  <!-- CGU -->
+  <div id="secCGU" class="card" style="margin-bottom:16px;border-left:4px solid #1F9D6B">
+    <div class="ct"><i class="fa-solid fa-handshake" style="color:#1F9D6B"></i> Conditions Générales d'Utilisation</div>
+    <div style="margin-bottom:14px">
+      <div style="font-weight:800;font-size:0.85rem;margin-bottom:8px;color:var(--tx)">💳 Abonnements</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;gap:8px;font-size:0.85rem"><i class="fa-solid fa-check" style="color:#1F9D6B;flex-shrink:0;margin-top:3px"></i><span>Abonnements mensuels renouvelables automatiquement</span></div>
+        <div style="display:flex;gap:8px;font-size:0.85rem"><i class="fa-solid fa-check" style="color:#1F9D6B;flex-shrink:0;margin-top:3px"></i><span>Résiliation à tout moment sans frais</span></div>
+        <div style="display:flex;gap:8px;font-size:0.85rem"><i class="fa-solid fa-check" style="color:#1F9D6B;flex-shrink:0;margin-top:3px"></i><span>Remboursement possible dans les 14 jours</span></div>
+        <div style="display:flex;gap:8px;font-size:0.85rem"><i class="fa-solid fa-check" style="color:#1F9D6B;flex-shrink:0;margin-top:3px"></i><span>Paiements sécurisés — aucune donnée bancaire stockée</span></div>
       </div>
     </div>
-  </div>
-
-  <div class="card" style="margin-bottom:16px">
-    <div class="ct">📱 Application BudgetSmart</div>
-    <div style="font-size:0.88rem;line-height:1.8;color:var(--tx)">
-      <p style="margin-bottom:10px"><strong>BudgetSmart v3.0.0</strong> est une application de gestion financière personnelle et professionnelle développée par Miss Nyunge Digital Services.</p>
-      <p style="margin-bottom:10px"><strong>Hébergement :</strong> GitHub Pages (Microsoft) — <span style="color:var(--mu)">github.com</span></p>
-      <p style="margin-bottom:10px"><strong>Base de données :</strong> Supabase — <span style="color:var(--mu)">supabase.com</span></p>
-      <p><strong>Paiements :</strong> Stripe — <span style="color:var(--mu)">stripe.com</span></p>
-    </div>
-  </div>
-
-  <div class="card" style="margin-bottom:16px">
-    <div class="ct">🔒 Protection des données personnelles (RGPD)</div>
-    <div style="font-size:0.88rem;line-height:1.8;color:var(--tx)">
-      <p style="margin-bottom:10px">Conformément au Règlement Général sur la Protection des Données (RGPD) et à la loi belge du 30 juillet 2018, vous disposez des droits suivants :</p>
-      <ul style="list-style:none;margin-bottom:12px">
-        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Droit d'accès à vos données personnelles</li>
-        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Droit de rectification et de correction</li>
-        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Droit à l'effacement (droit à l'oubli)</li>
-        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Droit à la portabilité des données</li>
-        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Droit d'opposition au traitement</li>
-      </ul>
-      <p style="margin-bottom:10px"><strong>Données collectées :</strong> email, données financières saisies par l'utilisateur, données de facturation.</p>
-      <p style="margin-bottom:10px"><strong>Finalité :</strong> Fourniture du service de gestion financière, facturation, et communications relatives au compte.</p>
-      <p><strong>Contact DPO :</strong> missnyunge@gmail.com</p>
-    </div>
-  </div>
-
-  <div class="card" style="margin-bottom:16px">
-    <div class="ct">💳 Conditions d'abonnement et de paiement</div>
-    <div style="font-size:0.88rem;line-height:1.8;color:var(--tx)">
-      <ul style="list-style:none">
-        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Les abonnements sont mensuels et renouvelables automatiquement</li>
-        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Résiliation possible à tout moment sans frais supplémentaires</li>
-        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Les paiements sont traités de manière sécurisée via Stripe</li>
-        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Aucune carte bancaire requise pour le plan gratuit</li>
-        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Remboursement possible dans les 14 jours suivant la souscription</li>
-        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Prix TTC — TVA belge applicable selon la législation en vigueur</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="card" style="margin-bottom:16px">
-    <div class="ct">🤝 Programme d'affiliation</div>
-    <div style="font-size:0.88rem;line-height:1.8;color:var(--tx)">
-      <ul style="list-style:none">
-        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Commissions de 20% (Basic), 25% (Premium) et 30% (Business) sur les abonnements</li>
-        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Paiements effectués en fin de mois via PayPal</li>
-        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Commission minimale de paiement : 5€</li>
-        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Les commissions sont calculées sur les abonnements actifs uniquement</li>
-        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Miss Nyunge Digital Services se réserve le droit de modifier les taux de commission avec un préavis de 30 jours</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="card" style="margin-bottom:16px">
-    <div class="ct">⚖️ Responsabilité et limitation</div>
-    <div style="font-size:0.88rem;line-height:1.8;color:var(--tx)">
-      <p style="margin-bottom:10px">BudgetSmart est un outil d'aide à la gestion financière. Les informations fournies ne constituent pas un conseil financier, comptable ou juridique professionnel.</p>
-      <p style="margin-bottom:10px">Miss Nyunge Digital Services ne saurait être tenu responsable des décisions financières prises sur la base des données calculées par l'application.</p>
-      <p>L'utilisateur est seul responsable de l'exactitude des données qu'il saisit dans l'application.</p>
-    </div>
-  </div>
-
-  <div class="card" style="margin-bottom:16px">
-    <div class="ct">📞 Contact et réclamations</div>
-    <div style="font-size:0.88rem;line-height:1.8;color:var(--tx)">
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <a href="mailto:missnyunge@gmail.com" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg);border-radius:10px;color:var(--tx);text-decoration:none">
-          <span style="font-size:1.3rem">📧</span>
-          <div><div style="font-weight:700">Email</div><div style="color:var(--mu);font-size:0.82rem">missnyunge@gmail.com</div></div>
-        </a>
-        <a href="https://wa.me/32495639902" target="_blank" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg);border-radius:10px;color:var(--tx);text-decoration:none">
-          <span style="font-size:1.3rem">📱</span>
-          <div><div style="font-weight:700">WhatsApp</div><div style="color:var(--mu);font-size:0.82rem">+32 495 63 99 02</div></div>
-        </a>
-        <a href="https://calendly.com/missnyungedigitalservices/echange-projet-digital-ecommerce" target="_blank" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg);border-radius:10px;color:var(--tx);text-decoration:none">
-          <span style="font-size:1.3rem">📞</span>
-          <div><div style="font-weight:700">Réserver un appel</div><div style="color:var(--mu);font-size:0.82rem">Calendly — 30 minutes</div></div>
-        </a>
+    <div style="margin-bottom:14px">
+      <div style="font-weight:800;font-size:0.85rem;margin-bottom:8px;color:var(--tx)">🤝 Affiliation</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;gap:8px;font-size:0.85rem"><i class="fa-solid fa-check" style="color:#1F9D6B;flex-shrink:0;margin-top:3px"></i><span>Commissions : Basic 20% · Premium 25% · Business 30%</span></div>
+        <div style="display:flex;gap:8px;font-size:0.85rem"><i class="fa-solid fa-check" style="color:#1F9D6B;flex-shrink:0;margin-top:3px"></i><span>Paiements fin de mois via PayPal (minimum 5€)</span></div>
+        <div style="display:flex;gap:8px;font-size:0.85rem"><i class="fa-solid fa-check" style="color:#1F9D6B;flex-shrink:0;margin-top:3px"></i><span>Modification des taux avec préavis de 30 jours</span></div>
       </div>
     </div>
+    <div style="background:rgba(31,157,107,0.06);border:1px solid rgba(31,157,107,0.15);border-radius:10px;padding:12px;font-size:0.82rem;color:var(--mu);line-height:1.7">
+      ⚖️ BudgetSmart est un outil d'aide à la gestion financière. L'utilisateur reste seul responsable de ses décisions financières.
+    </div>
   </div>
 
-  <div style="text-align:center;padding:20px;font-size:0.78rem;color:var(--mu)">
-    Dernière mise à jour : Octobre 2026 · BudgetSmart v3.0.0<br/>
-    © 2026 Miss Nyunge Digital Services — Tous droits réservés
+  <!-- CONTACT -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="ct"><i class="fa-solid fa-headset"></i> Contact</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <a href="mailto:missnyunge@gmail.com" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:10px;color:var(--tx);text-decoration:none;border:2px solid var(--bo);transition:all 0.2s" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--bo)'">
+        <i class="fa-solid fa-envelope" style="color:var(--or);font-size:1.2rem;width:20px;text-align:center"></i>
+        <div><div style="font-weight:700;font-size:0.88rem">missnyunge@gmail.com</div></div>
+        <i class="fa-solid fa-arrow-right" style="margin-left:auto;color:var(--mu)"></i>
+      </a>
+      <a href="https://wa.me/32495639902" target="_blank" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:10px;color:var(--tx);text-decoration:none;border:2px solid var(--bo);transition:all 0.2s" onmouseover="this.style.borderColor='#25D366'" onmouseout="this.style.borderColor='var(--bo)'">
+        <i class="fa-brands fa-whatsapp" style="color:#25D366;font-size:1.2rem;width:20px;text-align:center"></i>
+        <div><div style="font-weight:700;font-size:0.88rem">WhatsApp — +32 495 63 99 02</div></div>
+        <i class="fa-solid fa-arrow-right" style="margin-left:auto;color:var(--mu)"></i>
+      </a>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:12px;font-size:0.75rem;color:var(--mu)">
+    © 2026 Miss Nyunge Digital Services — Tous droits réservés · BudgetSmart v3.0.0
   </div>
 </section>
 
