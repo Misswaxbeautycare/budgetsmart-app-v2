@@ -67,7 +67,7 @@ input,select{font-family:var(--fb);}
 .ni.active{background:var(--g);color:#fff;font-weight:700;}
 .nb{font-size:0.58rem;background:rgba(200,146,42,0.22);color:var(--gol);padding:2px 7px;border-radius:8px;font-weight:800;text-transform:uppercase;}
 .nav-admin{color:var(--gol)!important;}
-.sb{padding:10px 12px 12px;border-top:1px solid rgba(255,255,255,0.08);flex-shrink:0;}
+.sb{padding:10px 12px 90px;border-top:1px solid rgba(255,255,255,0.08);}
 .sb-plan{font-size:0.7rem;color:var(--gol);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;font-weight:800;}
 .sb-up{font-size:0.85rem;color:rgba(255,255,255,0.42);display:block;font-weight:600;cursor:pointer;transition:color var(--tr);}
 .sb-up:hover{color:var(--gol);}
@@ -951,3 +951,11 @@ textarea.inp{resize:vertical;min-height:80px;line-height:1.6;}
   margin-top: 6px;
 }
 #pdfUploadZone:hover { background: var(--orp) !important; }
+
+/* Sidebar scroll fix - admin button visible */
+@media(max-width:900px){
+  .sb{ padding-bottom:140px !important; }
+}
+@media(min-width:901px){
+  .sb{ padding-bottom:90px !important; }
+}
