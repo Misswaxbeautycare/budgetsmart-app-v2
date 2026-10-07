@@ -1471,7 +1471,7 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791413573"></script>
+<script src="script.js?v=1791413670"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
@@ -1481,121 +1481,57 @@ function togglePwd(id,btn){
 }
 </script>
 
-<!-- BOUTON AFFILIATION CLIGNOTANT -->
-<div id="affilBtn" style="
+
+
+<!-- BOUTON AFFILIATION FLOTTANT -->
+<div id="affilFloat" style="
   position:fixed;
-  bottom:6px;
-  right:20px;
-  z-index:9998;
+  bottom:16px;
+  left:16px;
+  z-index:8000;
   display:flex;
   flex-direction:column;
-  align-items:flex-end;
-  gap:8px;
+  align-items:flex-start;
+  gap:6px;
 ">
-  <!-- Lien Landing Page -->
-  <a href="landing.html" target="_blank" style="
-    background:linear-gradient(135deg,#2C1654,#6B3FA0);
-    color:#fff;
-    padding:10px 16px;
-    border-radius:12px;
-    font-size:0.82rem;
-    font-weight:800;
-    text-decoration:none;
-    box-shadow:0 4px 16px rgba(44,22,84,0.4);
-    display:flex;
+  <!-- Bouton principal -->
+  <a href="landing.html#affiliation" target="_blank" style="
+    display:inline-flex;
     align-items:center;
     gap:6px;
-    transition:all 0.2s;
-  " onmouseover="this.style.transform='scale(1.05)'" 
-     onmouseout="this.style.transform='scale(1)'">
-    🌐 Voir la présentation
-  </a>
-
-  <!-- Bouton Affiliation clignotant -->
-  <a href="landing.html#affiliation" target="_blank" id="affilPulse" style="
     background:linear-gradient(135deg,#1F9D6B,#2ECC71);
     color:#fff;
-    padding:13px 20px;
-    border-radius:14px;
-    font-size:0.9rem;
+    padding:9px 14px;
+    border-radius:24px;
+    font-size:0.78rem;
     font-weight:800;
     text-decoration:none;
-    box-shadow:0 4px 20px rgba(31,157,107,0.5);
-    display:flex;
-    align-items:center;
-    gap:8px;
-    position:relative;
-    animation:affilPulse 2s infinite;
+    box-shadow:0 3px 12px rgba(31,157,107,0.4);
+    animation:affilGlow 2.5s ease-in-out infinite;
+    white-space:nowrap;
   ">
-    <span style="font-size:1.1rem">💰</span>
-    Gagner de l'argent — Affiliation
+    <span style="font-size:0.9rem">💰</span>
+    Affiliation
     <span style="
-      position:absolute;
-      top:-6px;
-      right:-6px;
-      background:#E8631C;
-      color:#fff;
+      background:rgba(255,255,255,0.25);
       font-size:0.65rem;
-      font-weight:900;
-      padding:2px 7px;
-      border-radius:10px;
-      animation:affilBadge 1s infinite alternate;
-    ">NOUVEAU</span>
-  </a>
-
-  <!-- Bouton fermer -->
-  <button onclick="document.getElementById('affilBtn').style.display='none'"
-    style="
-      background:rgba(0,0,0,0.4);
-      color:rgba(255,255,255,0.6);
-      border:none;
+      padding:1px 6px;
       border-radius:8px;
-      padding:4px 10px;
-      font-size:0.75rem;
-      cursor:pointer;
-      align-self:flex-end;
-    ">✕ Fermer</button>
+      font-weight:900;
+    ">20-30%</span>
+  </a>
 </div>
 
 <style>
-@keyframes affilPulse {
-  0%   { box-shadow: 0 4px 20px rgba(31,157,107,0.5); transform: scale(1); }
-  50%  { box-shadow: 0 8px 32px rgba(31,157,107,0.8); transform: scale(1.03); }
-  100% { box-shadow: 0 4px 20px rgba(31,157,107,0.5); transform: scale(1); }
+@keyframes affilGlow {
+  0%,100% { box-shadow:0 3px 12px rgba(31,157,107,0.4); }
+  50%      { box-shadow:0 3px 20px rgba(31,157,107,0.7); }
 }
-@keyframes affilBadge {
-  0%   { background: #E8631C; }
-  100% { background: #D98C12; }
+/* Sur mobile éviter chevauchement avec le bas */
+@media(max-width:900px){
+  #affilFloat { bottom:70px; left:12px; }
 }
 </style>
-
-<!-- MODAL ADMIN ACCESS -->
-<div id="adminAccessModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;padding:20px">
-  <div style="background:var(--card);border-radius:20px;padding:32px 28px;max-width:380px;width:100%;border:2px solid var(--or);box-shadow:0 20px 60px rgba(0,0,0,0.5)">
-    <div style="text-align:center;margin-bottom:24px">
-      <div style="font-size:3rem;margin-bottom:10px">👑</div>
-      <div style="font-family:var(--ft);font-size:1.4rem;font-weight:900;color:var(--tx)">Espace Admin</div>
-      <div style="font-size:0.88rem;color:var(--mu);margin-top:6px">Entrez votre mot de passe administrateur</div>
-    </div>
-    <div id="adminModalError" style="display:none;background:#fdecea;border:2px solid #f5b0a0;border-radius:10px;padding:10px 14px;color:#c0392b;font-weight:700;margin-bottom:14px;font-size:0.88rem"></div>
-    <div style="position:relative;margin-bottom:16px">
-      <input type="password" id="adminPwdInput" placeholder="Mot de passe admin"
-        style="width:100%;padding:14px 46px 14px 16px;border:2px solid var(--bo);border-radius:12px;font-size:1rem;outline:none;background:var(--bg);color:var(--tx)"
-        onkeydown="if(event.key==='Enter')submitAdminPwd()"
-      />
-      <button type="button" onclick="toggleAdminPwd()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem">👁️</button>
-    </div>
-    <button onclick="submitAdminPwd()" style="width:100%;padding:14px;background:var(--or);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer;margin-bottom:10px">
-      Accéder à l'espace Admin →
-    </button>
-    <button onclick="closeAdminModal()" style="width:100%;padding:12px;background:none;border:2px solid var(--bo);border-radius:12px;font-size:0.9rem;font-weight:700;cursor:pointer;color:var(--mu)">
-      Annuler
-    </button>
-    <div style="text-align:center;margin-top:14px;font-size:0.78rem;color:var(--mu)">
-      Mot de passe oublié ? Contactez le support.
-    </div>
-  </div>
-</div>
 </body>
 </html>
   <!-- BADGE RÉGION -->
