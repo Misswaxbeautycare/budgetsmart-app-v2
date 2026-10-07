@@ -2076,32 +2076,115 @@ const LANGS = {
     today:"Aujourd\'hui", thisWeek:"Cette semaine", thisMonth:"Ce mois",
     welcome:"Bienvenue", logout:"Déconnexion",
     budget:"Budget", forecast:"Prévision", hello:"Bonjour",
-    income:"Revenus", save:"Économies", noData:"Aucune donnée"
+    income:"Revenus", save:"Économies", noData:"Aucune donnée",
+    settings:"Paramètres", profile:"Profil", share:"Partager",
+    suivi:"Suivi", facturation:"Facturation", pricing:"Plans",
+    defis:"Défis", tips:"Conseils", calendrier:"Calendrier",
+    add:"Ajouter", save_btn:"Sauvegarder", cancel:"Annuler", delete:"Supprimer",
+    loading:"Chargement...", error:"Erreur", success:"Succès"
   },
   en: {
     dashboard:"Dashboard", expenses:"Expenses", goals:"Goals",
     today:"Today", thisWeek:"This week", thisMonth:"This month",
     welcome:"Welcome", logout:"Logout",
     budget:"Budget", forecast:"Forecast", hello:"Hello",
-    income:"Income", save:"Savings", noData:"No data"
+    income:"Income", save:"Savings", noData:"No data",
+    settings:"Settings", profile:"Profile", share:"Share",
+    suivi:"Tracking", facturation:"Invoicing", pricing:"Plans",
+    defis:"Challenges", tips:"Tips", calendrier:"Calendar",
+    add:"Add", save_btn:"Save", cancel:"Cancel", delete:"Delete",
+    loading:"Loading...", error:"Error", success:"Success"
   },
   ln: {
     dashboard:"Tableau", expenses:"Mabimba", goals:"Biloko",
     today:"Lelo", thisWeek:"Poso oyo", thisMonth:"Sanza oyo",
     welcome:"Boyei bolamu", logout:"Bima",
     budget:"Bütjö", forecast:"Prevision", hello:"Mbote",
-    income:"Mbongo", save:"Kobatela", noData:"Eloko te"
+    income:"Mbongo ya koya", save:"Kobatela", noData:"Eloko te",
+    settings:"Milobi", profile:"Profil", share:"Bongisa",
+    suivi:"Kolanda", facturation:"Facture", pricing:"Mapango",
+    defis:"Mikakatano", tips:"Toli", calendrier:"Kalenda",
+    add:"Yaka kotia", save_btn:"Batelela", cancel:"Boya", delete:"Bunga",
+    loading:"Kozela...", error:"Suka", success:"Malamu"
+  },
+  es: {
+    dashboard:"Panel principal", expenses:"Gastos", goals:"Objetivos",
+    today:"Hoy", thisWeek:"Esta semana", thisMonth:"Este mes",
+    welcome:"Bienvenido", logout:"Salir",
+    budget:"Presupuesto", forecast:"Previsión", hello:"Hola",
+    income:"Ingresos", save:"Ahorros", noData:"Sin datos",
+    settings:"Ajustes", profile:"Perfil", share:"Compartir",
+    suivi:"Seguimiento", facturation:"Facturación", pricing:"Planes",
+    defis:"Desafíos", tips:"Consejos", calendrier:"Calendario",
+    add:"Añadir", save_btn:"Guardar", cancel:"Cancelar", delete:"Eliminar",
+    loading:"Cargando...", error:"Error", success:"Éxito"
+  },
+  pt: {
+    dashboard:"Painel", expenses:"Despesas", goals:"Objetivos",
+    today:"Hoje", thisWeek:"Esta semana", thisMonth:"Este mês",
+    welcome:"Bem-vindo", logout:"Sair",
+    budget:"Orçamento", forecast:"Previsão", hello:"Olá",
+    income:"Receitas", save:"Poupanças", noData:"Sem dados",
+    settings:"Configurações", profile:"Perfil", share:"Partilhar",
+    suivi:"Acompanhamento", facturation:"Faturação", pricing:"Planos",
+    defis:"Desafios", tips:"Dicas", calendrier:"Calendário",
+    add:"Adicionar", save_btn:"Guardar", cancel:"Cancelar", delete:"Eliminar",
+    loading:"A carregar...", error:"Erro", success:"Sucesso"
+  },
+  sw: {
+    dashboard:"Dashibodi", expenses:"Matumizi", goals:"Malengo",
+    today:"Leo", thisWeek:"Wiki hii", thisMonth:"Mwezi huu",
+    welcome:"Karibu", logout:"Toka",
+    budget:"Bajeti", forecast:"Utabiri", hello:"Habari",
+    income:"Mapato", save:"Akiba", noData:"Hakuna data",
+    settings:"Mipangilio", profile:"Wasifu", share:"Shiriki",
+    suivi:"Ufuatiliaji", facturation:"Ankara", pricing:"Mipango",
+    defis:"Changamoto", tips:"Vidokezo", calendrier:"Kalenda",
+    add:"Ongeza", save_btn:"Hifadhi", cancel:"Ghairi", delete:"Futa",
+    loading:"Inapakia...", error:"Hitilafu", success:"Mafanikio"
+  },
+  ha: {
+    dashboard:"Dashboard", expenses:"Kashe-kudi", goals:"Manufa",
+    today:"Yau", thisWeek:"Wannan mako", thisMonth:"Wannan wata",
+    welcome:"Barka da zuwa", logout:"Fita",
+    budget:"Kasafin kudi", forecast:"Hasashe", hello:"Sannu",
+    income:"Kudin shiga", save:"Tanadi", noData:"Babu bayanai",
+    settings:"Saitunan", profile:"Bayani", share:"Raba",
+    suivi:"Bibiya", facturation:"Takarda", pricing:"Shirye-shirye",
+    defis:"Kalubale", tips:"Shawarwari", calendrier:"Kalanda",
+    add:"Kara", save_btn:"Adana", cancel:"Soke", delete:"Share",
+    loading:"Ana lodi...", error:"Kuskure", success:"Nasara"
+  },
+  wo: {
+    dashboard:"Bord", expenses:"Fàll", goals:"Mël",
+    today:"Tey", thisWeek:"Ayu bi", thisMonth:"Weer wi",
+    welcome:"Dalal ak jamm", logout:"Dem",
+    budget:"Caabi", forecast:"Xam-xam", hello:"Na nga def",
+    income:"Xaalis", save:"Denceel", noData:"Dafa amul dara",
+    settings:"Yëgël", profile:"Profil", share:"Baal",
+    suivi:"Xool", facturation:"Facture", pricing:"Njëg",
+    defis:"Dëkk", tips:"Xam-xam", calendrier:"Almanax",
+    add:"Yokku", save_btn:"Denc", cancel:"Bëgg du", delete:"Sell",
+    loading:"Jëm...", error:"Njëkk", success:"Mu baax"
   }
 };
+
+
 let currentLang = localStorage.getItem("bs_lang") || "fr";
 function t(key) { return LANGS[currentLang]?.[key] || LANGS.fr[key] || key; }
 function setLang(lang) {
   currentLang = lang; localStorage.setItem("bs_lang", lang);
-  const flags = {fr:"🇫🇷 Français", en:"🇬🇧 English", ln:"🇨🇩 Lingála"};
+  const flags = {
+    fr:"🇫🇷 Français", en:"🇬🇧 English", ln:"🇨🇩 Lingála",
+    es:"🇪🇸 Español", pt:"🇧🇷 Português", sw:"🇰🇪 Kiswahili",
+    ha:"🇳🇬 Hausa", wo:"🇸🇳 Wolof"
+  };
   toast(flags[lang] || lang);
   document.querySelectorAll("[data-lang]").forEach(b => 
     b.classList.toggle("active", b.dataset.lang === lang)
   );
+  const el = document.getElementById("settLangDesc");
+  if (el) el.textContent = flags[lang] || lang;
 }
 function initLang() {
   document.querySelectorAll("[data-lang]").forEach(btn => {
