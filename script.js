@@ -3363,6 +3363,389 @@ function setPricing(mode) {
   renderPricingAll();
 }
 
+
+/* ══════════════════════════════════════════════
+   SYSTÈME D'AFFILIATION AUTOMATIQUE COMPLET
+   - Lien unique par affilié
+   - Tracking automatique des conversions
+   - Calcul commissions en temps réel
+   - Tableau de bord affilié
+   - Historique mensuel
+══════════════════════════════════════════════ */
+
+const AFFIL_COMMISSIONS = { basic: 0.20, premium: 0.25, business: 0.30 };
+const AFFIL_PRICES_EU   = { basic: 2.99, premium: 5.99, business: 9.99 };
+const AFFIL_PRICES_AF   = { basic: 1.00, premium: 2.00, business: 3.00 };
+const SUPABASE_URL_AF   = 'https://otpnegpmvsmutyhhmkvp.supabase.co';
+const SUPABASE_KEY_AF   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90cG5lZ3BtdnNtdXR5aGhta3ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MzkxMzYsImV4cCI6MjA5NzIxNTEzNn0.n0BOebUlmZpMzygGAhNlRSyYnLiPNU0iM0xousqscHo';
+
+// ── Générer un code affilié unique ──
+function generateAffiliateCode(name) {
+  const clean = name.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+  const rand  = Math.random().toString(36).slice(2,6).toUpperCase();
+  return 'AF-' + clean + '-' + rand;
+}
+
+// ── Créer le lien affilié ──
+function buildAffiliateLink(code) {
+  return 'https://misswaxbeautycare.github.io/budgetsmart-app-v2/?ref=' + code;
+}
+
+// ── Détecter si visite vient d'un affilié ──
+function detectAffiliateRef() {
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
+  if (ref) {
+    localStorage.setItem('bs_ref', ref);
+    localStorage.setItem('bs_ref_time', Date.now().toString());
+    // Track visit in Supabase
+    trackAffiliateVisit(ref);
+  }
+  return ref || localStorage.getItem('bs_ref') || null;
+}
+
+async function trackAffiliateVisit(code) {
+  try {
+    await fetch(SUPABASE_URL_AF + '/rest/v1/affiliate_visits', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY_AF,
+        'Authorization': 'Bearer ' + SUPABASE_KEY_AF,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        affiliate_code: code,
+        visited_at: new Date().toISOString(),
+        user_agent: navigator.userAgent.slice(0,100)
+      })
+    });
+  } catch(e) {}
+}
+
+// ── Enregistrer une conversion ──
+async function trackAffiliateConversion(affiliateCode, plan, region) {
+  if (!affiliateCode) return;
+  const price = (region==='af' ? AFFIL_PRICES_AF : AFFIL_PRICES_EU)[plan] || 0;
+  const commission = price * (AFFIL_COMMISSIONS[plan] || 0.20);
+  try {
+    await fetch(SUPABASE_URL_AF + '/rest/v1/affiliate_conversions', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY_AF,
+        'Authorization': 'Bearer ' + SUPABASE_KEY_AF,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        affiliate_code: affiliateCode,
+        plan: plan,
+        region: region,
+        sale_amount: price,
+        commission: commission,
+        converted_at: new Date().toISOString(),
+        month: new Date().toISOString().slice(0,7),
+        paid: false
+      })
+    });
+  } catch(e) {}
+}
+
+// ── Charger stats affilié depuis Supabase ──
+async function loadAffiliateStats(code) {
+  try {
+    const [visits, convs] = await Promise.all([
+      fetch(SUPABASE_URL_AF + '/rest/v1/affiliate_visits?affiliate_code=eq.' + code + '&select=count', {
+        headers: { 'apikey': SUPABASE_KEY_AF, 'Authorization': 'Bearer ' + SUPABASE_KEY_AF, 'Prefer': 'count=exact' }
+      }),
+      fetch(SUPABASE_URL_AF + '/rest/v1/affiliate_conversions?affiliate_code=eq.' + code + '&order=converted_at.desc', {
+        headers: { 'apikey': SUPABASE_KEY_AF, 'Authorization': 'Bearer ' + SUPABASE_KEY_AF }
+      })
+    ]);
+    const visitCount = visits.headers.get('content-range')?.split('/')[1] || 0;
+    const convData   = await convs.json() || [];
+    return { visits: parseInt(visitCount)||0, conversions: convData };
+  } catch(e) { return { visits: 0, conversions: [] }; }
+}
+
+// ── Créer un affilié ──
+async function createAffiliate(name, email, paypal) {
+  const code = generateAffiliateCode(name);
+  const link = buildAffiliateLink(code);
+  const affiliates = JSON.parse(localStorage.getItem('bs_affiliates') || '[]');
+  const newAff = {
+    id: Date.now(),
+    code, name, email, paypal,
+    link,
+    createdAt: new Date().toISOString(),
+    totalCommission: 0,
+    totalPaid: 0
+  };
+  affiliates.push(newAff);
+  localStorage.setItem('bs_affiliates', JSON.stringify(affiliates));
+  // Save to Supabase
+  try {
+    await fetch(SUPABASE_URL_AF + '/rest/v1/affiliates', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY_AF,
+        'Authorization': 'Bearer ' + SUPABASE_KEY_AF,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ code, name, email, paypal_email: paypal, link, created_at: newAff.createdAt })
+    });
+  } catch(e) {}
+  return newAff;
+}
+
+// ── Rendre la page affiliés dans l'admin ──
+async function renderAdminAffiliates() {
+  const el = document.getElementById('adminAffiliatesList');
+  if (!el) return;
+  
+  const affiliates = JSON.parse(localStorage.getItem('bs_affiliates') || '[]');
+  
+  // Stats globales
+  let totalVisits = 0, totalConv = 0, totalComm = 0;
+  
+  if (!affiliates.length) {
+    el.innerHTML = `
+      <div style="text-align:center;padding:32px;color:var(--mu)">
+        <div style="font-size:3rem;margin-bottom:12px">🤝</div>
+        <div style="font-weight:700;margin-bottom:8px">Aucun affilié encore</div>
+        <div style="font-size:0.85rem">Ajoutez votre premier affilié avec le formulaire ci-dessus</div>
+      </div>`;
+    return;
+  }
+
+  // Load stats for each affiliate
+  const rows = await Promise.all(affiliates.map(async (aff) => {
+    const stats = await loadAffiliateStats(aff.code);
+    const thisMonth = new Date().toISOString().slice(0,7);
+    const monthConv = stats.conversions.filter(c => c.month === thisMonth);
+    const monthComm = monthConv.reduce((s,c) => s + (c.commission||0), 0);
+    const totalCommAff = stats.conversions.reduce((s,c) => s + (c.commission||0), 0);
+    const unpaid = stats.conversions.filter(c => !c.paid).reduce((s,c) => s + (c.commission||0), 0);
+    
+    totalVisits += stats.visits;
+    totalConv   += stats.conversions.length;
+    totalComm   += unpaid;
+    
+    const initials = aff.name.charAt(0).toUpperCase();
+    return `
+      <div style="background:var(--bg);border:2px solid var(--bo);border-radius:14px;padding:18px;margin-bottom:14px">
+        
+        <!-- En-tête affilié -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+          <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--go));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;color:#fff;flex-shrink:0">${initials}</div>
+          <div style="flex:1;min-width:120px">
+            <div style="font-weight:800;font-size:0.95rem">${aff.name}</div>
+            <div style="font-size:0.78rem;color:var(--mu)">${aff.email}</div>
+          </div>
+          <div style="background:rgba(31,157,107,0.15);color:#1F9D6B;padding:4px 12px;border-radius:20px;font-size:0.78rem;font-weight:800;flex-shrink:0">Code: ${aff.code}</div>
+        </div>
+
+        <!-- Stats en 4 colonnes -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">
+          <div style="background:var(--card);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-family:var(--ft);font-size:1.4rem;font-weight:900;color:var(--bl)">${stats.visits}</div>
+            <div style="font-size:0.72rem;color:var(--mu);margin-top:2px">Visites</div>
+          </div>
+          <div style="background:var(--card);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-family:var(--ft);font-size:1.4rem;font-weight:900;color:var(--or)">${stats.conversions.length}</div>
+            <div style="font-size:0.72rem;color:var(--mu);margin-top:2px">Abonnés</div>
+          </div>
+          <div style="background:var(--card);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-family:var(--ft);font-size:1.4rem;font-weight:900;color:#1F9D6B">${monthComm.toFixed(2)}€</div>
+            <div style="font-size:0.72rem;color:var(--mu);margin-top:2px">Ce mois</div>
+          </div>
+          <div style="background:var(--card);border-radius:10px;padding:12px;text-align:center;border:2px solid ${unpaid>0?'var(--or)':'var(--bo)'}">
+            <div style="font-family:var(--ft);font-size:1.4rem;font-weight:900;color:var(--or)">${unpaid.toFixed(2)}€</div>
+            <div style="font-size:0.72rem;color:var(--mu);margin-top:2px">À payer</div>
+          </div>
+        </div>
+
+        <!-- Lien affilié -->
+        <div style="background:var(--card);border-radius:10px;padding:12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div style="font-size:0.78rem;color:var(--mu);flex-shrink:0;font-weight:700">🔗 Son lien :</div>
+          <div style="font-size:0.78rem;color:var(--tx);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">${aff.link}</div>
+          <button onclick="copyAffLink('${aff.link}')" style="padding:6px 12px;background:var(--or);color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:0.78rem;font-weight:700;flex-shrink:0">Copier</button>
+          <button onclick="shareAffLink('${aff.name}','${aff.link}')" style="padding:6px 12px;background:#25D366;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:0.78rem;font-weight:700;flex-shrink:0">📱 WA</button>
+        </div>
+
+        <!-- Conversions ce mois -->
+        ${monthConv.length ? `
+        <div style="margin-bottom:12px">
+          <div style="font-size:0.78rem;font-weight:800;color:var(--mu);text-transform:uppercase;margin-bottom:6px">Abonnements ce mois</div>
+          ${monthConv.map(c => `
+            <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--card);border-radius:7px;margin-bottom:4px;font-size:0.78rem">
+              <span style="background:${c.plan==='premium'?'var(--or)':c.plan==='business'?'var(--go)':'#2E7DD6'};color:${c.plan==='business'?'#1A1007':'#fff'};padding:2px 8px;border-radius:10px;font-weight:700">${c.plan}</span>
+              <span style="color:var(--mu)">${c.converted_at?.slice(0,10)||''}</span>
+              <span style="margin-left:auto;font-weight:700;color:#1F9D6B">+${c.commission?.toFixed(2)||'0.00'}€</span>
+              <span style="color:var(--mu);font-size:0.7rem">${c.region==='af'?'🌍':'🌐'}</span>
+            </div>`).join('')}
+        </div>` : ''}
+
+        <!-- Actions paiement -->
+        ${unpaid > 0 ? `
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div style="flex:1;font-size:0.85rem;color:var(--tx)">
+            Payer <strong style="color:var(--or)">${unpaid.toFixed(2)}€</strong> à ${aff.name}
+            ${aff.paypal ? '<span style="color:var(--mu)"> via PayPal</span>' : ''}
+          </div>
+          ${aff.paypal ? `
+          <a href="https://www.paypal.com/paypalme/${aff.paypal.replace('@','')}/${unpaid.toFixed(2)}" target="_blank"
+            style="padding:8px 14px;background:#009CDE;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+            💳 Payer via PayPal
+          </a>` : ''}
+          <button onclick="markAffPaid('${aff.code}')" style="padding:8px 14px;background:#1F9D6B;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:700">
+            ✅ Marquer payé
+          </button>
+        </div>` : `
+        <div style="font-size:0.82rem;color:#1F9D6B;font-weight:700">✅ Tout à jour — aucun paiement en attente</div>`}
+      </div>`;
+  }));
+
+  // Summary header
+  const summary = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
+      <div style="background:linear-gradient(135deg,var(--or),var(--or2));border-radius:12px;padding:16px;text-align:center">
+        <div style="font-family:var(--ft);font-size:2rem;font-weight:900;color:#fff">${affiliates.length}</div>
+        <div style="font-size:0.8rem;color:rgba(255,255,255,0.8);margin-top:3px">Affiliés actifs</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#1F9D6B,#2ECC71);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-family:var(--ft);font-size:2rem;font-weight:900;color:#fff">${totalConv}</div>
+        <div style="font-size:0.8rem;color:rgba(255,255,255,0.8);margin-top:3px">Total abonnés</div>
+      </div>
+      <div style="background:linear-gradient(135deg,var(--go),#F0D060);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-family:var(--ft);font-size:2rem;font-weight:900;color:#1A1007">${totalComm.toFixed(2)}€</div>
+        <div style="font-size:0.8rem;color:rgba(26,20,16,0.7);margin-top:3px">À reverser ce mois</div>
+      </div>
+    </div>`;
+
+  el.innerHTML = summary + rows.join('');
+}
+
+function copyAffLink(link) {
+  navigator.clipboard?.writeText(link);
+  toast('🔗 Lien copié !');
+}
+
+function shareAffLink(name, link) {
+  const msg = encodeURIComponent(
+    'Bonjour ' + name + ' !\n\n' +
+    'Voici votre lien d\'affiliation BudgetSmart personnel :\n' +
+    link + '\n\n' +
+    'Partagez ce lien à vos contacts. Chaque personne qui s\'abonne via votre lien vous rapporte une commission mensuelle automatique !\n\n' +
+    '📊 Commissions : Basic 20% · Premium 25% · Business 30%\n\n' +
+    'Merci de faire partie du programme !\n— Miss Nyunge / BudgetSmart'
+  );
+  window.open('https://wa.me/?text=' + msg, '_blank');
+}
+
+async function markAffPaid(code) {
+  if (!confirm('Marquer toutes les commissions de cet affilié comme payées ce mois ?')) return;
+  try {
+    await fetch(SUPABASE_URL_AF + '/rest/v1/affiliate_conversions?affiliate_code=eq.' + code + '&paid=eq.false', {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY_AF,
+        'Authorization': 'Bearer ' + SUPABASE_KEY_AF,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ paid: true, paid_at: new Date().toISOString() })
+    });
+  } catch(e) {}
+  // Update local
+  toast('✅ Paiement enregistré !');
+  renderAdminAffiliates();
+}
+
+async function addNewAffiliate() {
+  const name   = document.getElementById('affNewName')?.value.trim();
+  const email  = document.getElementById('affNewEmail')?.value.trim();
+  const paypal = document.getElementById('affNewPaypal')?.value.trim();
+  if (!name || !email) { toast('⚠️ Nom et email requis.'); return; }
+  const btn = document.getElementById('btnAddAffiliate');
+  if (btn) { btn.disabled = true; btn.textContent = 'Création...'; }
+  const aff = await createAffiliate(name, email, paypal);
+  if (btn) { btn.disabled = false; btn.textContent = '+ Ajouter l\'affilié'; }
+  document.getElementById('affNewName').value  = '';
+  document.getElementById('affNewEmail').value = '';
+  document.getElementById('affNewPaypal').value = '';
+  toast('✅ Affilié créé ! Lien: ' + aff.code);
+  // Send WA automatically
+  shareAffLink(aff.name, aff.link);
+  renderAdminAffiliates();
+}
+
+// ── PAGE AFFILIÉ (pour l'affilié lui-même) ──
+async function renderMyAffiliateStats() {
+  const el = document.getElementById('myAffiliateDash');
+  if (!el) return;
+  const myCode = ls('profile',{}).affiliateCode || null;
+  if (!myCode) {
+    el.innerHTML = '<div class="empty">Vous n\'êtes pas encore affilié. Contactez l\'admin.</div>';
+    return;
+  }
+  const stats = await loadAffiliateStats(myCode);
+  const myLink = buildAffiliateLink(myCode);
+  const thisMonth = new Date().toISOString().slice(0,7);
+  const monthConv = stats.conversions.filter(c => c.month === thisMonth);
+  const monthComm = monthConv.reduce((s,c) => s + (c.commission||0), 0);
+  const totalComm = stats.conversions.reduce((s,c) => s + (c.commission||0), 0);
+  const unpaid    = stats.conversions.filter(c => !c.paid).reduce((s,c) => s + (c.commission||0), 0);
+
+  el.innerHTML = `
+    <div style="background:linear-gradient(135deg,var(--or),var(--go));border-radius:16px;padding:24px;margin-bottom:20px;color:#fff">
+      <div style="font-size:0.82rem;opacity:0.85;margin-bottom:4px">Votre code affilié</div>
+      <div style="font-family:var(--ft);font-size:1.8rem;font-weight:900;letter-spacing:0.05em">${myCode}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px">
+      <div style="background:var(--card);border:2px solid var(--bo);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-family:var(--ft);font-size:2rem;font-weight:900;color:var(--bl)">${stats.visits}</div>
+        <div style="font-size:0.78rem;color:var(--mu);margin-top:3px">Visites via votre lien</div>
+      </div>
+      <div style="background:var(--card);border:2px solid var(--bo);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-family:var(--ft);font-size:2rem;font-weight:900;color:var(--or)">${stats.conversions.length}</div>
+        <div style="font-size:0.78rem;color:var(--mu);margin-top:3px">Personnes abonnées</div>
+      </div>
+      <div style="background:var(--card);border:2px solid var(--bo);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-family:var(--ft);font-size:2rem;font-weight:900;color:#1F9D6B">${monthComm.toFixed(2)}€</div>
+        <div style="font-size:0.78rem;color:var(--mu);margin-top:3px">Commission ce mois</div>
+      </div>
+      <div style="background:var(--card);border:2px solid var(--or);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-family:var(--ft);font-size:2rem;font-weight:900;color:var(--or)">${unpaid.toFixed(2)}€</div>
+        <div style="font-size:0.78rem;color:var(--mu);margin-top:3px">En attente de paiement</div>
+      </div>
+    </div>
+    <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:16px">
+      <div style="font-size:0.82rem;font-weight:800;color:var(--mu);margin-bottom:8px">🔗 VOTRE LIEN PERSONNEL</div>
+      <div style="font-size:0.82rem;word-break:break-all;color:var(--tx);margin-bottom:10px">${myLink}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="navigator.clipboard?.writeText('${myLink}');toast('Lien copié !');" class="btn-g" style="flex:1;min-width:120px">📋 Copier mon lien</button>
+        <button onclick="shareAffLink('',\'${myLink}\')" style="flex:1;min-width:120px;padding:12px;background:#25D366;color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:700">📱 Partager WA</button>
+      </div>
+    </div>
+    ${stats.conversions.length ? `
+    <div style="background:var(--card);border-radius:12px;padding:16px">
+      <div style="font-size:0.82rem;font-weight:800;color:var(--mu);margin-bottom:10px">Historique des conversions</div>
+      ${stats.conversions.slice(0,10).map(c => `
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bo);font-size:0.82rem">
+          <span style="background:${c.plan==='premium'?'var(--or)':c.plan==='business'?'var(--go)':'#2E7DD6'};color:${c.plan==='business'?'#1A1007':'#fff'};padding:2px 8px;border-radius:8px;font-weight:700;font-size:0.72rem">${c.plan}</span>
+          <span style="color:var(--mu)">${c.converted_at?.slice(0,10)||''}</span>
+          <span style="margin-left:auto;font-weight:800;color:#1F9D6B">+${c.commission?.toFixed(2)||'0'}€</span>
+          <span style="font-size:0.7rem;padding:2px 6px;border-radius:6px;background:${c.paid?'rgba(31,157,107,0.1)':'rgba(232,99,28,0.1)'};color:${c.paid?'#1F9D6B':'var(--or)'}">${c.paid?'Payé':'En attente'}</span>
+        </div>`).join('')}
+    </div>` : ''}`;
+}
+
+// ── Détecter ref au chargement ──
+window.addEventListener('DOMContentLoaded', () => {
+  detectAffiliateRef();
+});
+
 /* ══ NAVIGATION ══ */
 function initNav() {
   document.querySelectorAll('.ni').forEach(el => {
@@ -3391,7 +3774,7 @@ function go(page) {
   if (page === 'family')      { renderPricingProject('pgFamily','pcFamily'); }
   if (page === 'suivi')       { renderSuivi(); suiviInit(); }
   if (page === 'facturation') { renderFacturesList(); factGo('liste'); }
-  if (page === 'admin')       { renderAdmin(); renderAdminUsers(); }
+  if (page === 'admin')       { renderAdmin(); renderAdminUsers(); renderAdminAffiliates(); }
   if (page === 'settings')    { initSettingsPage(); }
   if (page === 'profile')     { loadProfile(); loadPhoto(); }
   if (page === 'share')       { renderShare(); }
