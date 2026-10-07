@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BudgetSmart v3</title>
-<link rel="stylesheet" href="style.css?v=1791408343"/>
+<link rel="stylesheet" href="style.css?v=1791408534"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#2E7D5E"/>
@@ -12,7 +12,85 @@
 <meta name="apple-mobile-web-app-title" content="BudgetSmart"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
+
+<style>
+/* ══ PARAMÈTRES PROFESSIONNELS ══ */
+.sett-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 18px;
+  cursor: pointer;
+  transition: background 0.15s;
+  gap: 12px;
+}
+.sett-item:hover { background: var(--orp); }
+.sett-item:active { background: var(--bo); }
+.sett-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+.sett-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+.sett-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--tx);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sett-desc {
+  font-size: 0.78rem;
+  color: var(--mu);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sett-arrow {
+  font-size: 1.3rem;
+  color: var(--mu);
+  font-weight: 300;
+  flex-shrink: 0;
+}
+.sett-divider { border-top: 1px solid var(--bo); }
+.sett-toggle {
+  width: 48px;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--bo);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.sett-toggle::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.sett-toggle.on { background: var(--or); }
+.sett-toggle.on::after { transform: translateX(20px); }
+</style></head>
 <body>
 
 <!-- ONBOARDING -->
@@ -1001,56 +1079,161 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 
 <!-- PARAMÈTRES -->
 <section class="page" id="p-settings">
-  <div class="ph"><div><h1 class="pt">Paramètres</h1><p class="ps">Configurez votre expérience</p></div></div>
-  <div class="card">
-    <div class="ct">🌍 Langue / Language / Lokóta</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">
-      <button data-lang="fr" class="btn-out" style="flex:1;min-width:100px">🇫🇷 Français</button>
-      <button data-lang="en" class="btn-out" style="flex:1;min-width:100px">🇬🇧 English</button>
-      <button data-lang="ln" class="btn-out" style="flex:1;min-width:100px">🇨🇩 Lingála</button>
+
+  <!-- EN-TÊTE PROFIL -->
+  <div style="background:linear-gradient(135deg,#E8631C,#D98C12);border-radius:var(--r);padding:28px 24px;margin-bottom:24px;display:flex;align-items:center;gap:20px;position:relative;overflow:hidden">
+    <div style="position:absolute;right:-20px;top:-20px;width:120px;height:120px;background:rgba(255,255,255,0.06);border-radius:50%"></div>
+    <div style="position:absolute;right:40px;bottom:-30px;width:80px;height:80px;background:rgba(255,255,255,0.04);border-radius:50%"></div>
+    <div id="settAvatar" style="width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-family:var(--ft);font-size:2rem;font-weight:900;color:#fff;border:3px solid rgba(255,255,255,0.3);flex-shrink:0">M</div>
+    <div style="flex:1">
+      <div id="settName" style="font-family:var(--ft);font-size:1.5rem;font-weight:900;color:#fff">Mon compte</div>
+      <div id="settEmail" style="font-size:0.88rem;color:rgba(255,255,255,0.8);margin-top:3px">missnyunge@gmail.com</div>
+      <div id="settPlan" style="display:inline-block;background:rgba(255,255,255,0.2);color:#fff;font-size:0.75rem;font-weight:800;padding:3px 12px;border-radius:20px;margin-top:8px">Plan Gratuit</div>
+    </div>
+    <button onclick="go('profile')" style="background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);color:#fff;padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.85rem;flex-shrink:0">✏️ Modifier</button>
+  </div>
+
+  <!-- CATÉGORIE : COMPTE -->
+  <div style="margin-bottom:8px;padding:0 4px;font-size:0.75rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:0.08em">Compte</div>
+  <div style="background:var(--card);border-radius:var(--r);border:2px solid var(--bo);overflow:hidden;margin-bottom:20px">
+    <div class="sett-item" onclick="go('profile')">
+      <div class="sett-left"><div class="sett-icon" style="background:#FFF1E6">👤</div><div><div class="sett-title">Profil personnel</div><div class="sett-desc">Nom, email, photo, devise</div></div></div>
+      <div class="sett-arrow">›</div>
+    </div>
+    <div class="sett-item sett-divider" onclick="go('pricing')">
+      <div class="sett-left"><div class="sett-icon" style="background:#FFF1E6">⭐</div><div><div class="sett-title">Mon abonnement</div><div class="sett-desc" id="settPlanDesc">Plan Gratuit — Passer à Premium</div></div></div>
+      <div class="sett-arrow">›</div>
+    </div>
+    <div class="sett-item sett-divider" onclick="showNotifSettings()">
+      <div class="sett-left"><div class="sett-icon" style="background:#F0FFF8">🔔</div><div><div class="sett-title">Notifications</div><div class="sett-desc">Rappels, alertes, échéances</div></div></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="notifToggle" class="sett-toggle" onclick="event.stopPropagation();toggleNotif(this)"></div>
+        <div class="sett-arrow">›</div>
+      </div>
+    </div>
+    <div class="sett-item sett-divider" onclick="showLangSettings()">
+      <div class="sett-left"><div class="sett-icon" style="background:#F0F8FF">🌍</div><div><div class="sett-title">Langue</div><div class="sett-desc" id="settLangDesc">Français</div></div></div>
+      <div class="sett-arrow">›</div>
     </div>
   </div>
 
-  <div class="card">
-    <div class="ct">📊 Budget prévisionnel mensuel</div>
-    <div id="budgetForecast"><div class="empty">Chargement...</div></div>
+  <!-- CATÉGORIE : APPARENCE -->
+  <div style="margin-bottom:8px;padding:0 4px;font-size:0.75rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:0.08em">Apparence</div>
+  <div style="background:var(--card);border-radius:var(--r);border:2px solid var(--bo);overflow:hidden;margin-bottom:20px">
+    <div class="sett-item" onclick="toggleDark()">
+      <div class="sett-left"><div class="sett-icon" style="background:#F5F0FF">🌙</div><div><div class="sett-title">Mode sombre</div><div class="sett-desc">Thème nuit pour vos yeux</div></div></div>
+      <div id="darkToggle" class="sett-toggle"></div>
+    </div>
+    <div class="sett-item sett-divider" onclick="showCurrencySettings()">
+      <div class="sett-left"><div class="sett-icon" style="background:#FFF8E6">💱</div><div><div class="sett-title">Devise</div><div class="sett-desc" id="settCurrencyDesc">Euro (€)</div></div></div>
+      <div class="sett-arrow">›</div>
+    </div>
   </div>
 
-  <div class="card">
-    <div class="ct">Mon compte</div>
-    <div class="set-item" id="setProfile"><div class="si-ico">👤</div><div class="si-inf"><div class="si-n">Mon Profil</div><div class="si-d">Nom, email, devise, photo</div></div><div class="si-a">→</div></div>
-    <div class="set-item" id="setNotif">
-      <div class="si-ico">🔔</div><div class="si-inf"><div class="si-n">Notifications</div><div class="si-d">Rappels quotidiens d'épargne</div></div>
-      <div class="si-tog" id="notifToggle"><div class="tog-ball"></div></div>
+  <!-- CATÉGORIE : DONNÉES -->
+  <div style="margin-bottom:8px;padding:0 4px;font-size:0.75rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:0.08em">Données & Synchronisation</div>
+  <div style="background:var(--card);border-radius:var(--r);border:2px solid var(--bo);overflow:hidden;margin-bottom:20px">
+    <div class="sett-item" id="btnSyncCloud" onclick="syncAllFromCloud()">
+      <div class="sett-left"><div class="sett-icon" style="background:#F0FFF8">☁️</div><div><div class="sett-title">Synchroniser le cloud</div><div class="sett-desc">Charger depuis Supabase</div></div></div>
+      <div class="sett-arrow">›</div>
     </div>
-    <div class="set-item" id="setPWA"><div class="si-ico">📲</div><div class="si-inf"><div class="si-n">Installer l'application</div><div class="si-d">Ajouter sur votre écran d'accueil</div></div><div class="si-a">→</div></div>
-    <div class="set-item danger" id="setLogout"><div class="si-ico">🚪</div><div class="si-inf"><div class="si-n">Se déconnecter</div><div class="si-d" id="userEmailDisplay">Connecté</div></div><div class="si-a">→</div></div>
-  </div>
-  <div class="card">
-    <div class="ct">Abonnement</div>
-    <div class="set-item" id="setPricing"><div class="si-ico">💳</div><div class="si-inf"><div class="si-n">Mes plans</div><div class="si-d">Voir et changer mon abonnement</div></div><div class="si-a">→</div></div>
-    <div class="set-item" id="setCoaching"><div class="si-ico">👑</div><div class="si-inf"><div class="si-n">Coaching Premium</div><div class="si-d">Réserver une séance avec l'experte</div></div><div class="si-a">→</div></div>
-  </div>
-  <div class="card">
-    <div class="ct">Application</div>
-    <div class="set-item" id="setShare"><div class="si-ico">📤</div><div class="si-inf"><div class="si-n">Partager l'application</div><div class="si-d">Inviter vos proches</div></div><div class="si-a">→</div></div>
-    <div class="set-item" id="setExport"><div class="si-ico">📊</div><div class="si-inf"><div class="si-n">Exporter mes données (JSON)</div><div class="si-d">Télécharger toutes vos données</div></div><div class="si-a">→</div></div>
-    <div class="set-item" id="btnEmailReport"><div class="si-ico">📧</div><div class="si-inf"><div class="si-n">Rapport mensuel par email</div><div class="si-d">Envoyer un résumé mensuel</div></div><div class="si-a">→</div></div>
-    <div class="set-item" id="btnRequestNotif"><div class="si-ico">🔔</div><div class="si-inf"><div class="si-n">Activer les notifications push</div><div class="si-d">Rappels rendez-vous et échéances</div></div><div class="si-a">→</div></div>
-    <div class="set-item" id="btnSyncCloud"><div class="si-ico">☁️</div><div class="si-inf"><div class="si-n">Synchroniser avec le cloud</div><div class="si-d">Charger vos données depuis Supabase</div></div><div class="si-a">→</div></div>
-    <div class="set-item" id="setPDF"><div class="si-ico">📄</div><div class="si-inf"><div class="si-n">Rapport mensuel PDF</div><div class="si-d">Générer un rapport imprimable</div></div><div class="si-a">→</div></div>
-    <div class="set-item" id="setDark"><div class="si-ico">🌙</div><div class="si-inf"><div class="si-n">Mode sombre</div><div class="si-d">Changer l'apparence de l'app</div></div><div class="si-tog" id="darkToggle"><div class="tog-ball"></div></div></div>
-    <div class="set-item danger" id="setClear"><div class="si-ico">🗑</div><div class="si-inf"><div class="si-n">Effacer toutes les données</div><div class="si-d">Action irréversible</div></div><div class="si-a">→</div></div>
-  </div>
-  <div class="card">
-    <div class="ct">À propos</div>
-    <div class="about-box">
-      <img src="icons/logo.png" class="about-logo" onerror="this.style.display='none'"/>
-      <div class="about-name">BudgetSmart</div>
-      <div class="about-ver">Version 3.0.0 · L'intelligence financière pour tous</div>
-      <div class="about-copy">© 2025 Miss Nyunge Digital Services · Belgique</div>
+    <div class="sett-item sett-divider" id="btnExport" onclick="exportData()">
+      <div class="sett-left"><div class="sett-icon" style="background:#F0F8FF">📤</div><div><div class="sett-title">Exporter mes données</div><div class="sett-desc">Télécharger en JSON</div></div></div>
+      <div class="sett-arrow">›</div>
+    </div>
+    <div class="sett-item sett-divider" id="btnEmailReport" onclick="generateEmailReport()">
+      <div class="sett-left"><div class="sett-icon" style="background:#FFF1E6">📧</div><div><div class="sett-title">Rapport mensuel</div><div class="sett-desc">Envoyer par email</div></div></div>
+      <div class="sett-arrow">›</div>
+    </div>
+    <div class="sett-item sett-divider" id="btnRequestNotif" onclick="requestNotifPermission()">
+      <div class="sett-left"><div class="sett-icon" style="background:#F5F0FF">🔔</div><div><div class="sett-title">Activer les notifications push</div><div class="sett-desc">Rappels automatiques</div></div></div>
+      <div class="sett-arrow">›</div>
     </div>
   </div>
+
+  <!-- CATÉGORIE : APPLICATION -->
+  <div style="margin-bottom:8px;padding:0 4px;font-size:0.75rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:0.08em">Application</div>
+  <div style="background:var(--card);border-radius:var(--r);border:2px solid var(--bo);overflow:hidden;margin-bottom:20px">
+    <div class="sett-item" id="setPWA" onclick="pwaInstall()">
+      <div class="sett-left"><div class="sett-icon" style="background:#F0FFF8">📱</div><div><div class="sett-title">Installer l'application</div><div class="sett-desc">Ajouter à l'écran d'accueil</div></div></div>
+      <div class="sett-arrow">›</div>
+    </div>
+    <div class="sett-item sett-divider" onclick="window.open('landing.html','_blank')">
+      <div class="sett-left"><div class="sett-icon" style="background:#FFF1E6">🌐</div><div><div class="sett-title">Page de présentation</div><div class="sett-desc">Voir la landing page</div></div></div>
+      <div class="sett-arrow">›</div>
+    </div>
+    <div class="sett-item sett-divider" onclick="window.open('landing.html#affiliation','_blank')">
+      <div class="sett-left"><div class="sett-icon" style="background:#F0FFF8">💰</div><div><div class="sett-title">Programme d'affiliation</div><div class="sett-desc">Gagner 20-30% de commission</div></div></div>
+      <div style="background:#E8631C;color:#fff;font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:10px;margin-right:8px">NOUVEAU</div>
+      <div class="sett-arrow">›</div>
+    </div>
+    <div class="sett-item sett-divider" onclick="go('share')">
+      <div class="sett-left"><div class="sett-icon" style="background:#F0F8FF">📤</div><div><div class="sett-title">Partager l'application</div><div class="sett-desc">Recommander à vos contacts</div></div></div>
+      <div class="sett-arrow">›</div>
+    </div>
+  </div>
+
+  <!-- CATÉGORIE : SUPPORT -->
+  <div style="margin-bottom:8px;padding:0 4px;font-size:0.75rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:0.08em">Support & Aide</div>
+  <div style="background:var(--card);border-radius:var(--r);border:2px solid var(--bo);overflow:hidden;margin-bottom:20px">
+    <div class="sett-item" onclick="window.open('https://calendly.com/missnyungedigitalservices/echange-projet-digital-ecommerce','_blank')">
+      <div class="sett-left"><div class="sett-icon" style="background:#FFF1E6">📞</div><div><div class="sett-title">Contacter le support</div><div class="sett-desc">Réserver un appel de 30 min</div></div></div>
+      <div class="sett-arrow">›</div>
+    </div>
+    <div class="sett-item sett-divider" onclick="window.open('mailto:missnyunge@gmail.com','_blank')">
+      <div class="sett-left"><div class="sett-icon" style="background:#F0F8FF">✉️</div><div><div class="sett-title">Envoyer un email</div><div class="sett-desc">missnyunge@gmail.com</div></div></div>
+      <div class="sett-arrow">›</div>
+    </div>
+    <div class="sett-item sett-divider" onclick="window.open('https://www.paypal.me/Misswaxbeautycare','_blank')">
+      <div class="sett-left"><div class="sett-icon" style="background:#E6F0FF">💳</div><div><div class="sett-title">Payer via PayPal</div><div class="sett-desc">Renouveler votre abonnement</div></div></div>
+      <div class="sett-arrow">›</div>
+    </div>
+  </div>
+
+  <!-- ZONE DANGER -->
+  <div style="margin-bottom:8px;padding:0 4px;font-size:0.75rem;font-weight:800;color:#D6432E;text-transform:uppercase;letter-spacing:0.08em">Zone dangereuse</div>
+  <div style="background:var(--card);border-radius:var(--r);border:2px solid rgba(214,67,46,0.2);overflow:hidden;margin-bottom:20px">
+    <div class="sett-item" id="btnClear" onclick="clearData()">
+      <div class="sett-left"><div class="sett-icon" style="background:#FFF1EE">🗑️</div><div><div class="sett-title" style="color:#D6432E">Effacer toutes les données</div><div class="sett-desc">Action irréversible</div></div></div>
+      <div class="sett-arrow" style="color:#D6432E">›</div>
+    </div>
+    <div class="sett-item sett-divider" onclick="doLogout()">
+      <div class="sett-left"><div class="sett-icon" style="background:#FFF1EE">🚪</div><div><div class="sett-title" style="color:#D6432E">Se déconnecter</div><div class="sett-desc">Retour à l'écran de connexion</div></div></div>
+      <div class="sett-arrow" style="color:#D6432E">›</div>
+    </div>
+  </div>
+
+  <!-- VERSION -->
+  <div style="text-align:center;padding:20px;color:var(--mu);font-size:0.82rem">
+    <div style="font-family:var(--ft);font-size:1.1rem;font-weight:800;color:var(--tx);margin-bottom:4px">BudgetSmart</div>
+    <div>Version 3.0.0 · Made with ❤️ by Miss Nyunge Digital Services</div>
+    <div style="margin-top:8px;display:flex;justify-content:center;gap:16px">
+      <a href="https://www.instagram.com/misswaxbeautycare" target="_blank" style="color:var(--or);text-decoration:none;font-size:1.2rem">📸</a>
+      <a href="https://www.facebook.com/share/1DrAHvEhDQ/" target="_blank" style="color:var(--or);text-decoration:none;font-size:1.2rem">📘</a>
+      <a href="https://www.tiktok.com/@misswaxbeautycare" target="_blank" style="color:var(--or);text-decoration:none;font-size:1.2rem">🎵</a>
+      <a href="https://www.linkedin.com/in/miss-nyunge-975949385" target="_blank" style="color:var(--or);text-decoration:none;font-size:1.2rem">💼</a>
+    </div>
+  </div>
+
+  <!-- MODALES LANGUES ET NOTIFICATIONS -->
+  <div id="langModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:8000;display:none;align-items:flex-end;justify-content:center">
+    <div style="background:var(--card);border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:500px;border-top:4px solid var(--or)">
+      <div style="font-family:var(--ft);font-size:1.2rem;font-weight:800;margin-bottom:20px">🌍 Choisir la langue</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button data-lang="fr" onclick="setLang('fr');closeLangModal()" class="sett-lang-btn" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:2px solid var(--bo);background:var(--bg);cursor:pointer;font-size:1rem;font-weight:700">
+          <span style="font-size:1.5rem">🇫🇷</span><span>Français</span><span style="margin-left:auto;color:var(--mu);font-size:0.85rem">French</span>
+        </button>
+        <button data-lang="en" onclick="setLang('en');closeLangModal()" class="sett-lang-btn" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:2px solid var(--bo);background:var(--bg);cursor:pointer;font-size:1rem;font-weight:700">
+          <span style="font-size:1.5rem">🇬🇧</span><span>English</span><span style="margin-left:auto;color:var(--mu);font-size:0.85rem">Anglais</span>
+        </button>
+        <button data-lang="ln" onclick="setLang('ln');closeLangModal()" class="sett-lang-btn" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:2px solid var(--bo);background:var(--bg);cursor:pointer;font-size:1rem;font-weight:700">
+          <span style="font-size:1.5rem">🇨🇩</span><span>Lingála</span><span style="margin-left:auto;color:var(--mu);font-size:0.85rem">Lingala</span>
+        </button>
+      </div>
+      <button onclick="closeLangModal()" style="width:100%;margin-top:16px;padding:13px;background:var(--bo);border:none;border-radius:10px;cursor:pointer;font-weight:700;font-size:0.95rem">Annuler</button>
+    </div>
+  </div>
+
 </section>
 
 <!-- ADMIN -->
@@ -1124,7 +1307,7 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791408343"></script>
+<script src="script.js?v=1791408534"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
