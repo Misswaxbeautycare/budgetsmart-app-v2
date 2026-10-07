@@ -292,6 +292,7 @@ function initApp() {
   initPDF();
   checkAdminMessage();
   initFacturation();
+  setTimeout(detectUserLocation, 1000);
   initLang();
   setTimeout(checkDailyReminders, 3000);
   setTimeout(drawAdvancedCharts, 1500);
@@ -3197,6 +3198,206 @@ function assignPlan(email, plan) {
   }
 }
 
+
+/* ══════════════════════════════════════
+   DÉTECTION GÉOGRAPHIQUE & PRIX ADAPTÉS
+══════════════════════════════════════ */
+
+// Pays africains éligibles aux tarifs réduits
+const AFRICA_COUNTRIES = [
+  'AO','BJ','BF','BI','CM','CV','CF','TD','KM','CG','CD','CI','DJ','EG',
+  'GQ','ER','ET','GA','GM','GH','GN','GW','KE','LS','LR','LY','MG','MW',
+  'ML','MR','MU','MA','MZ','NA','NE','NG','RW','ST','SN','SL','SO','ZA',
+  'SS','SD','SZ','TZ','TG','TN','UG','ZM','ZW','DZ'
+];
+
+// Codes de confirmation pour accès aux prix africains (code secret)
+const AFRICA_ACCESS_CODE = 'AFRICA2024BS';
+
+let userGeoData = null;
+let priceRegion = 'eu'; // 'eu' ou 'af'
+
+// Plans tarifaires
+const PRICE_PLANS = {
+  eu: {
+    basic:    { price: '2,99€', period: '/mois', stripe: 'https://buy.stripe.com/3cI28r0nRbNva7J3VyaEE00' },
+    premium:  { price: '5,99€', period: '/mois', stripe: 'https://buy.stripe.com/00wbJ14E76tbfs3eAcaEE02' },
+    business: { price: '9,99€', period: '/mois', stripe: 'https://buy.stripe.com/cNi9ATc6z9Fn7ZB4ZCaEE01' }
+  },
+  af: {
+    basic:    { price: '1€',    period: '/mois', stripe: 'https://buy.stripe.com/3cI28r0nRbNva7J3VyaEE00' },
+    premium:  { price: '2€',    period: '/mois', stripe: 'https://buy.stripe.com/00wbJ14E76tbfs3eAcaEE02' },
+    business: { price: '3€',    period: '/mois', stripe: 'https://buy.stripe.com/cNi9ATc6z9Fn7ZB4ZCaEE01' }
+  }
+};
+
+async function detectUserLocation() {
+  // Check if already verified
+  const saved = localStorage.getItem('bs_geo_region');
+  const savedTime = localStorage.getItem('bs_geo_time');
+  if (saved && savedTime && (Date.now() - parseInt(savedTime)) < 86400000) {
+    priceRegion = saved;
+    applyPriceRegion(saved);
+    return;
+  }
+
+  try {
+    // Use free IP geolocation API
+    const res = await Promise.race([
+      fetch('https://ipapi.co/json/', {method:'GET'}),
+      new Promise((_, rej) => setTimeout(() => rej('timeout'), 5000))
+    ]);
+    const data = await res.json();
+    userGeoData = data;
+    const countryCode = (data.country_code || '').toUpperCase();
+    
+    if (AFRICA_COUNTRIES.includes(countryCode)) {
+      priceRegion = 'af';
+      localStorage.setItem('bs_geo_region', 'af');
+      localStorage.setItem('bs_geo_time', Date.now().toString());
+      localStorage.setItem('bs_geo_country', countryCode);
+      applyPriceRegion('af');
+    } else {
+      priceRegion = 'eu';
+      localStorage.setItem('bs_geo_region', 'eu');
+      localStorage.setItem('bs_geo_time', Date.now().toString());
+      localStorage.setItem('bs_geo_country', countryCode);
+      applyPriceRegion('eu');
+    }
+  } catch(e) {
+    // Default to EU if detection fails
+    priceRegion = 'eu';
+    applyPriceRegion('eu');
+  }
+}
+
+function applyPriceRegion(region) {
+  const plans = PRICE_PLANS[region];
+  if (!plans) return;
+  
+  // Update all price displays in pricing page
+  const priceEls = {
+    'priceBasic':    plans.basic.price,
+    'pricePremium':  plans.premium.price,
+    'priceBusiness': plans.business.price,
+  };
+  Object.entries(priceEls).forEach(([id, price]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = price;
+  });
+
+  // Update Stripe links
+  const links = {
+    'stripeBasic':    plans.basic.stripe,
+    'stripePremium':  plans.premium.stripe,
+    'stripeBusiness': plans.business.stripe,
+  };
+  Object.entries(links).forEach(([id, url]) => {
+    const el = document.getElementById(id);
+    if (el) el.href = url;
+  });
+
+  // Show region badge
+  const badge = document.getElementById('pricingRegionBadge');
+  if (badge) {
+    if (region === 'af') {
+      badge.style.display = 'flex';
+      badge.innerHTML = '🌍 Prix spéciaux Afrique détectés automatiquement · <button onclick="showAfricaInfo()" style="background:none;border:none;color:inherit;cursor:pointer;text-decoration:underline;font-size:inherit;padding:0;margin-left:4px">En savoir plus</button>';
+    } else {
+      badge.style.display = 'flex';
+      badge.innerHTML = '🌍 Vous êtes en Europe · <button onclick="enterAfricaCode()" style="background:none;border:none;color:inherit;cursor:pointer;text-decoration:underline;font-size:inherit;padding:0;margin-left:4px">Vous êtes en Afrique ?</button>';
+    }
+  }
+
+  // Update toggle buttons
+  const togEU = document.getElementById('togEU');
+  const togAF = document.getElementById('togAF');
+  if (togEU) togEU.style.opacity = region === 'eu' ? '1' : '0.5';
+  if (togAF) togAF.style.opacity = region === 'af' ? '1' : '0.5';
+}
+
+function enterAfricaCode() {
+  const modal = document.createElement('div');
+  modal.id = 'africaCodeModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML = `
+    <div style="background:var(--card);border-radius:20px;padding:32px 28px;max-width:380px;width:100%;border:2px solid var(--go)">
+      <div style="text-align:center;margin-bottom:22px">
+        <div style="font-size:2.5rem;margin-bottom:10px">🌍</div>
+        <div style="font-family:var(--ft);font-size:1.3rem;font-weight:900">Prix Afrique</div>
+        <div style="font-size:0.88rem;color:var(--mu);margin-top:8px;line-height:1.6">
+          Les prix réduits sont réservés aux résidents des pays africains.<br/>
+          Si vous êtes en Afrique, entrez le code de vérification que vous avez reçu.
+        </div>
+      </div>
+      <div id="africaCodeErr" style="display:none;background:#fdecea;border:2px solid #f5b0a0;border-radius:8px;padding:10px;color:#c0392b;font-weight:700;margin-bottom:12px;font-size:0.85rem"></div>
+      <input type="text" id="africaCodeInput" placeholder="Entrez votre code de vérification"
+        style="width:100%;padding:13px;border:2px solid var(--bo);border-radius:10px;font-size:1rem;outline:none;background:var(--bg);color:var(--tx);margin-bottom:12px;text-transform:uppercase;text-align:center;letter-spacing:0.1em"
+        oninput="this.value=this.value.toUpperCase()"
+        onkeydown="if(event.key==='Enter')verifyAfricaCode()"/>
+      <button onclick="verifyAfricaCode()" class="btn-g" style="width:100%;margin-bottom:10px">Vérifier mon accès →</button>
+      <button onclick="document.getElementById('africaCodeModal').remove()" style="width:100%;padding:11px;background:none;border:2px solid var(--bo);border-radius:10px;cursor:pointer;font-weight:700;color:var(--mu)">Annuler</button>
+      <div style="margin-top:14px;padding:12px;background:var(--bg);border-radius:8px;font-size:0.78rem;color:var(--mu);text-align:center;line-height:1.5">
+        Pour obtenir votre code, contactez-nous :<br/>
+        📱 <a href="https://wa.me/32495639902" target="_blank" style="color:var(--or)">WhatsApp</a> · 
+        ✉️ <a href="mailto:missnyunge@gmail.com" style="color:var(--or)">Email</a>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  setTimeout(() => document.getElementById('africaCodeInput')?.focus(), 100);
+}
+
+function verifyAfricaCode() {
+  const inp = document.getElementById('africaCodeInput');
+  const err = document.getElementById('africaCodeErr');
+  const code = inp?.value?.trim() || '';
+
+  // Valid codes - you can add more
+  const validCodes = [
+    'AFRICA2024BS',
+    'BUDGETSMART-AF',
+    'MISSNYUNGE-AF',
+    'CONGO2024',
+    'SENEGAL2024',
+    'NIGERIA2024',
+    'KENYA2024',
+    'CAMEROUN2024',
+    'COTE-IVOIRE-2024',
+    'BURKINA2024'
+  ];
+
+  if (validCodes.includes(code)) {
+    priceRegion = 'af';
+    localStorage.setItem('bs_geo_region', 'af');
+    localStorage.setItem('bs_geo_time', Date.now().toString());
+    localStorage.setItem('bs_geo_verified_code', code);
+    document.getElementById('africaCodeModal')?.remove();
+    applyPriceRegion('af');
+    renderPricingAll();
+    toast('✅ Accès aux prix Afrique activé !');
+  } else {
+    if (err) { err.textContent = '❌ Code invalide. Contactez-nous pour obtenir votre code.'; err.style.display = 'block'; }
+    if (inp) inp.value = '';
+  }
+}
+
+function showAfricaInfo() {
+  const country = localStorage.getItem('bs_geo_country') || '?';
+  toast('🌍 Votre pays détecté : ' + country + ' — Prix Afrique appliqués automatiquement !');
+}
+
+// Override setPricing to use geo detection
+function setPricing(mode) {
+  if (mode === 'af' && priceRegion !== 'af') {
+    // Not in Africa - ask for code
+    enterAfricaCode();
+    return;
+  }
+  priceRegion = mode;
+  applyPriceRegion(mode);
+  renderPricingAll();
+}
+
 /* ══ NAVIGATION ══ */
 function initNav() {
   document.querySelectorAll('.ni').forEach(el => {
@@ -3851,6 +4052,7 @@ function renderPricingProject(elId, payBoxId) {
 }
 
 function renderPricingAll() {
+  applyPriceRegion(priceRegion);
   renderPricingMain();
   renderPricingProject('pgBusiness','pcBusiness');
   renderPricingProject('pgCouple','pcCouple');
