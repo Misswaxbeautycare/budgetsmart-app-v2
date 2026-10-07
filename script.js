@@ -3047,6 +3047,70 @@ function initSettingsPage() {
   el('settCurrencyDesc', curNames[prof.currency||'€']||'Euro (€)');
 }
 
+
+/* ══ ADMIN ACCESS ══ */
+function openAdminAccess() {
+  const modal = document.getElementById('adminAccessModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    setTimeout(() => {
+      const inp = document.getElementById('adminPwdInput');
+      if (inp) inp.focus();
+    }, 100);
+  }
+}
+
+function closeAdminModal() {
+  const modal = document.getElementById('adminAccessModal');
+  if (modal) modal.style.display = 'none';
+  const inp = document.getElementById('adminPwdInput');
+  if (inp) inp.value = '';
+  const err = document.getElementById('adminModalError');
+  if (err) err.style.display = 'none';
+}
+
+function toggleAdminPwd() {
+  const inp = document.getElementById('adminPwdInput');
+  if (inp) inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function submitAdminPwd() {
+  const inp   = document.getElementById('adminPwdInput');
+  const err   = document.getElementById('adminModalError');
+  const pwd   = inp?.value || '';
+  
+  if (!pwd) {
+    if (err) { err.textContent = 'Entrez le mot de passe.'; err.style.display = 'block'; }
+    return;
+  }
+  
+  if (pwd === 'Budgetsmart20@131690-25') {
+    isAdmin = true;
+    closeAdminModal();
+    // Show admin in nav
+    const adminLi = document.getElementById('adminLi');
+    if (adminLi) adminLi.style.display = 'block';
+    // Activate admin features
+    if (typeof activateAdmin === 'function') activateAdmin();
+    go('admin');
+    toast('👑 Bienvenue dans l\'espace Admin !');
+  } else {
+    if (err) { err.textContent = '❌ Mot de passe incorrect.'; err.style.display = 'block'; }
+    if (inp) { inp.value = ''; inp.focus(); }
+    // Shake animation
+    const box = err?.closest('div[style*="border-radius:20px"]');
+    if (box) { box.style.animation = 'shake 0.3s'; setTimeout(() => box.style.animation = '', 300); }
+  }
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', (e) => {
+  const modal = document.getElementById('adminAccessModal');
+  if (modal && modal.style.display === 'flex' && e.target === modal) {
+    closeAdminModal();
+  }
+});
+
 /* ══ NAVIGATION ══ */
 function initNav() {
   document.querySelectorAll('.ni').forEach(el => {
