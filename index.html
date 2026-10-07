@@ -273,7 +273,19 @@
 
   </ul>
   <div class="sb">
-
+    <!-- Bouton Admin discret -->
+    <button id="adminTrigger" onclick="openAdminAccess()" style="
+      width:100%;padding:8px 12px;margin-bottom:8px;
+      background:transparent;border:1px dashed rgba(255,255,255,0.12);
+      border-radius:8px;color:rgba(255,255,255,0.25);
+      font-size:0.75rem;font-weight:600;cursor:pointer;
+      display:flex;align-items:center;gap:7px;transition:all 0.2s;
+    " onmouseover="this.style.borderColor='rgba(232,99,28,0.4)';this.style.color='var(--or)';this.style.background='rgba(232,99,28,0.06)'"
+       onmouseout="this.style.borderColor='rgba(255,255,255,0.12)';this.style.color='rgba(255,255,255,0.25)';this.style.background='transparent'">
+      <i class="fa-solid fa-shield-halved" style="font-size:0.8rem"></i>
+      <span>Administration</span>
+      <i class="fa-solid fa-chevron-right" style="margin-left:auto;font-size:0.65rem"></i>
+    </button>
     <div class="sb-plan" id="sbPlan">Plan Gratuit — Essai 7 jours</div>
     <a class="sb-up" data-p="pricing">Passer à Premium</a>
     <button id="btnDarkModeSide" class="dark-toggle-btn">🌙 Mode sombre</button>
@@ -1508,7 +1520,7 @@ Essayez gratuitement : https://misswaxbeautycare.github.io/budgetsmart-app-v2/</
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791415841"></script>
+<script src="script.js?v=1791415873"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
