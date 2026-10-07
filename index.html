@@ -829,6 +829,7 @@
     <button class="suivi-tab" data-tab="upload">📤 Importer PDF</button>
     <button class="suivi-tab" data-tab="apercu">👁️ Aperçu</button>
     <button class="suivi-tab" data-tab="importees">🗂️ Importées</button>
+    <button class="suivi-tab" data-tab="editeur">✏️ Éditeur</button>
   </div>
 
   <!-- ── LISTE ── -->
@@ -1054,6 +1055,19 @@
         <div style="font-size:4rem;margin-bottom:16px">📄</div>
         <div style="font-size:1.1rem;font-weight:800;margin-bottom:8px">Aucun aperçu disponible</div>
         <div style="font-size:0.9rem">Créez ou importez une facture pour la voir ici</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ÉDITEUR VISUEL ── -->
+  <div class="suivi-panel" data-panel="editeur" style="display:none">
+    <div id="pdfEditorZone">
+      <div style="text-align:center;padding:60px 20px;color:var(--mu)">
+        <div style="font-size:4rem;margin-bottom:16px">✏️</div>
+        <div style="font-size:1.1rem;font-weight:800;margin-bottom:8px">Éditeur de document</div>
+        <div style="font-size:0.9rem;margin-bottom:20px">Importez un PDF ou choisissez une facture à modifier</div>
+        <button onclick="factGo('upload')" class="btn-g" style="margin-right:10px">📤 Importer un PDF</button>
+        <button onclick="factGo('importees')" class="btn-out">🗂️ Mes documents</button>
       </div>
     </div>
   </div>
@@ -1457,7 +1471,7 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791412576"></script>
+<script src="script.js?v=1791413573"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
