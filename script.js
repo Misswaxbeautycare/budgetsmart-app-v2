@@ -3088,13 +3088,15 @@ function submitAdminPwd() {
   if (pwd === 'Budgetsmart20@131690-25') {
     isAdmin = true;
     closeAdminModal();
+    // Activer plan Business automatiquement
+    activateAdminPlan();
+    migrateDataToPlan('business');
     // Show admin in nav
     const adminLi = document.getElementById('adminLi');
     if (adminLi) adminLi.style.display = 'block';
-    // Activate admin features
     if (typeof activateAdmin === 'function') activateAdmin();
     go('admin');
-    toast('👑 Bienvenue dans l\'espace Admin !');
+    toast('👑 Bienvenue Admin ! Plan Business activé.');
   } else {
     if (err) { err.textContent = '❌ Mot de passe incorrect.'; err.style.display = 'block'; }
     if (inp) { inp.value = ''; inp.focus(); }
@@ -3745,6 +3747,130 @@ async function renderMyAffiliateStats() {
 window.addEventListener('DOMContentLoaded', () => {
   detectAffiliateRef();
 });
+
+
+/* ══ GESTION PLAN UTILISATEUR ══ */
+
+// Plans et leurs fonctionnalités
+const PLAN_FEATURES = {
+  gratuit:  { facturation:false, sync:false, budget:false, rapport:false, defisMax:3,  objectifsMax:1  },
+  basic:    { facturation:true,  sync:true,  budget:false, rapport:false, defisMax:11, objectifsMax:10 },
+  premium:  { facturation:true,  sync:true,  budget:true,  rapport:true,  defisMax:11, objectifsMax:99 },
+  business: { facturation:true,  sync:true,  budget:true,  rapport:true,  defisMax:11, objectifsMax:99 }
+};
+
+function getCurrentPlan() {
+  // Admin toujours Business
+  if (isAdmin) return 'business';
+  return localStorage.getItem('bs_userPlan') || ls('userPlan','gratuit') || 'gratuit';
+}
+
+function setMyPlan(plan) {
+  // Sauvegarder
+  localStorage.setItem('bs_userPlan', plan);
+  sv('userPlan', plan);
+  
+  // Mettre à jour l'interface
+  updatePlanUI(plan);
+  
+  // Appliquer les fonctionnalités
+  activatePlanFeatures(plan);
+  
+  const planNames = {gratuit:'Gratuit',basic:'Basic',premium:'Premium ⭐',business:'Business 👑'};
+  toast('✅ Plan ' + (planNames[plan]||plan) + ' activé !');
+}
+
+function updatePlanUI(plan) {
+  const planNames  = {gratuit:'Gratuit',basic:'Basic',premium:'Premium ⭐',business:'Business 👑'};
+  const planColors = {gratuit:'var(--mu)',basic:'#2E7DD6',premium:'var(--or)',business:'var(--go)'};
+  const planText   = planNames[plan] || plan;
+  const planColor  = planColors[plan] || 'var(--mu)';
+  const isGold     = plan === 'business';
+  
+  // Sidebar badge
+  const sbPlan = document.getElementById('sbPlan');
+  if (sbPlan) {
+    sbPlan.textContent = 'Plan ' + planText;
+    sbPlan.style.color = planColor;
+  }
+  
+  // Bouton upgrade → cacher si premium ou business
+  const sbUp = document.querySelector('.sb-up');
+  if (sbUp) sbUp.style.display = (plan === 'premium' || plan === 'business') ? 'none' : 'block';
+  
+  // Admin page - mon plan badge
+  const myPlanBadge = document.getElementById('myCurrentPlan');
+  if (myPlanBadge) {
+    myPlanBadge.textContent = planText;
+    myPlanBadge.style.background = planColor;
+    myPlanBadge.style.color = isGold ? '#1A1007' : '#fff';
+  }
+  
+  // Paramètres - description plan
+  const settPlanDesc = document.getElementById('settPlanDesc');
+  if (settPlanDesc) {
+    settPlanDesc.textContent = (plan === 'gratuit') 
+      ? 'Passer à Premium — à partir de 2,99€/mois'
+      : 'Plan actif — ' + planText;
+  }
+  
+  // Badge sur l'avatar dans paramètres  
+  const settPlan = document.getElementById('settPlan');
+  if (settPlan) {
+    settPlan.textContent = planText;
+    settPlan.style.background = planColor;
+    settPlan.style.color = isGold ? '#1A1007' : '#fff';
+  }
+}
+
+function activatePlanFeatures(plan) {
+  const features = PLAN_FEATURES[plan] || PLAN_FEATURES.gratuit;
+  
+  // Facturation - toujours visible mais afficher badge si gratuit
+  const factNav = document.querySelector('.ni[data-p="facturation"]');
+  if (factNav) {
+    if (!features.facturation) {
+      factNav.innerHTML = 'Facturation <span style="font-size:0.7rem;background:var(--or);color:#fff;padding:1px 6px;border-radius:4px;margin-left:4px">Basic+</span>';
+    }
+  }
+  
+  // Sync cloud
+  const syncBtn = document.getElementById('btnSyncCloud');
+  if (syncBtn && !features.sync) {
+    syncBtn.style.opacity = '0.5';
+    syncBtn.title = 'Disponible à partir du plan Basic';
+  }
+}
+
+// ── Activer automatiquement Business pour l\'admin ──
+function activateAdminPlan() {
+  setMyPlan('business');
+  // Marquer dans profil
+  const profile = ls('profile', {});
+  profile.plan = 'business';
+  profile.isAdmin = true;
+  sv('profile', profile);
+}
+
+// ── Migrer les données existantes vers le nouveau plan ──
+function migrateDataToPlan(plan) {
+  const features = PLAN_FEATURES[plan] || PLAN_FEATURES.gratuit;
+  const existing = {
+    entries:    ls('entries',[]).length,
+    goals:      ls('goals',[]).length,
+    dettes:     ls('dettes',[]).length,
+    evenements: ls('evenements',[]).length,
+    taches:     ls('taches',[]).length,
+    factures:   ls('factures',[]).length,
+  };
+  
+  const total = Object.values(existing).reduce((s,v)=>s+v,0);
+  if (total === 0) return;
+  
+  // Toutes les données existantes sont conservées
+  // Le nouveau plan donne juste accès à plus de fonctionnalités
+  toast('✅ ' + total + ' enregistrements conservés avec votre plan ' + plan + ' !');
+}
 
 /* ══ NAVIGATION ══ */
 function initNav() {
