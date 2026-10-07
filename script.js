@@ -2893,6 +2893,77 @@ function selectTemplate(tpl, el) {
   if(el) el.classList.add('active');
 }
 
+
+/* ══ PARAMÈTRES — FONCTIONS ══ */
+function showLangSettings() {
+  const modal = document.getElementById('langModal');
+  if (modal) { modal.style.display = 'flex'; }
+}
+function closeLangModal() {
+  const modal = document.getElementById('langModal');
+  if (modal) { modal.style.display = 'none'; }
+}
+function showNotifSettings() {
+  requestNotifPermission();
+}
+function showCurrencySettings() {
+  const currencies = ['€ Euro','$ Dollar','£ Livre','FCFA Franc CFA','CDF Franc congolais'];
+  const cur = prompt('Choisissez votre devise:\n' + currencies.map((c,i)=>(i+1)+'. '+c).join('\n') + '\n\nTapez le numéro (1-5):','1');
+  if (!cur) return;
+  const symbols = ['€','$','£','FCFA','CDF'];
+  const names = ['Euro (€)','Dollar ($)','Livre (£)','Franc CFA (FCFA)','Franc congolais (CDF)'];
+  const idx = parseInt(cur)-1;
+  if (idx >= 0 && idx < symbols.length) {
+    const p = ls('profile',{}); p.currency = symbols[idx];
+    sv('profile', p);
+    const el = document.getElementById('settCurrencyDesc');
+    if (el) el.textContent = names[idx];
+    toast('Devise mise à jour : ' + symbols[idx]);
+    renderDash();
+  }
+}
+function toggleNotif(el) {
+  if (el) el.classList.toggle('on');
+  requestNotifPermission();
+}
+function doLogout() {
+  if (!confirm('Se déconnecter ?')) return;
+  localStorage.removeItem('bs_local_user');
+  localStorage.removeItem('bs_session');
+  currentUser = null;
+  document.body.classList.remove('authed');
+  const scr = document.getElementById('authScreen');
+  if (scr) scr.style.display = 'flex';
+  toast('Déconnecté.');
+}
+function initSettingsPage() {
+  // Update profile info in settings header
+  const user = currentUser;
+  const profile = ls('profile',{});
+  const name = profile.name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Mon compte';
+  const email = user?.email || profile.email || 'missnyunge@gmail.com';
+  const plan = ls('userPlan','gratuit');
+  const planNames = {gratuit:'Plan Gratuit',basic:'Plan Basic',premium:'Plan Premium ⭐',business:'Plan Business 👑'};
+  const el = (id,val) => { const e=document.getElementById(id); if(e) e.textContent=val; };
+  el('settName', name);
+  el('settEmail', email);
+  el('settPlan', planNames[plan]||'Plan Gratuit');
+  el('settPlanDesc', plan==='gratuit'?'Passer à Premium — à partir de 2,99€/mois':'Plan actif — Gérer');
+  // Avatar
+  const av = document.getElementById('settAvatar');
+  if (av) av.textContent = name.charAt(0).toUpperCase();
+  // Dark mode toggle
+  const dk = document.getElementById('darkToggle');
+  if (dk && document.body.classList.contains('dark')) dk.classList.add('on');
+  // Lang
+  const langNames = {fr:'Français 🇫🇷',en:'English 🇬🇧',ln:'Lingála 🇨🇩'};
+  el('settLangDesc', langNames[currentLang]||'Français');
+  // Currency
+  const curNames = {'€':'Euro (€)','$':'Dollar ($)','£':'Livre (£)','FCFA':'Franc CFA','CDF':'Franc congolais'};
+  const prof = ls('profile',{});
+  el('settCurrencyDesc', curNames[prof.currency||'€']||'Euro (€)');
+}
+
 /* ══ NAVIGATION ══ */
 function initNav() {
   document.querySelectorAll('.ni').forEach(el => {
@@ -2922,6 +2993,7 @@ function go(page) {
   if (page === 'suivi')       { renderSuivi(); suiviInit(); }
   if (page === 'facturation') { renderFacturesList(); factGo('liste'); }
   if (page === 'admin')       { renderAdmin(); }
+  if (page === 'settings')    { initSettingsPage(); }
   if (page === 'profile')     { loadProfile(); loadPhoto(); }
   if (page === 'share')       { renderShare(); }
 }
