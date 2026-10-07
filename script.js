@@ -4467,6 +4467,36 @@ function deleteAvis(id) {
   toast('Avis supprimé.');
 }
 
+
+/* ══ PARTAGE APPLICATION ══ */
+function shareApp(platform) {
+  const url = encodeURIComponent('https://misswaxbeautycare.github.io/budgetsmart-app-v2/');
+  const msg = encodeURIComponent(
+    '💰 *BudgetSmart* — L\'intelligence financière pour tous !\n\n' +
+    '✅ Dashboard · Facturation pro · Objectifs · Agenda\n' +
+    '✅ Gratuit pour commencer !\n\n' +
+    '🔗 https://misswaxbeautycare.github.io/budgetsmart-app-v2/'
+  );
+  const map = {
+    wa:  'https://wa.me/?text=' + msg,
+    fb:  'https://www.facebook.com/sharer/sharer.php?u=' + url,
+    tw:  'https://twitter.com/intent/tweet?text=' + msg,
+    li:  'https://www.linkedin.com/sharing/share-offsite/?url=' + url,
+    em:  'mailto:?subject=' + encodeURIComponent('Découvrez BudgetSmart') + '&body=' + msg,
+    sms: 'sms:?body=' + msg,
+  };
+  if (platform === 'ig' || platform === 'tk') {
+    navigator.clipboard?.writeText('https://misswaxbeautycare.github.io/budgetsmart-app-v2/');
+    toast((platform==='ig'?'📸 Instagram':'🎵 TikTok') + ' — Lien copié ! Collez-le dans votre bio.');
+    return;
+  }
+  if (map[platform]) window.open(map[platform], '_blank');
+}
+function shareCustom(p) {
+  const msg = encodeURIComponent(document.getElementById('shareCustomMsg')?.value||'');
+  if (p==='wa') window.open('https://wa.me/?text='+msg,'_blank');
+  else window.open('mailto:?subject='+encodeURIComponent('BudgetSmart')+'&body='+msg,'_blank');
+}
 /* ══ NAVIGATION ══ */
 function initNav() {
   document.querySelectorAll('.ni').forEach(el => {
