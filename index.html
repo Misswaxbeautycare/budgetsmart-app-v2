@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BudgetSmart v3</title>
-<link rel="stylesheet" href="style.css?v=1791409511"/>
+<link rel="stylesheet" href="style.css?v=1791410416"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#2E7D5E"/>
@@ -256,35 +256,25 @@
     <li><a class="ni" data-p="facturation">📄 Facturation</a></li>
     <li><a class="ni" data-p="share">Partager l'app</a></li>
     <li><a class="ni" data-p="settings">Paramètres</a></li>
-    <li id="adminLi"><a class="ni nav-admin" data-p="admin">👑 Admin</a></li>
+    <li id="adminLi" style="display:none"><a class="ni" data-p="admin">Admin</a></li>
   </ul>
   <div class="sb">
-  <!-- BOUTON ADMIN VISIBLE -->
-  <button id="btnAdminAccess" onclick="openAdminAccess()" style="
-    width:100%;
-    padding:11px 14px;
-    background:rgba(232,99,28,0.1);
-    border:2px solid rgba(232,99,28,0.25);
-    border-radius:10px;
-    color:var(--or);
-    font-size:0.88rem;
-    font-weight:800;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    margin-bottom:10px;
-    transition:all 0.2s;
-  " onmouseover="this.style.background='rgba(232,99,28,0.2)'" 
-     onmouseout="this.style.background='rgba(232,99,28,0.1)'">
-    <span style="font-size:1.1rem">👑</span>
-    <span>Accès Admin</span>
-    <span style="margin-left:auto;font-size:0.72rem;opacity:0.7">→</span>
-  </button>
+
     <div class="sb-plan" id="sbPlan">Plan Gratuit — Essai 7 jours</div>
     <a class="sb-up" data-p="pricing">Passer à Premium</a>
     <button id="btnDarkModeSide" class="dark-toggle-btn">🌙 Mode sombre</button>
-  </div>
+    <!-- Accès discret admin - invisible pour les utilisateurs normaux -->
+  <div id="adminTrigger" onclick="openAdminAccess()" style="
+    text-align:center;
+    padding:6px;
+    margin-top:8px;
+    cursor:pointer;
+    color:rgba(255,255,255,0.12);
+    font-size:0.7rem;
+    user-select:none;
+    -webkit-user-select:none;
+  " title="">v3.0.0</div>
+</div>
 </nav>
 
 <!-- MOBILE HEADER -->
@@ -1283,55 +1273,99 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 <!-- ADMIN -->
 <section class="page" id="p-admin">
   <div class="ph">
-    <div><h1 class="pt">Espace Admin</h1><p class="ps">Gérez tous vos utilisateurs et leurs plans</p></div>
-    <div class="admin-badge">👑 Propriétaire</div>
+    <div><h1 class="pt">👑 Espace Admin</h1>
+    <p class="ps">Gestion des utilisateurs et abonnements</p></div>
+    <button onclick="doLogout()" style="background:none;border:2px solid var(--bo);color:var(--mu);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:700">Déconnexion →</button>
   </div>
 
-  <!-- STATS GLOBALES -->
-  <div class="admin-stats">
-    <div class="as as-g"><div class="as-ico">👥</div><div class="as-l">Utilisateurs total</div><div class="as-v" id="adTotalUsers">0</div></div>
-    <div class="as as-go"><div class="as-ico">💰</div><div class="as-l">Revenus estimés/mois</div><div class="as-v" id="adRevenu">0 €</div></div>
-    <div class="as as-b"><div class="as-ico">👑</div><div class="as-l">Abonnés payants</div><div class="as-v" id="adPayants">0</div></div>
-    <div class="as as-o"><div class="as-ico">🔥</div><div class="as-l">Taux conversion</div><div class="as-v" id="adConversion">0%</div></div>
+  <!-- STATS RAPIDES -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+    <div style="background:var(--card);border:2px solid var(--bo);border-radius:var(--r);padding:16px;text-align:center">
+      <div style="font-family:var(--ft);font-size:1.8rem;font-weight:900;color:var(--or)" id="adTotalUsers">0</div>
+      <div style="font-size:0.78rem;color:var(--mu);margin-top:3px">Utilisateurs</div>
+    </div>
+    <div style="background:var(--card);border:2px solid var(--bo);border-radius:var(--r);padding:16px;text-align:center">
+      <div style="font-family:var(--ft);font-size:1.8rem;font-weight:900;color:#2E7DD6" id="adPaidUsers">0</div>
+      <div style="font-size:0.78rem;color:var(--mu);margin-top:3px">Abonnés payants</div>
+    </div>
+    <div style="background:var(--card);border:2px solid var(--bo);border-radius:var(--r);padding:16px;text-align:center">
+      <div style="font-family:var(--ft);font-size:1.8rem;font-weight:900;color:#1F9D6B" id="adRevenue">0€</div>
+      <div style="font-size:0.78rem;color:var(--mu);margin-top:3px">Revenus/mois</div>
+    </div>
+    <div style="background:var(--card);border:2px solid var(--bo);border-radius:var(--r);padding:16px;text-align:center">
+      <div style="font-family:var(--ft);font-size:1.8rem;font-weight:900;color:#D98C12" id="adAffiliates">0</div>
+      <div style="font-size:0.78rem;color:var(--mu);margin-top:3px">Affiliés</div>
+    </div>
   </div>
-  <!-- MESSAGE AUX UTILISATEURS -->
-  <div class="card">
-    <div class="ct">📢 Envoyer un message à tous les utilisateurs</div>
-    <div class="fg"><label>Message</label><textarea class="inp" id="adMessage" rows="3" placeholder="Ex: Nouvelle fonctionnalité disponible ! Découvrez le nouveau module Suivi…" style="resize:vertical"></textarea></div>
-    <button class="btn-g" id="btnSendMessage">📤 Envoyer à tous</button>
-    <div id="adMessageStatus" style="margin-top:10px"></div>
+
+  <!-- MON PLAN (pour vous) -->
+  <div class="card" style="border:2px solid var(--or);margin-bottom:20px">
+    <div class="ct" style="color:var(--or)">⭐ Mon plan — Miss Nyunge</div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+      <div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--go));display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;color:#fff">M</div>
+      <div>
+        <div style="font-weight:800;font-size:1rem">Miss Nyunge</div>
+        <div style="font-size:0.85rem;color:var(--mu)">missnyunge@gmail.com</div>
+      </div>
+      <div id="myCurrentPlan" style="margin-left:auto;background:var(--or);color:#fff;padding:5px 14px;border-radius:20px;font-size:0.82rem;font-weight:800">Business</div>
+    </div>
+    <div style="font-size:0.85rem;color:var(--mu);margin-bottom:12px">Changer mon plan :</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="setMyPlan('gratuit')" style="padding:9px 16px;border-radius:8px;border:2px solid var(--bo);background:none;cursor:pointer;font-weight:700;font-size:0.85rem;color:var(--tx)">Gratuit</button>
+      <button onclick="setMyPlan('basic')" style="padding:9px 16px;border-radius:8px;border:2px solid #2E7DD6;background:#2E7DD6;cursor:pointer;font-weight:700;font-size:0.85rem;color:#fff">Basic</button>
+      <button onclick="setMyPlan('premium')" style="padding:9px 16px;border-radius:8px;border:2px solid var(--or);background:var(--or);cursor:pointer;font-weight:700;font-size:0.85rem;color:#fff">Premium ⭐</button>
+      <button onclick="setMyPlan('business')" style="padding:9px 16px;border-radius:8px;border:2px solid var(--go);background:var(--go);cursor:pointer;font-weight:700;font-size:0.85rem;color:#1A1007">Business 👑</button>
+    </div>
+  </div>
+
+  <!-- LIENS STRIPE -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="ct">💳 Liens de paiement à envoyer aux clients</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:var(--rs);border:1px solid var(--bo)">
+        <div style="flex:1"><div style="font-weight:700;font-size:0.9rem">Basic — 2,99€/mois</div><div style="font-size:0.78rem;color:var(--mu)">Europe | 1€/mois Afrique</div></div>
+        <button onclick="navigator.clipboard?.writeText('https://buy.stripe.com/3cI28r0nRbNva7J3VyaEE00');toast('Lien copié !');" style="padding:7px 12px;background:var(--bl);color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:0.82rem;font-weight:700">Copier</button>
+        <a href="https://buy.stripe.com/3cI28r0nRbNva7J3VyaEE00" target="_blank" style="padding:7px 12px;background:var(--or);color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:0.82rem;font-weight:700;text-decoration:none">Ouvrir</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:var(--rs);border:1px solid var(--bo)">
+        <div style="flex:1"><div style="font-weight:700;font-size:0.9rem">Premium — 5,99€/mois</div><div style="font-size:0.78rem;color:var(--mu)">Europe | 2€/mois Afrique</div></div>
+        <button onclick="navigator.clipboard?.writeText('https://buy.stripe.com/00wbJ14E76tbfs3eAcaEE02');toast('Lien copié !');" style="padding:7px 12px;background:var(--bl);color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:0.82rem;font-weight:700">Copier</button>
+        <a href="https://buy.stripe.com/00wbJ14E76tbfs3eAcaEE02" target="_blank" style="padding:7px 12px;background:var(--or);color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:0.82rem;font-weight:700;text-decoration:none">Ouvrir</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:var(--rs);border:1px solid var(--bo)">
+        <div style="flex:1"><div style="font-weight:700;font-size:0.9rem">Business — 9,99€/mois</div><div style="font-size:0.78rem;color:var(--mu)">Europe | 3€/mois Afrique</div></div>
+        <button onclick="navigator.clipboard?.writeText('https://buy.stripe.com/cNi9ATc6z9Fn7ZB4ZCaEE01');toast('Lien copié !');" style="padding:7px 12px;background:var(--bl);color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:0.82rem;font-weight:700">Copier</button>
+        <a href="https://buy.stripe.com/cNi9ATc6z9Fn7ZB4ZCaEE01" target="_blank" style="padding:7px 12px;background:var(--or);color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:0.82rem;font-weight:700;text-decoration:none">Ouvrir</a>
+      </div>
+    </div>
+    <div style="margin-top:12px;padding:12px;background:var(--bg);border-radius:var(--rs);font-size:0.82rem;color:var(--mu)">
+      💡 Copiez le lien → envoyez au client par WhatsApp ou Email → quand il paie, attribuez-lui son plan ci-dessous.
+    </div>
   </div>
 
   <!-- GESTION UTILISATEURS -->
   <div class="card">
-    <div class="ct">Gestion des utilisateurs et plans</div>
-    <div class="admin-search-row">
-      <input type="text" class="inp" id="adSearchUser" placeholder="Rechercher par email ou nom…" style="flex:1"/>
-      <button class="btn-g" id="btnRefreshUsers">🔄 Actualiser</button>
+    <div class="ct">👥 Utilisateurs — Attribuer un plan</div>
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <input type="text" class="inp" id="admin-search" placeholder="🔍 Rechercher un utilisateur..." style="flex:1;min-width:180px" oninput="renderAdmin()"/>
+      <select class="inp" id="admin-filter" style="width:160px" onchange="renderAdmin()">
+        <option value="all">Tous les plans</option>
+        <option value="gratuit">Gratuit</option>
+        <option value="basic">Basic</option>
+        <option value="premium">Premium</option>
+        <option value="business">Business</option>
+      </select>
     </div>
-    <div id="adUsersList"><div class="empty">Chargement des utilisateurs…</div></div>
+    <div id="adminUsersList"></div>
   </div>
 
-  <!-- ACCÈS RAPIDE -->
-  <div class="card">
-    <div class="ct">Accès rapide</div>
-    <div class="admin-nav">
-      <button class="anb" data-p="dashboard">Dashboard</button>
-      <button class="anb" data-p="daily">Dépenses</button>
-      <button class="anb" data-p="goals">Objectif</button>
-      <button class="anb" data-p="business">Business</button>
-      <button class="anb" data-p="couple">Couple</button>
-      <button class="anb" data-p="tips">Conseils</button>
-      <button class="anb" data-p="defis">Défis</button>
-      <button class="anb" data-p="family">Famille</button>
-      <button class="anb" data-p="pricing">Plans</button>
-      <button class="anb" data-p="coaching">Coaching</button>
-    </div>
+  <!-- MESSAGE À TOUS -->
+  <div class="card" style="margin-top:20px">
+    <div class="ct">📢 Envoyer un message à tous</div>
+    <textarea class="inp" id="adminMsg" rows="3" placeholder="Votre message pour tous les utilisateurs..." style="width:100%;margin-bottom:12px"></textarea>
+    <button id="btnSendMessage" onclick="sendMessageToAll()" class="btn-g" style="width:100%">📢 Envoyer à tous</button>
   </div>
 
-  <div class="card" style="text-align:center">
-    <button class="btn-danger" id="btnLogout">Quitter le mode Admin</button>
-  </div>
 </section>
 
 </main>
@@ -1351,7 +1385,7 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791409511"></script>
+<script src="script.js?v=1791410416"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
