@@ -4,7 +4,8 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BudgetSmart v3</title>
-<link rel="stylesheet" href="style.css?v=1791414339"/>
+<link rel="stylesheet" href="style.css?v=1791414486"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#2E7D5E"/>
@@ -97,7 +98,8 @@
   25%{transform:translateX(-8px)}
   75%{transform:translateX(8px)}
 }
-</style></head>
+</style><style>.ni i{width:18px;text-align:center;margin-right:6px;opacity:0.7;}.ni.active i{opacity:1;color:var(--or);}</style>
+</head>
 <body>
 
 <!-- ONBOARDING -->
@@ -238,15 +240,15 @@
     </div>
   </div>
   <ul class="nav">
-    <li><a class="ni active" data-p="dashboard">Tableau de bord</a></li>
-    <li><a class="ni" data-p="daily">Dépenses quotidiennes</a></li>
+    <li><a class="ni active" data-p="dashboard"><i class="fa-solid fa-chart-line"></i> Tableau de bord</a></li>
+    <li><a class="ni" data-p="daily"><i class="fa-solid fa-wallet"></i> Dépenses</a></li>
     <li class="ns">MES OBJECTIFS</li>
-    <li><a class="ni" data-p="goals">Objectif Personnel</a></li>
-    <li><a class="ni" data-p="business">Projet Business <span class="nb">Premium</span></a></li>
-    <li><a class="ni" data-p="couple">Projet Couple <span class="nb">Premium</span></a></li>
+    <li><a class="ni" data-p="goals"><i class="fa-solid fa-bullseye"></i> Objectifs</a></li>
+    <li><a class="ni" data-p="business"><i class="fa-solid fa-briefcase"></i> Business <span class="nb">Premium</span></a></li>
+    <li><a class="ni" data-p="couple"><i class="fa-solid fa-heart"></i> Couple <span class="nb">Premium</span></a></li>
     <li class="ns">ÉPARGNE</li>
-    <li><a class="ni" data-p="suivi">Suivi</a></li>
-    <li><a class="ni" data-p="calendrier">📅 Calendrier</a></li>
+    <li><a class="ni" data-p="suivi"><i class="fa-solid fa-chart-bar"></i> Suivi</a></li>
+    <li><a class="ni" data-p="calendrier"><i class="fa-solid fa-calendar-days"></i> Calendrier</a></li>
     <li><a class="ni" data-p="tips">Conseils financiers</a></li>
     <li><a class="ni" data-p="defis">Défis d'épargne</a></li>
     <li><a class="ni" data-p="family">Mode Famille</a></li>
@@ -255,8 +257,8 @@
     <li><a class="ni" data-p="coaching">Coaching Premium</a></li>
     <li><a class="ni" data-p="facturation">📄 Facturation</a></li>
     <li><a class="ni" data-p="share">Partager l'app</a></li>
-    <li><a class="ni" data-p="settings">Paramètres</a></li>
-    <li id="adminLi" style="display:none"><a class="ni" data-p="admin">Admin</a></li>
+    <li><a class="ni" data-p="settings"><i class="fa-solid fa-gear"></i> Paramètres</a></li>
+    <li id="adminLi" style="display:none"><a class="ni" data-p="admin"><i class="fa-solid fa-shield-halved"></i> Admin</a></li>
   </ul>
   <div class="sb">
 
@@ -1084,40 +1086,73 @@
 
 <!-- PARTAGER -->
 <section class="page" id="p-share">
-  <div class="ph"><div><h1 class="pt">Partager l'app</h1><p class="ps">Invitez vos proches à rejoindre BudgetSmart</p></div></div>
-  <div class="card">
-    <div class="ct">Votre lien</div>
-    <div class="share-link-box">
-      <div class="slb-url">https://misswaxbeautycare.github.io/budgetsmart</div>
-      <button class="btn-g" id="btnCopyLink">Copier</button>
+  <div class="ph">
+    <div><h1 class="pt">Partager BudgetSmart</h1>
+    <p class="ps">Invitez vos proches à rejoindre BudgetSmart</p></div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="ct"><i class="fa-solid fa-link"></i> Lien de l'application</div>
+    <div style="display:flex;gap:10px;align-items:center;background:var(--bg);border:2px solid var(--bo);border-radius:12px;padding:12px 16px;flex-wrap:wrap">
+      <div style="flex:1;font-size:0.82rem;color:var(--tx);word-break:break-all">https://misswaxbeautycare.github.io/budgetsmart-app-v2/</div>
+      <button onclick="navigator.clipboard?.writeText('https://misswaxbeautycare.github.io/budgetsmart-app-v2/');toast('🔗 Lien copié !');" style="padding:9px 14px;background:var(--or);color:#fff;border:none;border-radius:9px;cursor:pointer;font-weight:700;font-size:0.85rem;flex-shrink:0">
+        <i class="fa-solid fa-copy"></i> Copier
+      </button>
     </div>
   </div>
-  <div class="card">
-    <div class="ct">Partager sur les réseaux</div>
-    <div class="share-grid">
-      <button class="shr-btn shr-wa" id="shareWA"><span>💬</span>WhatsApp</button>
-      <button class="shr-btn shr-fb" id="shareFB"><span>📘</span>Facebook</button>
-      <button class="shr-btn shr-ig" id="shareIG"><span>📸</span>Instagram</button>
-      <button class="shr-btn shr-tk" id="shareTK"><span>🎵</span>TikTok</button>
-      <button class="shr-btn shr-em" id="shareEM"><span>✉️</span>Email</button>
-      <button class="shr-btn shr-tw" id="shareTW"><span>🐦</span>Twitter/X</button>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="ct"><i class="fa-solid fa-share-nodes"></i> Partager sur les réseaux</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-top:8px">
+      <button onclick="shareApp('wa')" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;background:#25D366;color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:0.85rem;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        <i class="fa-brands fa-whatsapp" style="font-size:1.8rem"></i>WhatsApp
+      </button>
+      <button onclick="shareApp('fb')" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;background:#1877F2;color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:0.85rem;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        <i class="fa-brands fa-facebook" style="font-size:1.8rem"></i>Facebook
+      </button>
+      <button onclick="shareApp('tw')" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;background:#000;color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:0.85rem;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        <i class="fa-brands fa-x-twitter" style="font-size:1.8rem"></i>X / Twitter
+      </button>
+      <button onclick="shareApp('ig')" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:0.85rem;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        <i class="fa-brands fa-instagram" style="font-size:1.8rem"></i>Instagram
+      </button>
+      <button onclick="shareApp('tk')" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;background:#010101;color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:0.85rem;border:2px solid rgba(255,255,255,0.1);transition:transform 0.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        <i class="fa-brands fa-tiktok" style="font-size:1.8rem"></i>TikTok
+      </button>
+      <button onclick="shareApp('li')" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;background:#0A66C2;color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:0.85rem;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        <i class="fa-brands fa-linkedin" style="font-size:1.8rem"></i>LinkedIn
+      </button>
+      <button onclick="shareApp('em')" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;background:#2E7DD6;color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:0.85rem;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        <i class="fa-solid fa-envelope" style="font-size:1.8rem"></i>Email
+      </button>
+      <button onclick="shareApp('sms')" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;background:#34C759;color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:0.85rem;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        <i class="fa-solid fa-comment-sms" style="font-size:1.8rem"></i>SMS
+      </button>
     </div>
   </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="ct"><i class="fa-solid fa-pen"></i> Message personnalisé</div>
+    <textarea id="shareCustomMsg" rows="4" class="inp" style="width:100%;margin-bottom:12px">💰 Je gère mes finances avec BudgetSmart — l'app qui change tout !
+Dashboard, facturation pro, objectifs d'épargne et bien plus.
+Essayez gratuitement : https://misswaxbeautycare.github.io/budgetsmart-app-v2/</textarea>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button onclick="shareCustom('wa')" style="flex:1;min-width:130px;padding:12px;background:#25D366;color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px">
+        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+      </button>
+      <button onclick="shareCustom('em')" style="flex:1;min-width:130px;padding:12px;background:#2E7DD6;color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px">
+        <i class="fa-solid fa-envelope"></i> Email
+      </button>
+    </div>
+  </div>
+
   <div class="card">
-    <div class="ct">Message prêt à envoyer</div>
-    <div class="share-msg" id="shareMsgBox">🌟 Découvrez BudgetSmart !
-
-L'app qui vous aide à gérer votre budget et épargner intelligemment.
-
-✅ Dépenses quotidiennes
-✅ Objectifs d'épargne
-✅ Défis d'épargne
-✅ Coaching financier
-
-🎁 7 jours gratuits !
-
-👉 https://misswaxbeautycare.github.io/budgetsmart</div>
-    <button class="btn-g" id="btnCopyMsg" style="margin-top:12px">Copier ce message</button>
+    <div class="ct"><i class="fa-solid fa-qrcode"></i> QR Code</div>
+    <div style="text-align:center;padding:20px">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://misswaxbeautycare.github.io/budgetsmart-app-v2/" 
+        alt="QR Code" style="border-radius:12px;border:3px solid var(--or);max-width:200px"/>
+      <div style="font-size:0.85rem;color:var(--mu);margin-top:10px">Scannez pour ouvrir BudgetSmart</div>
+    </div>
   </div>
 </section>
 
@@ -1471,7 +1506,7 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791414339"></script>
+<script src="script.js?v=1791414486"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
