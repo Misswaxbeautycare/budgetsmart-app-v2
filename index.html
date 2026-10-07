@@ -240,25 +240,37 @@
     </div>
   </div>
   <ul class="nav">
+
+    <!-- ── 1. FINANCES ── -->
+    <li class="ns">FINANCES</li>
     <li><a class="ni active" data-p="dashboard"><i class="fa-solid fa-chart-line"></i> Tableau de bord</a></li>
-    <li><a class="ni" data-p="daily"><i class="fa-solid fa-wallet"></i> Dépenses</a></li>
-    <li class="ns">MES OBJECTIFS</li>
-    <li><a class="ni" data-p="goals"><i class="fa-solid fa-bullseye"></i> Objectifs</a></li>
-    <li><a class="ni" data-p="business"><i class="fa-solid fa-briefcase"></i> Business <span class="nb">Premium</span></a></li>
-    <li><a class="ni" data-p="couple"><i class="fa-solid fa-heart"></i> Couple <span class="nb">Premium</span></a></li>
-    <li class="ns">ÉPARGNE</li>
-    <li><a class="ni" data-p="suivi"><i class="fa-solid fa-chart-bar"></i> Suivi</a></li>
+    <li><a class="ni" data-p="daily"><i class="fa-solid fa-wallet"></i> Dépenses quotidiennes</a></li>
+    <li><a class="ni" data-p="suivi"><i class="fa-solid fa-chart-bar"></i> Suivi & Épargne</a></li>
+    <li><a class="ni" data-p="defis"><i class="fa-solid fa-fire"></i> Défis d'épargne</a></li>
+    <li><a class="ni" data-p="tips"><i class="fa-solid fa-lightbulb"></i> Conseils financiers</a></li>
+
+    <!-- ── 2. OBJECTIFS ── -->
+    <li class="ns">OBJECTIFS</li>
+    <li><a class="ni" data-p="goals"><i class="fa-solid fa-bullseye"></i> Objectif Personnel</a></li>
+    <li><a class="ni" data-p="business"><i class="fa-solid fa-briefcase"></i> Projet Business <span class="nb">Premium</span></a></li>
+    <li><a class="ni" data-p="couple"><i class="fa-solid fa-heart"></i> Projet Couple <span class="nb">Premium</span></a></li>
+    <li><a class="ni" data-p="family"><i class="fa-solid fa-house-user"></i> Mode Famille <span class="nb">Premium</span></a></li>
+
+    <!-- ── 3. OUTILS ── -->
+    <li class="ns">OUTILS PRO</li>
+    <li><a class="ni" data-p="facturation"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a></li>
     <li><a class="ni" data-p="calendrier"><i class="fa-solid fa-calendar-days"></i> Calendrier</a></li>
-    <li><a class="ni" data-p="tips">Conseils financiers</a></li>
-    <li><a class="ni" data-p="defis">Défis d'épargne</a></li>
-    <li><a class="ni" data-p="family">Mode Famille</a></li>
-    <li class="ns">COMPTE</li>
-    <li><a class="ni" data-p="pricing">Abonnements</a></li>
-    <li><a class="ni" data-p="coaching">Coaching Premium</a></li>
-    <li><a class="ni" data-p="facturation">📄 Facturation</a></li>
-    <li><a class="ni" data-p="share">Partager l'app</a></li>
+    <li><a class="ni" data-p="coaching"><i class="fa-solid fa-graduation-cap"></i> Coaching Premium</a></li>
+
+    <!-- ── 4. COMPTE ── -->
+    <li class="ns">MON COMPTE</li>
+    <li><a class="ni" data-p="pricing"><i class="fa-solid fa-tag"></i> Plans & Abonnements</a></li>
+    <li><a class="ni" data-p="avis"><i class="fa-solid fa-star"></i> Avis clients</a></li>
+    <li><a class="ni" data-p="share"><i class="fa-solid fa-share-nodes"></i> Partager l'app</a></li>
+    <li><a class="ni" data-p="legal"><i class="fa-solid fa-scale-balanced"></i> Mentions légales</a></li>
     <li><a class="ni" data-p="settings"><i class="fa-solid fa-gear"></i> Paramètres</a></li>
-    <li id="adminLi" style="display:none"><a class="ni" data-p="admin"><i class="fa-solid fa-shield-halved"></i> Admin</a></li>
+    <li id="adminLi" style="display:none"><a class="ni" data-p="admin"><i class="fa-solid fa-shield-halved"></i> Administration</a></li>
+
   </ul>
   <div class="sb">
 
@@ -1506,7 +1518,7 @@ Essayez gratuitement : https://misswaxbeautycare.github.io/budgetsmart-app-v2/</
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791414591"></script>
+<script src="script.js?v=1791414746"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
