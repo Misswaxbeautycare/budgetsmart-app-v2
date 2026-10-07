@@ -4124,6 +4124,9 @@ function downloadEditedPDF() {
 
 function sendEditedDoc(method) {
   if (!pdfEditorData) return;
+  sendDocWithLogo(method, pdfEditorData);
+  return;
+  // Legacy below
   const nom     = pdfEditorData.clientNom || 'Client';
   const numero  = pdfEditorData.numero || '';
   const total   = (pdfEditorData.total || 0).toFixed(2);
@@ -4146,6 +4149,165 @@ function sendEditedDoc(method) {
   pdfEditorData.statut = 'envoyee';
   savePDFEdits();
   toast('✅ Document envoyé !');
+}
+
+
+/* ══ DEMANDE LIEN AFFILIÉ + MESSAGES AVEC LOGO ══ */
+
+function demanderLienAffilie() {
+  const name  = prompt('Votre prénom et nom :','');
+  if (!name) return;
+  const email = prompt('Votre email :','');
+  if (!email) return;
+
+  // Message WhatsApp avec logo BudgetSmart
+  const msgWA = encodeURIComponent(
+    '💰 *BudgetSmart* — Demande de lien affilié\n' +
+    '━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+    '👤 Nom : ' + name + '\n' +
+    '📧 Email : ' + email + '\n\n' +
+    'Je souhaite rejoindre le programme d\'affiliation BudgetSmart et recevoir mon lien personnel.\n\n' +
+    '📊 Commissions : Basic 20% · Premium 25% · Business 30%\n\n' +
+    '━━━━━━━━━━━━━━━━━━━━━━\n' +
+    '💰 *BudgetSmart v3.0.0*\n' +
+    '🌐 https://misswaxbeautycare.github.io/budgetsmart-app-v2/'
+  );
+
+  // Message Email avec logo
+  const subjEmail = encodeURIComponent('Demande lien affilié BudgetSmart — ' + name);
+  const bodyEmail = encodeURIComponent(
+    'Bonjour,\n\n' +
+    'Je souhaite rejoindre le programme d\'affiliation BudgetSmart.\n\n' +
+    'Mes informations :\n' +
+    '• Nom : ' + name + '\n' +
+    '• Email : ' + email + '\n\n' +
+    'Merci de m\'envoyer mon lien d\'affiliation personnel.\n\n' +
+    'Cordialement,\n' + name + '\n\n' +
+    '---\n' +
+    'BudgetSmart v3.0.0\n' +
+    'https://misswaxbeautycare.github.io/budgetsmart-app-v2/'
+  );
+
+  // Popup choix WA ou Email
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML = `
+    <div style="background:var(--card);border-radius:20px;padding:28px;max-width:360px;width:100%;text-align:center;border:2px solid #1F9D6B">
+      <div style="font-size:2.5rem;margin-bottom:12px">💰</div>
+      <div style="font-family:var(--ft);font-size:1.2rem;font-weight:900;margin-bottom:6px">BudgetSmart</div>
+      <div style="font-size:0.88rem;color:var(--mu);margin-bottom:20px">Envoyer votre demande de lien affilié</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <a href="https://wa.me/32495639902?text=${msgWA}" target="_blank"
+          style="display:flex;align-items:center;gap:10px;padding:14px 18px;background:#25D366;color:#fff;border-radius:12px;font-weight:800;text-decoration:none;font-size:0.95rem">
+          <span style="font-size:1.3rem">📱</span>
+          <span>Envoyer sur WhatsApp</span>
+        </a>
+        <a href="mailto:missnyunge@gmail.com?subject=${subjEmail}&body=${bodyEmail}"
+          style="display:flex;align-items:center;gap:10px;padding:14px 18px;background:#2E7DD6;color:#fff;border-radius:12px;font-weight:800;text-decoration:none;font-size:0.95rem">
+          <span style="font-size:1.3rem">📧</span>
+          <span>Envoyer par Email</span>
+        </a>
+        <button onclick="this.closest('div[style*=fixed]').remove()"
+          style="padding:11px;background:none;border:2px solid var(--bo);border-radius:10px;cursor:pointer;font-weight:700;color:var(--mu)">
+          Annuler
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+// ── Partage WhatsApp avec logo BudgetSmart ──
+function shareWithLogo(text, phone) {
+  const fullMsg = encodeURIComponent(
+    text + '\n\n' +
+    '━━━━━━━━━━━━━━━━━━━━━━\n' +
+    '💰 *BudgetSmart v3*\n' +
+    '🌐 https://misswaxbeautycare.github.io/budgetsmart-app-v2/\n' +
+    '📧 missnyunge@gmail.com'
+  );
+  const url = phone
+    ? 'https://wa.me/' + phone.replace(/\D/g,'') + '?text=' + fullMsg
+    : 'https://wa.me/?text=' + fullMsg;
+  window.open(url, '_blank');
+}
+
+// ── Email avec logo BudgetSmart ──
+function emailWithLogo(to, subject, body) {
+  const fullBody = encodeURIComponent(
+    body + '\n\n' +
+    '---\n' +
+    'BudgetSmart v3.0.0 — L\'intelligence financière pour tous\n' +
+    'https://misswaxbeautycare.github.io/budgetsmart-app-v2/\n' +
+    'missnyunge@gmail.com | +32 495 63 99 02\n' +
+    'Développé par Miss Nyunge Digital Services, Bruxelles'
+  );
+  window.open('mailto:' + to + '?subject=' + encodeURIComponent(subject) + '&body=' + fullBody, '_blank');
+}
+
+// ── Patch shareAffLink pour inclure logo ──
+function shareAffLink(name, link) {
+  const msg = encodeURIComponent(
+    '💰 *BudgetSmart* — Programme d\'affiliation\n' +
+    '━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+    'Bonjour ' + name + ' !\n\n' +
+    '🎉 Votre lien d\'affiliation personnel est prêt !\n\n' +
+    '🔗 *Votre lien unique :*\n' +
+    link + '\n\n' +
+    '📊 *Vos commissions :*\n' +
+    '• Basic → 20% (≈0,60€/mois/personne)\n' +
+    '• Premium → 25% (≈1,50€/mois/personne)\n' +
+    '• Business → 30% (≈3€/mois/personne)\n\n' +
+    '✅ Partagez ce lien sur Instagram, TikTok, Facebook, WhatsApp...\n' +
+    'Chaque personne qui s\'abonne via votre lien vous rapporte une commission mensuelle automatique !\n\n' +
+    '━━━━━━━━━━━━━━━━━━━━━━\n' +
+    '💰 *BudgetSmart v3.0.0*\n' +
+    '🌐 https://misswaxbeautycare.github.io/budgetsmart-app-v2/\n' +
+    '📧 missnyunge@gmail.com | 📞 +32 495 63 99 02'
+  );
+  window.open('https://wa.me/?text=' + msg, '_blank');
+}
+
+// ── Patch sendEditedDoc pour inclure logo ──
+function sendDocWithLogo(method, facture) {
+  const f       = facture || pdfEditorData;
+  if (!f) return;
+  const nom     = f.clientNom || 'Client';
+  const numero  = f.numero || '';
+  const total   = (f.total || 0).toFixed(2);
+  const bodyWA  = encodeURIComponent(
+    '💰 *BudgetSmart* — Facture\n' +
+    '━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+    'Bonjour ' + nom + ',\n\n' +
+    '📄 Veuillez trouver votre facture *' + numero + '*\n' +
+    '💶 Montant total : *' + total + '€*\n\n' +
+    'Pour toute question, contactez-nous.\n\n' +
+    '━━━━━━━━━━━━━━━━━━━━━━\n' +
+    '💰 *BudgetSmart v3.0.0*\n' +
+    '📧 missnyunge@gmail.com | 📞 +32 495 63 99 02\n' +
+    '🌐 https://misswaxbeautycare.github.io/budgetsmart-app-v2/'
+  );
+  const bodyEmail = encodeURIComponent(
+    'Bonjour ' + nom + ',\n\n' +
+    'Veuillez trouver ci-joint votre facture ' + numero + '\n' +
+    'Montant total : ' + total + '€\n\n' +
+    'Pour toute question, n\'hésitez pas à nous contacter.\n\n' +
+    'Cordialement,\n' +
+    'BudgetSmart\n\n' +
+    '---\n' +
+    'BudgetSmart v3.0.0 — L\'intelligence financière pour tous\n' +
+    'https://misswaxbeautycare.github.io/budgetsmart-app-v2/\n' +
+    'missnyunge@gmail.com | +32 495 63 99 02'
+  );
+  if (method === 'wa') {
+    const phone = f.clientTel
+      ? f.clientTel.replace(/\D/g,'')
+      : prompt('Numéro WhatsApp du client :','');
+    if (phone) window.open('https://wa.me/' + phone + '?text=' + bodyWA, '_blank');
+  } else {
+    const email = f.clientEmail || prompt('Email du client :','');
+    if (email) window.open('mailto:' + email + '?subject=Facture ' + encodeURIComponent(numero) + '&body=' + bodyEmail, '_blank');
+  }
 }
 
 /* ══ NAVIGATION ══ */
