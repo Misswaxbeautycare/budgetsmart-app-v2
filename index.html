@@ -1219,15 +1219,30 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
   <div id="langModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:8000;display:none;align-items:flex-end;justify-content:center">
     <div style="background:var(--card);border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:500px;border-top:4px solid var(--or)">
       <div style="font-family:var(--ft);font-size:1.2rem;font-weight:800;margin-bottom:20px">🌍 Choisir la langue</div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <button data-lang="fr" onclick="setLang('fr');closeLangModal()" class="sett-lang-btn" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:2px solid var(--bo);background:var(--bg);cursor:pointer;font-size:1rem;font-weight:700">
-          <span style="font-size:1.5rem">🇫🇷</span><span>Français</span><span style="margin-left:auto;color:var(--mu);font-size:0.85rem">French</span>
+      <div style="display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto">
+        <button data-lang="fr" onclick="setLang('fr');closeLangModal()" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:12px;border:2px solid var(--bo);background:var(--bg);cursor:pointer;font-size:.95rem;font-weight:700;text-align:left">
+          <span style="font-size:1.4rem;flex-shrink:0">🇫🇷</span><span style="flex:1">Français</span><span style="color:var(--mu);font-size:.82rem">French</span>
         </button>
-        <button data-lang="en" onclick="setLang('en');closeLangModal()" class="sett-lang-btn" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:2px solid var(--bo);background:var(--bg);cursor:pointer;font-size:1rem;font-weight:700">
-          <span style="font-size:1.5rem">🇬🇧</span><span>English</span><span style="margin-left:auto;color:var(--mu);font-size:0.85rem">Anglais</span>
+        <button data-lang="en" onclick="setLang('en');closeLangModal()" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:12px;border:2px solid var(--bo);background:var(--bg);cursor:pointer;font-size:.95rem;font-weight:700;text-align:left">
+          <span style="font-size:1.4rem;flex-shrink:0">🇬🇧</span><span style="flex:1">English</span><span style="color:var(--mu);font-size:.82rem">Anglais</span>
         </button>
-        <button data-lang="ln" onclick="setLang('ln');closeLangModal()" class="sett-lang-btn" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:2px solid var(--bo);background:var(--bg);cursor:pointer;font-size:1rem;font-weight:700">
-          <span style="font-size:1.5rem">🇨🇩</span><span>Lingála</span><span style="margin-left:auto;color:var(--mu);font-size:0.85rem">Lingala</span>
+        <button data-lang="ln" onclick="setLang('ln');closeLangModal()" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:12px;border:2px solid var(--bo);background:var(--bg);cursor:pointer;font-size:.95rem;font-weight:700;text-align:left">
+          <span style="font-size:1.4rem;flex-shrink:0">🇨🇩</span><span style="flex:1">Lingála</span><span style="color:var(--mu);font-size:.82rem">Lingala</span>
+        </button>
+        <button data-lang="es" onclick="setLang('es');closeLangModal()" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:12px;border:2px solid var(--bo);background:var(--bg);cursor:pointer;font-size:.95rem;font-weight:700;text-align:left">
+          <span style="font-size:1.4rem;flex-shrink:0">🇪🇸</span><span style="flex:1">Español</span><span style="color:var(--mu);font-size:.82rem">Espagnol</span>
+        </button>
+        <button data-lang="pt" onclick="setLang('pt');closeLangModal()" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:12px;border:2px solid var(--bo);background:var(--bg);cursor:pointer;font-size:.95rem;font-weight:700;text-align:left">
+          <span style="font-size:1.4rem;flex-shrink:0">🇧🇷</span><span style="flex:1">Português</span><span style="color:var(--mu);font-size:.82rem">Portugais</span>
+        </button>
+        <button data-lang="sw" onclick="setLang('sw');closeLangModal()" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:12px;border:2px solid var(--bo);background:var(--bg);cursor:pointer;font-size:.95rem;font-weight:700;text-align:left">
+          <span style="font-size:1.4rem;flex-shrink:0">🇰🇪</span><span style="flex:1">Kiswahili</span><span style="color:var(--mu);font-size:.82rem">Swahili</span>
+        </button>
+        <button data-lang="ha" onclick="setLang('ha');closeLangModal()" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:12px;border:2px solid var(--bo);background:var(--bg);cursor:pointer;font-size:.95rem;font-weight:700;text-align:left">
+          <span style="font-size:1.4rem;flex-shrink:0">🇳🇬</span><span style="flex:1">Hausa</span><span style="color:var(--mu);font-size:.82rem">Haoussa</span>
+        </button>
+        <button data-lang="wo" onclick="setLang('wo');closeLangModal()" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:12px;border:2px solid var(--bo);background:var(--bg);cursor:pointer;font-size:.95rem;font-weight:700;text-align:left">
+          <span style="font-size:1.4rem;flex-shrink:0">🇸🇳</span><span style="flex:1">Wolof</span><span style="color:var(--mu);font-size:.82rem">Wolof</span>
         </button>
       </div>
       <button onclick="closeLangModal()" style="width:100%;margin-top:16px;padding:13px;background:var(--bo);border:none;border-radius:10px;cursor:pointer;font-weight:700;font-size:0.95rem">Annuler</button>
@@ -1307,7 +1322,7 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791408534"></script>
+<script src="script.js?v=1791409402"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
