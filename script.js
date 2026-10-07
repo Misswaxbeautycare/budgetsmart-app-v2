@@ -4310,6 +4310,163 @@ function sendDocWithLogo(method, facture) {
   }
 }
 
+
+/* ══ SYSTÈME D'AVIS ══ */
+let currentStarRating = 0;
+const STAR_LABELS = {1:'Mauvais 😞',2:'Passable 😐',3:'Bien 🙂',4:'Très bien 😊',5:'Excellent ! 🤩'};
+
+function setStarRating(val) {
+  currentStarRating = val;
+  document.getElementById('avisNote').value = val;
+  document.getElementById('starLabel').textContent = STAR_LABELS[val] || '';
+  document.querySelectorAll('.star-btn').forEach(s => {
+    const v = parseInt(s.dataset.val);
+    s.style.opacity = v <= val ? '1' : '0.25';
+    s.style.color   = v <= val ? '#D98C12' : '';
+    s.style.transform = v <= val ? 'scale(1.1)' : 'scale(1)';
+  });
+}
+
+function submitAvis() {
+  const note  = parseInt(document.getElementById('avisNote').value) || 0;
+  const nom   = document.getElementById('avisNom').value.trim();
+  const pays  = document.getElementById('avisPays').value.trim();
+  const texte = document.getElementById('avisTexte').value.trim();
+  const role  = document.getElementById('avisRole').value.trim();
+  if (!note)  { toast('⚠️ Choisissez une note (1 à 5 étoiles).'); return; }
+  if (!nom)   { toast('⚠️ Entrez votre prénom.'); return; }
+  if (!texte) { toast('⚠️ Écrivez votre avis.'); return; }
+  if (texte.length < 10) { toast('⚠️ Votre avis est trop court (minimum 10 caractères).'); return; }
+  const avis = ls('avis', []);
+  const newAvis = {
+    id: Date.now(), note, nom, pays, texte, role,
+    date: new Date().toISOString().slice(0,10),
+    likes: 0
+  };
+  avis.unshift(newAvis);
+  sv('avis', avis);
+  // Reset form
+  currentStarRating = 0;
+  document.getElementById('avisNote').value = '0';
+  document.getElementById('avisNom').value  = '';
+  document.getElementById('avisPays').value = '';
+  document.getElementById('avisTexte').value = '';
+  document.getElementById('avisRole').value  = '';
+  document.querySelectorAll('.star-btn').forEach(s => { s.style.opacity='0.3'; s.style.color=''; s.style.transform='scale(1)'; });
+  document.getElementById('starLabel').textContent = '';
+  renderAvis();
+  toast('✅ Merci pour votre avis ! Il est maintenant publié.');
+  // Save to Supabase in background
+  saveAvisToCloud(newAvis);
+}
+
+async function saveAvisToCloud(avis) {
+  try {
+    await fetch('https://otpnegpmvsmutyhhmkvp.supabase.co/rest/v1/reviews', {
+      method: 'POST',
+      headers: {
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90cG5lZ3BtdnNtdXR5aGhta3ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MzkxMzYsImV4cCI6MjA5NzIxNTEzNn0.n0BOebUlmZpMzygGAhNlRSyYnLiPNU0iM0xousqscHo',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90cG5lZ3BtdnNtdXR5aGhta3ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MzkxMzYsImV4cCI6MjA5NzIxNTEzNn0.n0BOebUlmZpMzygGAhNlRSyYnLiPNU0iM0xousqscHo',
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        rating: avis.note, author_name: avis.nom,
+        location: avis.pays, content: avis.texte,
+        role: avis.role, created_at: new Date().toISOString()
+      })
+    });
+  } catch(e) {}
+}
+
+function renderAvis() {
+  const avis = ls('avis', []);
+  const list = document.getElementById('avisList');
+  const stats = document.getElementById('avisStats');
+  if (!list) return;
+  if (!avis.length) {
+    list.innerHTML = '<div class="empty" style="padding:32px;text-align:center">Aucun avis encore. Soyez le premier !</div>';
+    if (stats) stats.style.display = 'none';
+    return;
+  }
+  // Stats
+  const avg = avis.reduce((s,a) => s+a.note, 0) / avis.length;
+  if (stats) {
+    stats.style.display = 'block';
+    const moyEl = document.getElementById('avisMoyenne');
+    const starsEl = document.getElementById('avisStars');
+    const countEl = document.getElementById('avisCount');
+    const barresEl = document.getElementById('avisBarres');
+    if (moyEl) moyEl.textContent = avg.toFixed(1);
+    if (starsEl) starsEl.textContent = '★'.repeat(Math.round(avg)) + '☆'.repeat(5-Math.round(avg));
+    if (countEl) countEl.textContent = avis.length + ' avis';
+    if (barresEl) {
+      barresEl.innerHTML = [5,4,3,2,1].map(n => {
+        const cnt = avis.filter(a => a.note === n).length;
+        const pct = avis.length ? Math.round(cnt/avis.length*100) : 0;
+        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+          <span style="font-size:0.78rem;color:var(--go);min-width:12px">${n}★</span>
+          <div style="flex:1;height:8px;background:var(--bo);border-radius:4px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:var(--go);border-radius:4px;transition:width 0.5s"></div>
+          </div>
+          <span style="font-size:0.75rem;color:var(--mu);min-width:28px">${cnt}</span>
+        </div>`;
+      }).join('');
+    }
+  }
+  // List
+  list.innerHTML = avis.map(a => `
+    <div style="background:var(--card);border:2px solid var(--bo);border-radius:14px;padding:18px;margin-bottom:12px">
+      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+        <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--go));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;color:#fff;flex-shrink:0">
+          ${a.nom.charAt(0).toUpperCase()}
+        </div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-weight:800;font-size:0.95rem">${a.nom}</span>
+            ${a.role ? `<span style="background:var(--bg);color:var(--mu);font-size:0.72rem;padding:2px 8px;border-radius:6px">${a.role}</span>` : ''}
+            ${a.pays ? `<span style="font-size:0.78rem;color:var(--mu)">📍 ${a.pays}</span>` : ''}
+          </div>
+          <div style="color:var(--go);font-size:1rem;margin-top:3px;letter-spacing:1px">
+            ${'★'.repeat(a.note)}${'☆'.repeat(5-a.note)}
+            <span style="font-size:0.75rem;color:var(--mu);margin-left:6px">${a.date}</span>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:0.9rem;color:var(--tx);line-height:1.7;font-style:italic">"${a.texte}"</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:12px">
+        <button onclick="likeAvis(${a.id})" style="background:none;border:1px solid var(--bo);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:0.8rem;color:var(--mu);display:flex;align-items:center;gap:5px">
+          👍 Utile <span id="likes-${a.id}">${a.likes||0}</span>
+        </button>
+        ${isAdmin ? `<button onclick="deleteAvis(${a.id})" style="background:none;border:1px solid rgba(214,67,46,0.3);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:0.78rem;color:#D6432E">🗑️</button>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function likeAvis(id) {
+  const liked = JSON.parse(localStorage.getItem('bs_liked_avis') || '[]');
+  if (liked.includes(id)) { toast('Vous avez déjà aimé cet avis.'); return; }
+  const avis = ls('avis', []);
+  const idx = avis.findIndex(a => a.id === id);
+  if (idx >= 0) {
+    avis[idx].likes = (avis[idx].likes || 0) + 1;
+    sv('avis', avis);
+    liked.push(id);
+    localStorage.setItem('bs_liked_avis', JSON.stringify(liked));
+    const el = document.getElementById('likes-'+id);
+    if (el) el.textContent = avis[idx].likes;
+    toast('👍 Merci !');
+  }
+}
+
+function deleteAvis(id) {
+  if (!isAdmin) return;
+  if (!confirm('Supprimer cet avis ?')) return;
+  sv('avis', ls('avis',[]).filter(a => a.id !== id));
+  renderAvis();
+  toast('Avis supprimé.');
+}
+
 /* ══ NAVIGATION ══ */
 function initNav() {
   document.querySelectorAll('.ni').forEach(el => {
@@ -4340,6 +4497,8 @@ function go(page) {
   if (page === 'facturation') { renderFacturesList(); factGo('liste'); }
   if (page === 'admin')       { renderAdmin(); renderAdminUsers(); renderAdminAffiliates(); }
   if (page === 'settings')    { initSettingsPage(); }
+  if (page === 'avis')        { renderAvis(); }
+  if (page === 'legal')       { /* static page */ }
   if (page === 'profile')     { loadProfile(); loadPhoto(); }
   if (page === 'share')       { renderShare(); }
 }
