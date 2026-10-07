@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BudgetSmart v3</title>
-<link rel="stylesheet" href="style.css?v=1791099712"/>
+<link rel="stylesheet" href="style.css?v=1791408343"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#2E7D5E"/>
@@ -1124,7 +1124,7 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791099712"></script>
+<script src="script.js?v=1791408343"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
@@ -1133,5 +1133,93 @@ function togglePwd(id,btn){
   else{i.type='password';btn.textContent='👁️';}
 }
 </script>
+
+<!-- BOUTON AFFILIATION CLIGNOTANT -->
+<div id="affilBtn" style="
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  z-index:9998;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:8px;
+">
+  <!-- Lien Landing Page -->
+  <a href="landing.html" target="_blank" style="
+    background:linear-gradient(135deg,#2C1654,#6B3FA0);
+    color:#fff;
+    padding:10px 16px;
+    border-radius:12px;
+    font-size:0.82rem;
+    font-weight:800;
+    text-decoration:none;
+    box-shadow:0 4px 16px rgba(44,22,84,0.4);
+    display:flex;
+    align-items:center;
+    gap:6px;
+    transition:all 0.2s;
+  " onmouseover="this.style.transform='scale(1.05)'" 
+     onmouseout="this.style.transform='scale(1)'">
+    🌐 Voir la présentation
+  </a>
+
+  <!-- Bouton Affiliation clignotant -->
+  <a href="landing.html#affiliation" target="_blank" id="affilPulse" style="
+    background:linear-gradient(135deg,#1F9D6B,#2ECC71);
+    color:#fff;
+    padding:13px 20px;
+    border-radius:14px;
+    font-size:0.9rem;
+    font-weight:800;
+    text-decoration:none;
+    box-shadow:0 4px 20px rgba(31,157,107,0.5);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    position:relative;
+    animation:affilPulse 2s infinite;
+  ">
+    <span style="font-size:1.1rem">💰</span>
+    Gagner de l'argent — Affiliation
+    <span style="
+      position:absolute;
+      top:-6px;
+      right:-6px;
+      background:#E8631C;
+      color:#fff;
+      font-size:0.65rem;
+      font-weight:900;
+      padding:2px 7px;
+      border-radius:10px;
+      animation:affilBadge 1s infinite alternate;
+    ">NOUVEAU</span>
+  </a>
+
+  <!-- Bouton fermer -->
+  <button onclick="document.getElementById('affilBtn').style.display='none'"
+    style="
+      background:rgba(0,0,0,0.4);
+      color:rgba(255,255,255,0.6);
+      border:none;
+      border-radius:8px;
+      padding:4px 10px;
+      font-size:0.75rem;
+      cursor:pointer;
+      align-self:flex-end;
+    ">✕ Fermer</button>
+</div>
+
+<style>
+@keyframes affilPulse {
+  0%   { box-shadow: 0 4px 20px rgba(31,157,107,0.5); transform: scale(1); }
+  50%  { box-shadow: 0 8px 32px rgba(31,157,107,0.8); transform: scale(1.03); }
+  100% { box-shadow: 0 4px 20px rgba(31,157,107,0.5); transform: scale(1); }
+}
+@keyframes affilBadge {
+  0%   { background: #E8631C; }
+  100% { background: #D98C12; }
+}
+</style>
 </body>
 </html>
