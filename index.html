@@ -1377,6 +1377,67 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
     <button id="btnSendMessage" onclick="sendMessageToAll()" class="btn-g" style="width:100%">📢 Envoyer à tous</button>
   </div>
 
+  <!-- PROGRAMME D'AFFILIATION -->
+  <div class="card" style="margin-top:20px">
+    <div class="ct" style="color:#1F9D6B">🤝 Programme d'affiliation</div>
+
+    <!-- Ajouter un affilié -->
+    <div style="background:var(--bg);border-radius:var(--rs);padding:16px;margin-bottom:18px;border:2px solid rgba(31,157,107,0.2)">
+      <div style="font-size:0.85rem;font-weight:800;color:var(--tx);margin-bottom:12px">➕ Ajouter un nouvel affilié</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div class="fg">
+          <label>Prénom et nom</label>
+          <input type="text" class="inp" id="affNewName" placeholder="Ex: Jean Dupont"/>
+        </div>
+        <div class="fg">
+          <label>Email</label>
+          <input type="email" class="inp" id="affNewEmail" placeholder="jean@email.com"/>
+        </div>
+        <div class="fg" style="grid-column:1/-1">
+          <label>Email PayPal (pour paiement automatique)</label>
+          <input type="email" class="inp" id="affNewPaypal" placeholder="paypal@email.com"/>
+        </div>
+      </div>
+      <button id="btnAddAffiliate" onclick="addNewAffiliate()" class="btn-g" style="width:100%;background:#1F9D6B">
+        + Ajouter l'affilié et envoyer son lien par WhatsApp
+      </button>
+      <div style="margin-top:10px;font-size:0.78rem;color:var(--mu);line-height:1.6">
+        💡 Un lien unique est généré automatiquement et envoyé par WhatsApp à l'affilié.
+        Chaque personne qui s'abonne via son lien lui rapporte une commission mensuelle.
+      </div>
+    </div>
+
+    <!-- Commissions -->
+    <div style="background:var(--bg);border-radius:var(--rs);padding:12px;margin-bottom:16px;border:1px solid var(--bo)">
+      <div style="font-size:0.78rem;font-weight:800;color:var(--mu);margin-bottom:8px">COMMISSIONS PAR PLAN</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div style="flex:1;text-align:center;padding:10px;background:var(--card);border-radius:8px">
+          <div style="font-family:var(--ft);font-size:1.4rem;font-weight:900;color:#2E7DD6">20%</div>
+          <div style="font-size:0.72rem;color:var(--mu)">Basic</div>
+          <div style="font-size:0.7rem;color:var(--mu)">≈0,60€/mois</div>
+        </div>
+        <div style="flex:1;text-align:center;padding:10px;background:var(--card);border-radius:8px">
+          <div style="font-family:var(--ft);font-size:1.4rem;font-weight:900;color:var(--or)">25%</div>
+          <div style="font-size:0.72rem;color:var(--mu)">Premium</div>
+          <div style="font-size:0.7rem;color:var(--mu)">≈1,50€/mois</div>
+        </div>
+        <div style="flex:1;text-align:center;padding:10px;background:var(--card);border-radius:8px">
+          <div style="font-family:var(--ft);font-size:1.4rem;font-weight:900;color:var(--go)">30%</div>
+          <div style="font-size:0.72rem;color:var(--mu)">Business</div>
+          <div style="font-size:0.7rem;color:var(--mu)">≈3€/mois</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liste des affiliés -->
+    <div id="adminAffiliatesList">
+      <div style="text-align:center;padding:24px;color:var(--mu)">
+        <div style="font-size:2rem;margin-bottom:8px">⏳</div>
+        <div>Chargement...</div>
+      </div>
+    </div>
+  </div>
+
 </section>
 
 </main>
@@ -1396,7 +1457,7 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791411679"></script>
+<script src="script.js?v=1791412576"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
