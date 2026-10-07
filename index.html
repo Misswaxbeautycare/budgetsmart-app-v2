@@ -1524,7 +1524,7 @@ Essayez gratuitement : https://misswaxbeautycare.github.io/budgetsmart-app-v2/</
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791415978"></script>
+<script src="script.js?v=1791416344"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
@@ -1736,6 +1736,31 @@ function togglePwd(id,btn){
   #affilFloat { bottom:70px; left:12px; }
 }
 </style>
+
+<!-- MODAL ADMIN ACCESS -->
+<div id="adminAccessModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border-radius:20px;padding:32px 28px;max-width:380px;width:100%;border:2px solid var(--or);box-shadow:0 20px 60px rgba(0,0,0,0.6)">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:3rem;margin-bottom:10px">👑</div>
+      <div style="font-family:var(--ft);font-size:1.4rem;font-weight:900;color:var(--tx)">Espace Admin</div>
+      <div style="font-size:0.88rem;color:var(--mu);margin-top:6px">Entrez votre mot de passe administrateur</div>
+    </div>
+    <div id="adminModalError" style="display:none;background:rgba(214,67,46,0.12);border:2px solid rgba(214,67,46,0.3);border-radius:10px;padding:10px 14px;color:#D6432E;font-weight:700;margin-bottom:14px;font-size:0.88rem"></div>
+    <div style="position:relative;margin-bottom:16px">
+      <input type="password" id="adminPwdInput" placeholder="Mot de passe admin"
+        style="width:100%;padding:14px 46px 14px 16px;border:2px solid var(--bo);border-radius:12px;font-size:1rem;outline:none;background:var(--bg);color:var(--tx);box-sizing:border-box"
+        onkeydown="if(event.key==='Enter')submitAdminPwd()"
+      />
+      <button type="button" onclick="toggleAdminPwd()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem">👁️</button>
+    </div>
+    <button onclick="submitAdminPwd()" style="width:100%;padding:14px;background:var(--or);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer;margin-bottom:10px">
+      Accéder à l'espace Admin →
+    </button>
+    <button onclick="closeAdminModal()" style="width:100%;padding:12px;background:none;border:2px solid var(--bo);border-radius:12px;font-size:0.9rem;font-weight:700;cursor:pointer;color:var(--mu)">
+      Annuler
+    </button>
+  </div>
+</div>
 </body>
 </html>
   <!-- BADGE RÉGION -->
