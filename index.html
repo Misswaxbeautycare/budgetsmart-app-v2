@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BudgetSmart v3</title>
-<link rel="stylesheet" href="style.css?v=1791410578"/>
+<link rel="stylesheet" href="style.css?v=1791414339"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#2E7D5E"/>
@@ -1471,7 +1471,7 @@ L'app qui vous aide à gérer votre budget et épargner intelligemment.
 </div>
 
 <div id="toast"></div>
-<script src="script.js?v=1791414084"></script>
+<script src="script.js?v=1791414339"></script>
 <script>
 function togglePwd(id,btn){
   var i=document.getElementById(id);
@@ -1482,6 +1482,179 @@ function togglePwd(id,btn){
 </script>
 
 
+
+
+<!-- PAGE AVIS -->
+<section class="page" id="p-avis">
+  <div class="ph">
+    <div><h1 class="pt">⭐ Avis clients</h1>
+    <p class="ps">Ce que nos utilisateurs disent de BudgetSmart</p></div>
+  </div>
+
+  <!-- FORMULAIRE DONNER UN AVIS -->
+  <div class="card" style="border:2px solid var(--go);margin-bottom:20px">
+    <div class="ct" style="color:var(--go)">✍️ Donner votre avis</div>
+    <div style="display:flex;gap:6px;margin-bottom:14px;align-items:center">
+      <div style="font-size:0.85rem;font-weight:700;color:var(--mu);margin-right:4px">Note :</div>
+      <div id="starRating" style="display:flex;gap:4px">
+        <span class="star-btn" data-val="1" onclick="setStarRating(1)" style="font-size:2rem;cursor:pointer;opacity:0.3;transition:all 0.15s">★</span>
+        <span class="star-btn" data-val="2" onclick="setStarRating(2)" style="font-size:2rem;cursor:pointer;opacity:0.3;transition:all 0.15s">★</span>
+        <span class="star-btn" data-val="3" onclick="setStarRating(3)" style="font-size:2rem;cursor:pointer;opacity:0.3;transition:all 0.15s">★</span>
+        <span class="star-btn" data-val="4" onclick="setStarRating(4)" style="font-size:2rem;cursor:pointer;opacity:0.3;transition:all 0.15s">★</span>
+        <span class="star-btn" data-val="5" onclick="setStarRating(5)" style="font-size:2rem;cursor:pointer;opacity:0.3;transition:all 0.15s">★</span>
+      </div>
+      <span id="starLabel" style="font-size:0.85rem;color:var(--mu);margin-left:6px"></span>
+    </div>
+    <input type="hidden" id="avisNote" value="0"/>
+    <div class="fg" style="margin-bottom:12px">
+      <label>Votre prénom</label>
+      <input type="text" class="inp" id="avisNom" placeholder="Votre prénom (affiché publiquement)"/>
+    </div>
+    <div class="fg" style="margin-bottom:12px">
+      <label>Votre pays / ville</label>
+      <input type="text" class="inp" id="avisPays" placeholder="Ex: Bruxelles, Kinshasa, Paris..."/>
+    </div>
+    <div class="fg" style="margin-bottom:12px">
+      <label>Votre avis</label>
+      <textarea class="inp" id="avisTexte" rows="4" placeholder="Partagez votre expérience avec BudgetSmart..."></textarea>
+    </div>
+    <div class="fg" style="margin-bottom:16px">
+      <label>Votre rôle / profession (optionnel)</label>
+      <input type="text" class="inp" id="avisRole" placeholder="Ex: Freelance, Entrepreneur, Comptable..."/>
+    </div>
+    <button onclick="submitAvis()" class="btn-g" style="width:100%">📤 Publier mon avis</button>
+    <div style="margin-top:10px;font-size:0.78rem;color:var(--mu);text-align:center">
+      Votre avis sera visible par tous les utilisateurs de BudgetSmart
+    </div>
+  </div>
+
+  <!-- STATS GLOBALES -->
+  <div id="avisStats" style="background:var(--card);border:2px solid var(--bo);border-radius:var(--r);padding:20px;margin-bottom:20px;display:none">
+    <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <div style="text-align:center">
+        <div id="avisMoyenne" style="font-family:var(--ft);font-size:3rem;font-weight:900;color:var(--go)">5.0</div>
+        <div id="avisStars" style="color:var(--go);font-size:1.3rem;letter-spacing:2px">★★★★★</div>
+        <div style="font-size:0.78rem;color:var(--mu);margin-top:3px" id="avisCount">0 avis</div>
+      </div>
+      <div style="flex:1;min-width:180px" id="avisBarres"></div>
+    </div>
+  </div>
+
+  <!-- LISTE DES AVIS -->
+  <div id="avisList">
+    <div class="empty">Aucun avis encore. Soyez le premier !</div>
+  </div>
+</section>
+
+<!-- PAGE MENTIONS LÉGALES -->
+<section class="page" id="p-legal">
+  <div class="ph">
+    <div><h1 class="pt">📜 Mentions légales</h1>
+    <p class="ps">Informations légales et conditions d'utilisation</p></div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="ct">🏢 Éditeur de l'application</div>
+    <div style="font-size:0.9rem;line-height:1.8;color:var(--tx)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><strong>Raison sociale</strong><br/><span style="color:var(--mu)">Miss Nyunge Digital Services</span></div>
+        <div><strong>Forme juridique</strong><br/><span style="color:var(--mu)">Entreprise individuelle</span></div>
+        <div><strong>Adresse</strong><br/><span style="color:var(--mu)">Bruxelles, Belgique</span></div>
+        <div><strong>Téléphone</strong><br/><span style="color:var(--mu)">+32 495 63 99 02</span></div>
+        <div><strong>Email</strong><br/><span style="color:var(--mu)">missnyunge@gmail.com</span></div>
+        <div><strong>Site web</strong><br/><span style="color:var(--mu)">missnyungedigitalservices.com</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="ct">📱 Application BudgetSmart</div>
+    <div style="font-size:0.88rem;line-height:1.8;color:var(--tx)">
+      <p style="margin-bottom:10px"><strong>BudgetSmart v3.0.0</strong> est une application de gestion financière personnelle et professionnelle développée par Miss Nyunge Digital Services.</p>
+      <p style="margin-bottom:10px"><strong>Hébergement :</strong> GitHub Pages (Microsoft) — <span style="color:var(--mu)">github.com</span></p>
+      <p style="margin-bottom:10px"><strong>Base de données :</strong> Supabase — <span style="color:var(--mu)">supabase.com</span></p>
+      <p><strong>Paiements :</strong> Stripe — <span style="color:var(--mu)">stripe.com</span></p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="ct">🔒 Protection des données personnelles (RGPD)</div>
+    <div style="font-size:0.88rem;line-height:1.8;color:var(--tx)">
+      <p style="margin-bottom:10px">Conformément au Règlement Général sur la Protection des Données (RGPD) et à la loi belge du 30 juillet 2018, vous disposez des droits suivants :</p>
+      <ul style="list-style:none;margin-bottom:12px">
+        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Droit d'accès à vos données personnelles</li>
+        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Droit de rectification et de correction</li>
+        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Droit à l'effacement (droit à l'oubli)</li>
+        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Droit à la portabilité des données</li>
+        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Droit d'opposition au traitement</li>
+      </ul>
+      <p style="margin-bottom:10px"><strong>Données collectées :</strong> email, données financières saisies par l'utilisateur, données de facturation.</p>
+      <p style="margin-bottom:10px"><strong>Finalité :</strong> Fourniture du service de gestion financière, facturation, et communications relatives au compte.</p>
+      <p><strong>Contact DPO :</strong> missnyunge@gmail.com</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="ct">💳 Conditions d'abonnement et de paiement</div>
+    <div style="font-size:0.88rem;line-height:1.8;color:var(--tx)">
+      <ul style="list-style:none">
+        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Les abonnements sont mensuels et renouvelables automatiquement</li>
+        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Résiliation possible à tout moment sans frais supplémentaires</li>
+        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Les paiements sont traités de manière sécurisée via Stripe</li>
+        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Aucune carte bancaire requise pour le plan gratuit</li>
+        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Remboursement possible dans les 14 jours suivant la souscription</li>
+        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Prix TTC — TVA belge applicable selon la législation en vigueur</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="ct">🤝 Programme d'affiliation</div>
+    <div style="font-size:0.88rem;line-height:1.8;color:var(--tx)">
+      <ul style="list-style:none">
+        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Commissions de 20% (Basic), 25% (Premium) et 30% (Business) sur les abonnements</li>
+        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Paiements effectués en fin de mois via PayPal</li>
+        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Commission minimale de paiement : 5€</li>
+        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Les commissions sont calculées sur les abonnements actifs uniquement</li>
+        <li style="padding:5px 0;display:flex;gap:8px"><span style="color:var(--or)">→</span> Miss Nyunge Digital Services se réserve le droit de modifier les taux de commission avec un préavis de 30 jours</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="ct">⚖️ Responsabilité et limitation</div>
+    <div style="font-size:0.88rem;line-height:1.8;color:var(--tx)">
+      <p style="margin-bottom:10px">BudgetSmart est un outil d'aide à la gestion financière. Les informations fournies ne constituent pas un conseil financier, comptable ou juridique professionnel.</p>
+      <p style="margin-bottom:10px">Miss Nyunge Digital Services ne saurait être tenu responsable des décisions financières prises sur la base des données calculées par l'application.</p>
+      <p>L'utilisateur est seul responsable de l'exactitude des données qu'il saisit dans l'application.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="ct">📞 Contact et réclamations</div>
+    <div style="font-size:0.88rem;line-height:1.8;color:var(--tx)">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <a href="mailto:missnyunge@gmail.com" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg);border-radius:10px;color:var(--tx);text-decoration:none">
+          <span style="font-size:1.3rem">📧</span>
+          <div><div style="font-weight:700">Email</div><div style="color:var(--mu);font-size:0.82rem">missnyunge@gmail.com</div></div>
+        </a>
+        <a href="https://wa.me/32495639902" target="_blank" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg);border-radius:10px;color:var(--tx);text-decoration:none">
+          <span style="font-size:1.3rem">📱</span>
+          <div><div style="font-weight:700">WhatsApp</div><div style="color:var(--mu);font-size:0.82rem">+32 495 63 99 02</div></div>
+        </a>
+        <a href="https://calendly.com/missnyungedigitalservices/echange-projet-digital-ecommerce" target="_blank" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg);border-radius:10px;color:var(--tx);text-decoration:none">
+          <span style="font-size:1.3rem">📞</span>
+          <div><div style="font-weight:700">Réserver un appel</div><div style="color:var(--mu);font-size:0.82rem">Calendly — 30 minutes</div></div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:20px;font-size:0.78rem;color:var(--mu)">
+    Dernière mise à jour : Octobre 2026 · BudgetSmart v3.0.0<br/>
+    © 2026 Miss Nyunge Digital Services — Tous droits réservés
+  </div>
+</section>
 
 <!-- BOUTON AFFILIATION FLOTTANT -->
 <div id="affilFloat" style="position:fixed;bottom:16px;left:16px;z-index:8000;">
