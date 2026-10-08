@@ -3381,7 +3381,7 @@ function generateAffiliateCode(name) {
 
 // ── Créer le lien affilié ──
 function buildAffiliateLink(code) {
-  return 'https://misswaxbeautycare.github.io/budgetsmart-app-v2/?ref=' + code;
+  return 'https://budgetsmart.missnyungedigitalservices.com?ref=' + code;
 }
 
 // ── Détecter si visite vient d'un affilié ──
@@ -4170,7 +4170,7 @@ function demanderLienAffilie() {
     '📊 Commissions : Basic 20% · Premium 25% · Business 30%\n\n' +
     '━━━━━━━━━━━━━━━━━━━━━━\n' +
     '💰 *BudgetSmart v3.0.0*\n' +
-    '🌐 https://misswaxbeautycare.github.io/budgetsmart-app-v2/'
+    '🌐 https://budgetsmart.missnyungedigitalservices.com'
   );
 
   // Message Email avec logo
@@ -4185,7 +4185,7 @@ function demanderLienAffilie() {
     'Cordialement,\n' + name + '\n\n' +
     '---\n' +
     'BudgetSmart v3.0.0\n' +
-    'https://misswaxbeautycare.github.io/budgetsmart-app-v2/'
+    'https://budgetsmart.missnyungedigitalservices.com'
   );
 
   // Popup choix WA ou Email
@@ -4223,7 +4223,7 @@ function shareWithLogo(text, phone) {
     text + '\n\n' +
     '━━━━━━━━━━━━━━━━━━━━━━\n' +
     '💰 *BudgetSmart v3*\n' +
-    '🌐 https://misswaxbeautycare.github.io/budgetsmart-app-v2/\n' +
+    '🌐 https://budgetsmart.missnyungedigitalservices.com\n' +
     '📧 missnyunge@gmail.com'
   );
   const url = phone
@@ -4238,7 +4238,7 @@ function emailWithLogo(to, subject, body) {
     body + '\n\n' +
     '---\n' +
     'BudgetSmart v3.0.0 — L\'intelligence financière pour tous\n' +
-    'https://misswaxbeautycare.github.io/budgetsmart-app-v2/\n' +
+    'https://budgetsmart.missnyungedigitalservices.com\n' +
     'missnyunge@gmail.com | +32 495 63 99 02\n' +
     'Développé par Miss Nyunge Digital Services, Bruxelles'
   );
@@ -4262,7 +4262,7 @@ function shareAffLink(name, link) {
     'Chaque personne qui s\'abonne via votre lien vous rapporte une commission mensuelle automatique !\n\n' +
     '━━━━━━━━━━━━━━━━━━━━━━\n' +
     '💰 *BudgetSmart v3.0.0*\n' +
-    '🌐 https://misswaxbeautycare.github.io/budgetsmart-app-v2/\n' +
+    '🌐 https://budgetsmart.missnyungedigitalservices.com\n' +
     '📧 missnyunge@gmail.com | 📞 +32 495 63 99 02'
   );
   window.open('https://wa.me/?text=' + msg, '_blank');
@@ -4285,7 +4285,7 @@ function sendDocWithLogo(method, facture) {
     '━━━━━━━━━━━━━━━━━━━━━━\n' +
     '💰 *BudgetSmart v3.0.0*\n' +
     '📧 missnyunge@gmail.com | 📞 +32 495 63 99 02\n' +
-    '🌐 https://misswaxbeautycare.github.io/budgetsmart-app-v2/'
+    '🌐 https://budgetsmart.missnyungedigitalservices.com'
   );
   const bodyEmail = encodeURIComponent(
     'Bonjour ' + nom + ',\n\n' +
@@ -4296,7 +4296,7 @@ function sendDocWithLogo(method, facture) {
     'BudgetSmart\n\n' +
     '---\n' +
     'BudgetSmart v3.0.0 — L\'intelligence financière pour tous\n' +
-    'https://misswaxbeautycare.github.io/budgetsmart-app-v2/\n' +
+    'https://budgetsmart.missnyungedigitalservices.com\n' +
     'missnyunge@gmail.com | +32 495 63 99 02'
   );
   if (method === 'wa') {
@@ -4470,12 +4470,12 @@ function deleteAvis(id) {
 
 /* ══ PARTAGE APPLICATION ══ */
 function shareApp(platform) {
-  const url = encodeURIComponent('https://misswaxbeautycare.github.io/budgetsmart-app-v2/');
+  const url = encodeURIComponent('https://budgetsmart.missnyungedigitalservices.com');
   const msg = encodeURIComponent(
     '💰 *BudgetSmart* — L\'intelligence financière pour tous !\n\n' +
     '✅ Dashboard · Facturation pro · Objectifs · Agenda\n' +
     '✅ Gratuit pour commencer !\n\n' +
-    '🔗 https://misswaxbeautycare.github.io/budgetsmart-app-v2/'
+    '🔗 https://budgetsmart.missnyungedigitalservices.com'
   );
   const map = {
     wa:  'https://wa.me/?text=' + msg,
@@ -4486,7 +4486,7 @@ function shareApp(platform) {
     sms: 'sms:?body=' + msg,
   };
   if (platform === 'ig' || platform === 'tk') {
-    navigator.clipboard?.writeText('https://misswaxbeautycare.github.io/budgetsmart-app-v2/');
+    navigator.clipboard?.writeText('https://budgetsmart.missnyungedigitalservices.com');
     toast((platform==='ig'?'📸 Instagram':'🎵 TikTok') + ' — Lien copié ! Collez-le dans votre bio.');
     return;
   }
